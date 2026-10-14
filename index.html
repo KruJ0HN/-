@@ -75,9 +75,15 @@
                         <label class="text-xs font-semibold text-slate-600">อีเมลจริง (ระบบจะส่ง OTP ไปที่นี่)</label>
                         <input type="email" id="regEmail" placeholder="student@example.com" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
                     </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน</label>
-                        <input type="password" id="regPassword" placeholder="อย่างน้อย 4 ตัวอักษร" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน</label>
+                            <input type="password" id="regPassword" placeholder="อย่างน้อย 4 ตัวอักษร" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่านอีกครั้ง</label>
+                            <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
                     </div>
                     <div>
                         <label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง</label>
@@ -247,11 +253,17 @@
         async function handleStudentRegister() {
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value.trim();
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
             const name = document.getElementById('regName').value.trim();
             const studentId = document.getElementById('regStudentId').value.trim();
 
-            if(!email || !password || !name || !studentId) {
+            if(!email || !password || !passwordConfirm || !name || !studentId) {
                 alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                alert("รหัสผ่าน และ ยืนยันรหัสผ่าน ไม่ตรงกัน! กรุณาตรวจสอบอีกครั้ง");
                 return;
             }
 
