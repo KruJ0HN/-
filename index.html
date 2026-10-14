@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจสอบผลการเรียน - Student Grade Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold">ระบบตรวจสอบผลการเรียน</h1>
+                    <p class="text-xs text-indigo-200">โรงเรียน / วิทยาลัยของคุณ</p>
+                </div>
+            </div>
+            <button id="navToggleBtn" onclick="toggleRole()" class="bg-indigo-600 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm font-medium transition shadow">
+                <i class="fa-solid fa-user-gear mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto p-4 md:p-6">
+
+        <!-- ================= STUDENT SECTION ================= -->
+        <div id="studentSection" class="space-y-6">
+            <!-- Login Card -->
+            <div id="studentLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">เข้าสู่ระบบสำหรับนักเรียน</h2>
+                <p class="text-slate-500 text-sm mb-6">กรอกรหัสนักเรียนและรหัสผ่านเพื่อดูผลการเรียน</p>
+                <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                    <div>
+                        <input type="text" id="studentIdInput" placeholder="รหัสนักเรียน (เช่น ST001)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-center font-medium">
+                    </div>
+                    <div>
+                        <input type="password" id="studentPinInput" placeholder="รหัสผ่าน (PIN)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-center font-medium">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
+                        เข้าสู่ระบบ
+                    </button>
+                </form>
+                <p class="text-xs text-slate-400 mt-4">* ทดลองใช้: รหัส ST001 / PIN: 1234</p>
+            </div>
+
+            <!-- Student Dashboard (Hidden by default) -->
+            <div id="studentDashboard" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800" id="stName">ด.ช. สมชาย รักดี</h2>
+                        <p class="text-slate-500 text-sm">รหัสนักเรียน: <span id="stId" class="font-semibold text-indigo-600">ST001</span> | ห้อง: <span id="stClass">ม.3/1</span></p>
+                    </div>
+                    <button onclick="studentLogout()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ
+                    </button>
+                </div>
+
+                <!-- Scores Table -->
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
+                        <span><i class="fa-solid fa-book-bookmark text-indigo-600 mr-2"></i>ผลการเรียนรายวิชา</span>
+                        <span class="text-sm text-slate-500">เกรดเฉลี่ยสะสม (GPA): <strong id="stGpa" class="text-indigo-600 text-lg">3.50</strong></span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">
+                                    <th class="p-4">รหัสวิชา - ชื่อวิชา</th>
+                                    <th class="p-4 text-center">คะแนนเก็บ (50)</th>
+                                    <th class="p-4 text-center">สอบปลายภาค (50)</th>
+                                    <th class="p-4 text-center">รวม (100)</th>
+                                    <th class="p-4 text-center">เกรด</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentScoreTableBody" class="divide-y text-slate-700 text-sm">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TEACHER (ADMIN) SECTION ================= -->
+        <div id="teacherSection" class="hidden space-y-6">
+            <!-- Admin Login Form -->
+            <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">เข้าสู่ระบบสำหรับครู (แอดมิน)</h2>
+                <p class="text-slate-500 text-sm mb-6">กรอกรหัส PIN สำหรับจัดการข้อมูลนักเรียน</p>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <input type="password" id="adminPinInput" placeholder="รหัส PIN แอดมิน" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-medium">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
+                        เข้าสู่ระบบแอดมิน
+                    </button>
+                </form>
+                <p class="text-xs text-slate-400 mt-4">* รหัส PIN เริ่มต้นคือ: 1234</p>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>ระบบจัดการคะแนนนักเรียน</h2>
+                        <p class="text-slate-500 text-sm">คุณกำลังอยู่ในโหมดผู้ดูแลระบบ (ครูผู้สอน)</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openAddStudentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">
+                            <i class="fa-solid fa-plus mr-1"></i> เพิ่มนักเรียน
+                        </button>
+                        <button onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student List Table -->
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                        <h3 class="font-bold text-slate-700">รายชื่อนักเรียนในระบบ</h3>
+                        <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="ค้นหารหัสนักเรียน/ชื่อ..." class="px-3 py-1.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">
+                                    <th class="p-4">รหัสนักเรียน</th>
+                                    <th class="p-4">ชื่อ - นามสกุล</th>
+                                    <th class="p-4">ชั้นเรียน</th>
+                                    <th class="p-4 text-center">รหัสผ่าน (PIN)</th>
+                                    <th class="p-4 text-center">จัดการคะแนน / ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminStudentTableBody" class="divide-y text-slate-700 text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Form for Adding/Editing Student -->
+    <div id="studentModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-xl font-bold text-slate-800" id="modalTitle">เพิ่มข้อมูลนักเรียน</h3>
+            <form onsubmit="saveStudentData(event)" class="space-y-3">
+                <input type="hidden" id="editIndex">
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">รหัสนักเรียน</label>
+                    <input type="text" id="mStudentId" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุล</label>
+                    <input type="text" id="mStudentName" required class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">ชั้นเรียน</label>
+                        <input type="text" id="mStudentClass" required placeholder="ม.3/1" class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน (PIN)</label>
+                        <input type="text" id="mStudentPin" required placeholder="1234" class="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                    </div>
+                </div>
+
+                <hr class="my-2">
+                <p class="font-semibold text-sm text-amber-700">คะแนนวิชาคณิตศาสตร์</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-slate-500">คะแนนเก็บ (50)</label>
+                        <input type="number" id="mMathWork" min="0" max="50" required class="w-full p-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-500">สอบปลายภาค (50)</label>
+                        <input type="number" id="mMathExam" min="0" max="50" required class="w-full p-2 border rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 text-slate-600 text-sm hover:bg-slate-100 rounded-lg">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-medium text-sm rounded-lg hover:bg-amber-700 shadow">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default Data
+        const initialStudents = [
+            { id: "ST001", name: "ด.ช. สมชาย รักดี", class: "ม.3/1", pin: "1234", scores: { mathWork: 42, mathExam: 43 } },
+            { id: "ST002", name: "ด.ญ. สมหญิง สดใส", class: "ม.3/1", pin: "1234", scores: { mathWork: 38, mathExam: 35 } }
+        ];
+
+        // Load data from LocalStorage
+        function getStudents() {
+            const data = localStorage.getItem('school_students');
+            return data ? JSON.parse(data) : initialStudents;
+        }
+
+        function saveStudents(data) {
+            localStorage.setItem('school_students', JSON.stringify(data));
+        }
+
+        let currentRole = 'student';
+
+        function toggleRole() {
+            const studentSec = document.getElementById('studentSection');
+            const teacherSec = document.getElementById('teacherSection');
+            const toggleBtn = document.getElementById('navToggleBtn');
+
+            if (currentRole === 'student') {
+                currentRole = 'teacher';
+                studentSec.classList.add('hidden');
+                teacherSec.classList.remove('hidden');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-user-graduate mr-1"></i> สลับไปหน้านักเรียน';
+            } else {
+                currentRole = 'student';
+                teacherSec.classList.add('hidden');
+                studentSec.classList.remove('hidden');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-user-gear mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)';
+            }
+        }
+
+        // --- Student Functions ---
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('studentIdInput').value.trim();
+            const pin = document.getElementById('studentPinInput').value.trim();
+            
+            const students = getStudents();
+            const student = students.find(s => s.id.toLowerCase() === id.toLowerCase() && s.pin === pin);
+
+            if (student) {
+                document.getElementById('studentLoginForm').classList.add('hidden');
+                document.getElementById('studentDashboard').classList.remove('hidden');
+                
+                document.getElementById('stName').innerText = student.name;
+                document.getElementById('stId').innerText = student.id;
+                document.getElementById('stClass').innerText = student.class;
+
+                renderStudentScores(student);
+            } else {
+                alert('รหัสนักเรียน หรือ รหัสผ่าน (PIN) ไม่ถูกต้อง!');
+            }
+        }
+
+        function calculateGrade(score) {
+            if (score >= 80) return '4.0';
+            if (score >= 75) return '3.5';
+            if (score >= 70) return '3.0';
+            if (score >= 65) return '2.5';
+            if (score >= 60) return '2.0';
+            if (score >= 55) return '1.5';
+            if (score >= 50) return '1.0';
+            return '0';
+        }
+
+        function renderStudentScores(student) {
+            const tbody = document.getElementById('studentScoreTableBody');
+            const mathTotal = Number(student.scores.mathWork) + Number(student.scores.mathExam);
+            const mathGrade = calculateGrade(mathTotal);
+
+            tbody.innerHTML = `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-medium text-slate-800">ค23101 - คณิตศาสตร์พื้นฐาน</td>
+                    <td class="p-4 text-center">${student.scores.mathWork}</td>
+                    <td class="p-4 text-center">${student.scores.mathExam}</td>
+                    <td class="p-4 text-center font-bold text-indigo-600">${mathTotal}</td>
+                    <td class="p-4 text-center"><span class="bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-full text-xs">${mathGrade}</span></td>
+                </tr>
+            `;
+            document.getElementById('stGpa').innerText = mathGrade;
+        }
+
+        function studentLogout() {
+            document.getElementById('studentDashboard').classList.add('hidden');
+            document.getElementById('studentLoginForm').classList.remove('hidden');
+            document.getElementById('studentIdInput').value = '';
+            document.getElementById('studentPinInput').value = '';
+        }
+
+        // --- Admin Functions ---
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('adminPinInput').value;
+            if (pin === '1234') {
+                document.getElementById('adminLoginForm').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminTable();
+            } else {
+                alert('รหัส PIN ของแอดมินไม่ถูกต้อง!');
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+            document.getElementById('adminPinInput').value = '';
+        }
+
+        function renderAdminTable() {
+            const students = getStudents();
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('adminStudentTableBody');
+            tbody.innerHTML = '';
+
+            students.filter(s => s.id.toLowerCase().includes(search) || s.name.toLowerCase().includes(search))
+            .forEach((s, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${s.id}</td>
+                        <td class="p-4">${s.name}</td>
+                        <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${s.class}</span></td>
+                        <td class="p-4 text-center font-mono text-xs text-slate-500">${s.pin}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editStudent(${index})" class="text-amber-600 hover:bg-amber-50 p-2 rounded-lg"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>
+                            <button onclick="deleteStudent(${index})" class="text-red-600 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('modalTitle').innerText = 'เพิ่มข้อมูลนักเรียน';
+            document.getElementById('editIndex').value = '-1';
+            document.getElementById('mStudentId').value = '';
+            document.getElementById('mStudentName').value = '';
+            document.getElementById('mStudentClass').value = '';
+            document.getElementById('mStudentPin').value = '1234';
+            document.getElementById('mMathWork').value = 0;
+            document.getElementById('mMathExam').value = 0;
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        function editStudent(index) {
+            const students = getStudents();
+            const s = students[index];
+            document.getElementById('modalTitle').innerText = 'แก้ไขข้อมูลคะแนน';
+            document.getElementById('editIndex').value = index;
+            document.getElementById('mStudentId').value = s.id;
+            document.getElementById('mStudentName').value = s.name;
+            document.getElementById('mStudentClass').value = s.class;
+            document.getElementById('mStudentPin').value = s.pin;
+            document.getElementById('mMathWork').value = s.scores.mathWork;
+            document.getElementById('mMathExam').value = s.scores.mathExam;
+            document.getElementById('studentModal').classList.remove('hidden');
+        }
+
+        function saveStudentData(e) {
+            e.preventDefault();
+            const index = Number(document.getElementById('editIndex').value);
+            const students = getStudents();
+
+            const studentObj = {
+                id: document.getElementById('mStudentId').value.trim(),
+                name: document.getElementById('mStudentName').value.trim(),
+                class: document.getElementById('mStudentClass').value.trim(),
+                pin: document.getElementById('mStudentPin').value.trim(),
+                scores: {
+                    mathWork: Number(document.getElementById('mMathWork').value),
+                    mathExam: Number(document.getElementById('mMathExam').value)
+                }
+            };
+
+            if (index === -1) {
+                students.push(studentObj);
+            } else {
+                students[index] = studentObj;
+            }
+
+            saveStudents(students);
+            closeStudentModal();
+            renderAdminTable();
+        }
+
+        function deleteStudent(index) {
+            if (confirm('คุณต้องการลบข้อมูลนักเรียนคนนี้ใช่หรือไม่?')) {
+                const students = getStudents();
+                students.splice(index, 1);
+                saveStudents(students);
+                renderAdminTable();
+            }
+        }
+    </script>
+</body>
+</html>
