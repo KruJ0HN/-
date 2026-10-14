@@ -171,10 +171,10 @@
                 <p class="text-slate-500 text-sm mb-6">กรอก Username และ รหัสผ่านแอดมิน</p>
                 <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                     <div>
-                        <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (AdminJohn)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                        <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm">
                     </div>
                     <div>
-                        <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (254712)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                        <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm">
                     </div>
                     <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
                         เข้าสู่ระบบแอดมิน
@@ -186,7 +186,7 @@
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>จัดการคะแนนผ่าน Google Sheets</h2>
-                        <p class="text-slate-500 text-sm">ครูจอห์นสามารถเข้าไปกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
+                        <p class="text-slate-500 text-sm">ครูสามารถเข้าไปกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
                     </div>
                     <div class="flex gap-2">
                         <a href="https://sheets.google.com" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1">
@@ -290,160 +290,4 @@
                     document.getElementById('otpForm').classList.add('hidden');
                     showStudentLogin();
                 } else {
-                    alert(data.message || "รหัส OTP ไม่ถูกต้อง");
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>ยืนยันรหัส OTP</span>';
-            }
-        }
-
-        async function handleStudentLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnLogin');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';
-
-            const payload = {
-                action: "login",
-                email: document.getElementById('studentEmailInput').value.trim(),
-                password: document.getElementById('studentPasswordInput').value.trim()
-            };
-
-            try {
-                const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                const data = await res.json();
-
-                if (data.status === "success") {
-                    currentUser = data.user;
-                    if (!currentUser.class) {
-                        document.getElementById('classSelectionModal').classList.remove('hidden');
-                    } else {
-                        showStudentDashboard();
-                    }
-                } else if (data.status === "need_verify") {
-                    alert("อีเมลนี้ยังไม่ได้ยืนยัน OTP");
-                    tempRegisterEmail = payload.email;
-                    document.getElementById('studentLoginForm').classList.add('hidden');
-                    document.getElementById('otpForm').classList.remove('hidden');
-                } else {
-                    alert(data.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>เข้าสู่ระบบ</span>';
-            }
-        }
-
-        async function handleSaveClass(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveClass');
-            const studentClass = document.getElementById('selectClassInput').value.trim();
-            btn.disabled = true;
-
-            const payload = {
-                action: "updateClass",
-                email: currentUser.email,
-                studentClass: studentClass
-            };
-
-            try {
-                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                currentUser.class = studentClass;
-                document.getElementById('classSelectionModal').classList.add('hidden');
-                showStudentDashboard();
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการบันทึกห้องเรียน");
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function showStudentDashboard() {
-            document.getElementById('studentLoginForm').classList.add('hidden');
-            document.getElementById('studentDashboard').classList.remove('hidden');
-
-            document.getElementById('stName').innerText = currentUser.name;
-            document.getElementById('stId').innerText = currentUser.studentId;
-            document.getElementById('stClass').innerText = currentUser.class;
-            document.getElementById('stEmail').innerText = currentUser.email;
-
-            loadStudentScores();
-        }
-
-        async function loadStudentScores() {
-            const thead = document.getElementById('studentScoreHeader');
-            const tbody = document.getElementById('studentScoreBody');
-            tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดคะแนนจาก Google Sheets...</td></tr>';
-
-            const payload = {
-                action: "getScores",
-                studentId: currentUser.studentId
-            };
-
-            try {
-                const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-                const data = await res.json();
-
-                if (data.status === "success" && data.headers) {
-                    let headerHtml = '<tr class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">';
-                    data.headers.forEach(h => {
-                        headerHtml += `<th class="p-4 text-center">${h}</th>`;
-                    });
-                    headerHtml += '</tr>';
-                    thead.innerHTML = headerHtml;
-
-                    if (data.scores) {
-                        let bodyHtml = '<tr class="hover:bg-slate-50 font-medium">';
-                        data.scores.forEach((sc, idx) => {
-                            if (idx === 0) {
-                                bodyHtml += `<td class="p-4 text-center font-bold text-indigo-600">${sc}</td>`;
-                            } else {
-                                bodyHtml += `<td class="p-4 text-center">${sc !== "" ? sc : "-"}</td>`;
-                            }
-                        });
-                        bodyHtml += '</tr>';
-                        tbody.innerHTML = bodyHtml;
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูลคะแนนของคุณในระบบ (รอครูกรอกคะแนนใน Google Sheets)</td></tr>';
-                    }
-                }
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูลคะแนน</td></tr>';
-            }
-        }
-
-        function studentLogout() {
-            currentUser = null;
-            document.getElementById('studentDashboard').classList.add('hidden');
-            document.getElementById('studentLoginForm').classList.remove('hidden');
-            document.getElementById('studentEmailInput').value = '';
-            document.getElementById('studentPasswordInput').value = '';
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('adminUsernameInput').value.trim();
-            const password = document.getElementById('adminPasswordInput').value.trim();
-
-            if (username === 'AdminJohn' && password === '254712') {
-                document.getElementById('adminLoginForm').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-            } else {
-                alert('ชื่อผู้ใช้ (Username) หรือ รหัสผ่าน ไม่ถูกต้อง!');
-            }
-        }
-
-        function adminLogout() {
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('adminLoginForm').classList.remove('hidden');
-            document.getElementById('adminUsernameInput').value = '';
-            document.getElementById('adminPasswordInput').value = '';
-        }
-    </script>
-</body>
-</html>
+                    alert(data.message ||
