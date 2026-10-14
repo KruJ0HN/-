@@ -13,7 +13,6 @@
 </head>
 <body class="bg-slate-100 min-h-screen">
 
-    <!-- Web App URL จาก Google Apps Script -->
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1-YgAt91Jujj5VX2DV7EFymFS_eQI9IKxigj1Pc8WZjAa9bxHg/exec";
     </script>
@@ -36,7 +35,7 @@
 
     <div class="max-w-5xl mx-auto p-4 md:p-6">
 
-        <!-- ================= STUDENT SECTION ================= -->
+        <!-- STUDENT SECTION -->
         <div id="studentSection" class="space-y-6">
             
             <!-- Student Login Card -->
@@ -58,7 +57,7 @@
                     </button>
                 </form>
                 <div class="mt-6 pt-4 border-t text-sm text-slate-600">
-                    ยังไม่มีบัญชีใช่ไหม? <button onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button>
+                    ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button>
                 </div>
             </div>
 
@@ -93,7 +92,7 @@
                     </button>
                 </form>
                 <div class="mt-4 text-center text-sm">
-                    มีบัญชีอยู่แล้ว? <button onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button>
+                    มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button>
                 </div>
             </div>
 
@@ -112,7 +111,7 @@
                 </form>
             </div>
 
-            <!-- Class Selection Modal (สำหรับเข้าใช้งานครั้งแรก) -->
+            <!-- Class Selection Modal -->
             <div id="classSelectionModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
                 <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl text-center space-y-4">
                     <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -143,7 +142,6 @@
                     </button>
                 </div>
 
-                <!-- Dynamic Scores Table -->
                 <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                     <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
                         <span><i class="fa-solid fa-table text-indigo-600 mr-2"></i>ตารางคะแนนล่าสุด (ดึงตรงจาก Google Sheets)</span>
@@ -154,10 +152,8 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead id="studentScoreHeader" class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">
-                                <!-- Headers dynamically loaded -->
                             </thead>
                             <tbody id="studentScoreBody" class="divide-y text-slate-700 text-sm">
-                                <!-- Data dynamically loaded -->
                             </tbody>
                         </table>
                     </div>
@@ -165,9 +161,8 @@
             </div>
         </div>
 
-        <!-- ================= TEACHER (ADMIN) SECTION ================= -->
+        <!-- TEACHER (ADMIN) SECTION -->
         <div id="teacherSection" class="hidden space-y-6">
-            <!-- Admin Login Form -->
             <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
                 <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                     <i class="fa-solid fa-user-shield"></i>
@@ -187,12 +182,11 @@
                 </form>
             </div>
 
-            <!-- Admin Dashboard -->
             <div id="adminDashboard" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>จัดการคะแนนผ่าน Google Sheets</h2>
-                        <p class="text-slate-500 text-sm">ครูจอห์นสามารถเข้าไปกรอกคะแนน เพิ่มช่องคะแนน หรือเปลี่ยนชื่องานได้ใน Google Sheets โดยตรง</p>
+                        <p class="text-slate-500 text-sm">ครูจอห์นสามารถเข้าไปกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
                     </div>
                     <div class="flex gap-2">
                         <a href="https://sheets.google.com" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1">
@@ -211,7 +205,6 @@
     <script>
         let currentUser = null;
         let tempRegisterEmail = "";
-
         let currentRole = 'student';
 
         function toggleRole() {
@@ -242,7 +235,6 @@
             document.getElementById('studentLoginForm').classList.remove('hidden');
         }
 
-        // --- Register & Send OTP ---
         async function handleStudentRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('btnRegister');
@@ -277,7 +269,6 @@
             }
         }
 
-        // --- Verify OTP ---
         async function handleVerifyOtp(e) {
             e.preventDefault();
             const btn = document.getElementById('btnVerifyOtp');
@@ -309,7 +300,6 @@
             }
         }
 
-        // --- Student Login ---
         async function handleStudentLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btnLogin');
@@ -329,7 +319,6 @@
                 if (data.status === "success") {
                     currentUser = data.user;
                     if (!currentUser.class) {
-                        // ถ้ายังไม่ได้เลือกระดับชั้น/ห้องเรียน
                         document.getElementById('classSelectionModal').classList.remove('hidden');
                     } else {
                         showStudentDashboard();
@@ -350,7 +339,6 @@
             }
         }
 
-        // --- Save Selected Class ---
         async function handleSaveClass(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSaveClass');
@@ -387,7 +375,6 @@
             loadStudentScores();
         }
 
-        // --- Load Dynamic Scores from Google Sheets ---
         async function loadStudentScores() {
             const thead = document.getElementById('studentScoreHeader');
             const tbody = document.getElementById('studentScoreBody');
@@ -403,7 +390,6 @@
                 const data = await res.json();
 
                 if (data.status === "success" && data.headers) {
-                    // Render Headers
                     let headerHtml = '<tr class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">';
                     data.headers.forEach(h => {
                         headerHtml += `<th class="p-4 text-center">${h}</th>`;
@@ -411,7 +397,6 @@
                     headerHtml += '</tr>';
                     thead.innerHTML = headerHtml;
 
-                    // Render Student Score Row
                     if (data.scores) {
                         let bodyHtml = '<tr class="hover:bg-slate-50 font-medium">';
                         data.scores.forEach((sc, idx) => {
@@ -440,7 +425,6 @@
             document.getElementById('studentPasswordInput').value = '';
         }
 
-        // --- Admin Functions ---
         function handleAdminLogin(e) {
             e.preventDefault();
             const username = document.getElementById('adminUsernameInput').value.trim();
@@ -459,3 +443,7 @@
             document.getElementById('adminLoginForm').classList.remove('hidden');
             document.getElementById('adminUsernameInput').value = '';
             document.getElementById('adminPasswordInput').value = '';
+        }
+    </script>
+</body>
+</html>
