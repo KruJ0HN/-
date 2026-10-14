@@ -31,9 +31,8 @@
 
     <div class="max-w-5xl mx-auto p-4 md:p-6">
 
-        <!-- ================= STUDENT SECTION ================= -->
+        <!-- STUDENT SECTION -->
         <div id="studentSection" class="space-y-6">
-            <!-- Login Card -->
             <div id="studentLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
                 <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                     <i class="fa-solid fa-user-graduate"></i>
@@ -54,7 +53,6 @@
                 <p class="text-xs text-slate-400 mt-4">* ทดลองใช้: รหัส ST001 / PIN: 1234</p>
             </div>
 
-            <!-- Student Dashboard (Hidden by default) -->
             <div id="studentDashboard" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex justify-between items-center">
                     <div>
@@ -66,7 +64,6 @@
                     </button>
                 </div>
 
-                <!-- Scores Table -->
                 <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                     <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
                         <span><i class="fa-solid fa-book-bookmark text-indigo-600 mr-2"></i>ผลการเรียนรายวิชา</span>
@@ -84,7 +81,6 @@
                                 </tr>
                             </thead>
                             <tbody id="studentScoreTableBody" class="divide-y text-slate-700 text-sm">
-                                <!-- Data populated by JS -->
                             </tbody>
                         </table>
                     </div>
@@ -92,9 +88,8 @@
             </div>
         </div>
 
-        <!-- ================= TEACHER (ADMIN) SECTION ================= -->
+        <!-- TEACHER SECTION -->
         <div id="teacherSection" class="hidden space-y-6">
-            <!-- Admin Login Form -->
             <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
                 <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                     <i class="fa-solid fa-user-shield"></i>
@@ -110,7 +105,6 @@
                 <p class="text-xs text-slate-400 mt-4">* รหัส PIN เริ่มต้นคือ: 1234</p>
             </div>
 
-            <!-- Admin Dashboard -->
             <div id="adminDashboard" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
                     <div>
@@ -127,7 +121,6 @@
                     </div>
                 </div>
 
-                <!-- Student List Table -->
                 <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                     <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
                         <h3 class="font-bold text-slate-700">รายชื่อนักเรียนในระบบ</h3>
@@ -145,7 +138,6 @@
                                 </tr>
                             </thead>
                             <tbody id="adminStudentTableBody" class="divide-y text-slate-700 text-sm">
-                                <!-- Populated by JS -->
                             </tbody>
                         </table>
                     </div>
@@ -155,7 +147,7 @@
 
     </div>
 
-    <!-- Modal Form for Adding/Editing Student -->
+    <!-- Modal Form -->
     <div id="studentModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <h3 class="text-xl font-bold text-slate-800" id="modalTitle">เพิ่มข้อมูลนักเรียน</h3>
@@ -202,13 +194,11 @@
     </div>
 
     <script>
-        // Default Data
         const initialStudents = [
             { id: "ST001", name: "ด.ช. สมชาย รักดี", class: "ม.3/1", pin: "1234", scores: { mathWork: 42, mathExam: 43 } },
             { id: "ST002", name: "ด.ญ. สมหญิง สดใส", class: "ม.3/1", pin: "1234", scores: { mathWork: 38, mathExam: 35 } }
         ];
 
-        // Load data from LocalStorage
         function getStudents() {
             const data = localStorage.getItem('school_students');
             return data ? JSON.parse(data) : initialStudents;
@@ -238,7 +228,6 @@
             }
         }
 
-        // --- Student Functions ---
         function handleStudentLogin(e) {
             e.preventDefault();
             const id = document.getElementById('studentIdInput').value.trim();
@@ -296,7 +285,6 @@
             document.getElementById('studentPinInput').value = '';
         }
 
-        // --- Admin Functions ---
         function handleAdminLogin(e) {
             e.preventDefault();
             const pin = document.getElementById('adminPinInput').value;
