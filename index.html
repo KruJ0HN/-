@@ -164,11 +164,14 @@ const showStudentLogin = () => showView("studentLoginForm");
 
 function toast(msg, type = "error") {
   const colors = { error: "bg-red-600", success: "bg-emerald-600", info: "bg-slate-700" };
+  document.querySelectorAll(".app-toast").forEach((t) => t.remove());
   const el = document.createElement("div");
-  el.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[60] ${colors[type]} text-white text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90vw]`;
-  el.textContent = msg;
+  el.className = `app-toast fixed top-4 left-1/2 -translate-x-1/2 z-[60] ${colors[type]} text-white text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90vw] cursor-pointer`;
+  el.textContent = msg + (type === "error" ? "  (แตะเพื่อปิด)" : "");
+  el.onclick = () => el.remove();
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 4000);
+  console.log("[" + type + "]", msg);
+  if (type !== "error") setTimeout(() => el.remove(), 8000); // ข้อความ error ค้างไว้จนกว่าจะแตะ
 }
 
 /* ครอบทุกการกดปุ่ม: กันกดซ้ำ + แสดง spinner + คืนสถานะปุ่มเสมอ (finally) + จับ error ทุกกรณี */
@@ -262,6 +265,31 @@ function initPasswordChecklist() {
 }
 document.addEventListener("DOMContentLoaded", initPasswordChecklist);
 
+/* ---------- ตรวจสถานะเซิร์ฟเวอร์ (แถบด้านล่างจอ) ---------- */
+const EXPECTED_VERSION = "2026-10-15-v4";
+async function checkServer() {
+  const el = document.createElement("div");
+  const base = "fixed bottom-2 left-2 right-2 sm:right-auto sm:max-w-md z-40 text-xs px-3 py-2 rounded-lg shadow text-white ";
+  el.className = base + "bg-slate-600";
+  el.textContent = "กำลังตรวจสอบการเชื่อมต่อเซิร์ฟเวอร์...";
+  document.body.appendChild(el);
+  try {
+    const j = await (await fetch(SCRIPT_URL)).json();
+    if (j.version === EXPECTED_VERSION) {
+      el.className = base + "bg-emerald-600";
+      el.textContent = "✓ เซิร์ฟเวอร์พร้อมใช้งาน (" + j.version + ")";
+      setTimeout(() => el.remove(), 5000);
+    } else {
+      el.className = base + "bg-red-600";
+      el.textContent = "⚠ เว็บยังเชื่อมกับ Script เวอร์ชันเก่า (" + (j.version || "ไม่ทราบ") + ") ต้อง Deploy เวอร์ชันใหม่ใน Apps Script";
+    }
+  } catch (_) {
+    el.className = base + "bg-red-600";
+    el.textContent = "⚠ เชื่อมต่อ Script ไม่ได้ หรือยัง Deploy โค้ดใหม่ไม่ครบ (ต้อง Deploy เวอร์ชันใหม่ / ตั้งสิทธิ์เป็น Anyone)";
+  }
+}
+document.addEventListener("DOMContentLoaded", checkServer);
+
 /* ---------- Register / OTP ---------- */
 function handleStudentRegister() {
   const email = $("regEmail").value.trim();
@@ -287,7 +315,7 @@ function handleStudentRegister() {
     $("otpInput").value = "";
     showView("otpForm");
     startCooldown(RESEND_SECONDS);
-    toast("ส่งรหัส OTP ไปที่อีเมลแล้ว (ตรวจในกล่องสแปมด้วย)", "success");
+    toast(r.message, "success");
     return true;
   });
 }
