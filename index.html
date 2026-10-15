@@ -1,543 +1,411 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจสอบผลการเรียน - ครูจอห์น</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบตรวจสอบผลการเรียน - ครูจอห์น</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Sarabun',sans-serif}</style>
 </head>
 <body class="bg-slate-100 min-h-screen">
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1-YgAt91Jujj5VX2DV7EFymFS_eQI9IKxigj1Pc8WZjAa9bxHg/exec";
+</script>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1-YgAt91Jujj5VX2DV7EFymFS_eQI9IKxigj1Pc8WZjAa9bxHg/exec";
-    </script>
+<nav class="bg-indigo-700 text-white shadow-lg">
+ <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-2">
+  <div class="flex items-center space-x-3">
+   <i class="fa-solid fa-graduation-cap text-3xl"></i>
+   <div><h1 class="text-xl font-bold">ระบบตรวจสอบผลการเรียน</h1><p class="text-xs text-indigo-200">ระบบติดตามและเช็คคะแนนนักเรียน/นักศึกษา</p></div>
+  </div>
+  <button id="navToggleBtn" type="button" onclick="toggleRole()" class="bg-indigo-600 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm font-medium transition shadow"><i class="fa-solid fa-user-shield mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)</button>
+ </div>
+</nav>
 
-    <!-- Navbar -->
-    <nav class="bg-indigo-700 text-white shadow-lg">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-graduation-cap text-3xl"></i>
-                <div>
-                    <h1 class="text-xl font-bold">ระบบตรวจสอบผลการเรียน</h1>
-                    <p class="text-xs text-indigo-200">ระบบติดตามและเช็คคะแนนนักเรียน/นักศึกษา</p>
-                </div>
-            </div>
-            <button id="navToggleBtn" type="button" onclick="toggleRole()" class="bg-indigo-600 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm font-medium transition shadow">
-                <i class="fa-solid fa-user-shield mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)
-            </button>
-        </div>
-    </nav>
+<div class="max-w-5xl mx-auto p-4 md:p-6">
+<div id="studentSection" class="space-y-6">
 
-    <div class="max-w-5xl mx-auto p-4 md:p-6">
+ <div id="studentLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
+  <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-graduate"></i></div>
+  <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับนักเรียน</h2>
+  <p class="text-slate-500 text-sm mb-6 text-center">กรอกอีเมลจริงและรหัสผ่านเพื่อเข้าดูคะแนน</p>
+  <div class="space-y-4">
+   <div><label class="text-xs font-semibold text-slate-600">อีเมล <span class="text-red-500">*</span></label>
+    <input type="email" id="studentEmailInput" placeholder="student@example.com" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1"></div>
+   <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน <span class="text-red-500">*</span></label>
+    <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1"></div>
+   <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>เข้าสู่ระบบ</span></button>
+  </div>
+  <div class="mt-6 pt-4 border-t text-sm text-slate-600 text-center">ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button></div>
+ </div>
 
-        <!-- STUDENT SECTION -->
-        <div id="studentSection" class="space-y-6">
-            
-            <!-- Student Login Card -->
-            <div id="studentLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-user-graduate"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับนักเรียน</h2>
-                <p class="text-slate-500 text-sm mb-6 text-center">กรอกอีเมลจริงและรหัสผ่านเพื่อเข้าดูคะแนน</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">อีเมล <span class="text-red-500">*</span></label>
-                        <input type="email" id="studentEmailInput" placeholder="student@example.com" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">รหัสผ่าน <span class="text-red-500">*</span></label>
-                        <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1">
-                    </div>
-                    <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2">
-                        <span>เข้าสู่ระบบ</span>
-                    </button>
-                </div>
-                <div class="mt-6 pt-4 border-t text-sm text-slate-600 text-center">
-                    ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button>
-                </div>
-            </div>
+ <div id="studentRegisterForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
+  <div class="text-center mb-6">
+   <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl"><i class="fa-solid fa-id-card"></i></div>
+   <h2 class="text-2xl font-bold text-slate-800">ลงทะเบียนนักเรียน</h2>
+   <p class="text-slate-500 text-sm">กรอกอีเมลจริงเพื่อรับรหัสยืนยัน OTP</p>
+  </div>
+  <div class="space-y-3">
+   <div><label class="text-xs font-semibold text-slate-600">อีเมลจริง <span class="text-red-500">*</span> (ระบบจะส่ง OTP ไปที่นี่)</label>
+    <input type="email" id="regEmail" placeholder="student@example.com" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div><label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
+     <input type="password" id="regPassword" placeholder="อย่างน้อย 4 ตัวอักษร" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
+    <div><label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
+     <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
+   </div>
+   <div><label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
+    <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
+   <div><label class="text-xs font-semibold text-slate-600">รหัสนักเรียน/นักศึกษา <span class="text-red-500">*</span></label>
+    <input type="text" id="regStudentId" placeholder="เช่น 660123" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
+   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
+  </div>
+  <div class="mt-4 text-center text-sm">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button></div>
+ </div>
 
-            <!-- Student Register Card -->
-            <div id="studentRegisterForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl">
-                        <i class="fa-solid fa-id-card"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-800">ลงทะเบียนนักเรียน</h2>
-                    <p class="text-slate-500 text-sm">กรอกอีเมลจริงเพื่อรับรหัสยืนยัน OTP</p>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">อีเมลจริง <span class="text-red-500">*</span> (ระบบจะส่ง OTP ไปที่นี่)</label>
-                        <input type="email" id="regEmail" placeholder="student@example.com" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
-                            <input type="password" id="regPassword" placeholder="อย่างน้อย 4 ตัวอักษร" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
-                            <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
-                        <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">รหัสนักเรียน/นักศึกษา <span class="text-red-500">*</span></label>
-                        <input type="text" id="regStudentId" placeholder="เช่น 660123" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-                    </div>
-                    <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2">
-                        <span>ส่งรหัส OTP ไปยังอีเมล</span>
-                    </button>
-                </div>
-                <div class="mt-4 text-center text-sm">
-                    มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button>
-                </div>
-            </div>
+ <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
+  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-key"></i></div>
+  <h2 class="text-2xl font-bold text-slate-800 mb-2">กรอกรหัสยืนยัน OTP</h2>
+  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของคุณแล้ว (ตรวจกล่องสแปมด้วย)</p>
+  <div class="space-y-4">
+   <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
+    <input type="text" id="otpInput" maxlength="6" inputmode="numeric" placeholder="------" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold text-xl tracking-widest"></div>
+   <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ยืนยันรหัส OTP</span></button>
+   <div class="pt-2">
+    <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="text-sm font-semibold text-indigo-600 hover:underline disabled:text-slate-400 disabled:no-underline"><span>ขอส่งรหัส OTP อีกครั้ง</span></button>
+    <p id="resendTimerText" class="text-xs text-slate-400 mt-1 hidden">สามารถขอรหัสใหม่ได้ในอีก <span id="timerSec" class="font-bold text-slate-600">60</span> วินาที</p>
+   </div>
+  </div>
+ </div>
 
-            <!-- OTP Verification Form -->
-            <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
-                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">กรอกรหัสยืนยัน OTP</h2>
-                <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของคุณแล้ว</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
-                        <input type="text" id="otpInput" maxlength="6" placeholder="รหัส OTP 6 หลัก" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold text-xl tracking-widest">
-                    </div>
-                    <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2">
-                        <span>ยืนยันรหัส OTP</span>
-                    </button>
+ <div id="classSelectionModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+  <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl text-center space-y-4">
+   <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-door-open"></i></div>
+   <h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น/ห้องเรียนของคุณ</h3>
+   <p class="text-xs text-slate-500">เพื่อจัดหมวดหมู่การเข้าดูคะแนนให้ถูกต้อง</p>
+   <div class="space-y-3">
+    <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">ระดับชั้น/ห้องเรียน <span class="text-red-500">*</span></label>
+     <input type="text" id="selectClassInput" placeholder="เช่น ม.3/1 หรือ ปวช.1/2" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-center font-medium"></div>
+    <button type="button" id="btnSaveClass" onclick="handleSaveClass()" class="w-full bg-indigo-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl shadow hover:bg-indigo-700"><span>เข้าสู่หน้าระบบ</span></button>
+   </div>
+  </div>
+ </div>
 
-                    <div class="pt-2">
-                        <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="text-sm font-semibold text-indigo-600 hover:underline disabled:text-slate-400 disabled:no-underline">
-                            ขอส่งรหัส OTP อีกครั้ง
-                        </button>
-                        <p id="resendTimerText" class="text-xs text-slate-400 mt-1 hidden">สามารถขอรหัสใหม่ได้ในอีก <span id="timerSec" class="font-bold text-slate-600">60</span> วินาที</p>
-                    </div>
-                </div>
-            </div>
+ <div id="studentDashboard" class="hidden space-y-6">
+  <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex justify-between items-center flex-wrap gap-4">
+   <div>
+    <h2 class="text-2xl font-bold text-slate-800" id="stName">-</h2>
+    <p class="text-slate-500 text-sm">รหัส: <span id="stId" class="font-semibold text-indigo-600">-</span> | ชั้น/ห้อง: <span id="stClass" class="font-semibold text-indigo-600">-</span> | อีเมล: <span id="stEmail" class="text-slate-600">-</span></p>
+   </div>
+   <button type="button" onclick="studentLogout()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition"><i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ</button>
+  </div>
+  <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+   <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
+    <span><i class="fa-solid fa-table text-indigo-600 mr-2"></i>ตารางคะแนนล่าสุด</span>
+    <button type="button" onclick="loadStudentScores()" class="text-xs bg-slate-200 hover:bg-slate-300 disabled:opacity-60 px-3 py-1 rounded-lg text-slate-700 transition"><span><i class="fa-solid fa-rotate mr-1"></i> รีเฟรชคะแนน</span></button>
+   </div>
+   <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+     <thead id="studentScoreHeader" class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase"></thead>
+     <tbody id="studentScoreBody" class="divide-y text-slate-700 text-sm"></tbody>
+    </table>
+   </div>
+  </div>
+ </div>
+</div>
 
-            <!-- Class Selection Modal -->
-            <div id="classSelectionModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-                <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl text-center space-y-4">
-                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl">
-                        <i class="fa-solid fa-door-open"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น/ห้องเรียนของคุณ</h3>
-                    <p class="text-xs text-slate-500">เพื่อจัดหมวดหมู่การเข้าดูคะแนนให้ถูกต้อง</p>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-600 block text-left mb-1">ระดับชั้น/ห้องเรียน <span class="text-red-500">*</span></label>
-                            <input type="text" id="selectClassInput" placeholder="เช่น ม.3/1 หรือ ปวช.1/2" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-center font-medium">
-                        </div>
-                        <button type="button" id="btnSaveClass" onclick="handleSaveClass()" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-xl shadow hover:bg-indigo-700">เข้าสู่หน้าระบบ</button>
-                    </div>
-                </div>
-            </div>
+<div id="teacherSection" class="hidden space-y-6">
+ <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
+  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
+  <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับครูผู้สอน</h2>
+  <p class="text-slate-500 text-sm mb-6 text-center">กรอก Username และ รหัสผ่านแอดมิน</p>
+  <div class="space-y-4">
+   <div><label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (Username) <span class="text-red-500">*</span></label>
+    <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
+   <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน (Password) <span class="text-red-500">*</span></label>
+    <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
+   <button type="button" onclick="handleAdminLogin()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md"><span>เข้าสู่ระบบแอดมิน</span></button>
+  </div>
+ </div>
+ <div id="adminDashboard" class="hidden space-y-6">
+  <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+   <div>
+    <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>จัดการคะแนนผ่าน Google Sheets</h2>
+    <p class="text-slate-500 text-sm">ครูสามารถกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
+   </div>
+   <div class="flex gap-2">
+    <a href="https://sheets.google.com" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1"><i class="fa-solid fa-file-excel"></i> เปิด Google Sheets กรอกคะแนน</a>
+    <button type="button" onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">ออกจากระบบ</button>
+   </div>
+  </div>
+ </div>
+</div>
+</div>
 
-            <!-- Student Dashboard -->
-            <div id="studentDashboard" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800" id="stName">-</h2>
-                        <p class="text-slate-500 text-sm">
-                            รหัส: <span id="stId" class="font-semibold text-indigo-600">-</span> | 
-                            ชั้น/ห้อง: <span id="stClass" class="font-semibold text-indigo-600">-</span> | 
-                            อีเมล: <span id="stEmail" class="text-slate-600">-</span>
-                        </p>
-                    </div>
-                    <button type="button" onclick="studentLogout()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition">
-                        <i class="fa-solid fa-right-from-bracket mr-1"></i> ออกจากระบบ
-                    </button>
-                </div>
+<script>
+const API_TIMEOUT_MS = 20000;
+const RESEND_SECONDS = 60;
+let currentUser = null;      // {email, name, studentId, class, token}
+let tempRegisterEmail = "";
+let currentRole = "student";
+let cooldownTimer = null;
 
-                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-                    <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
-                        <span><i class="fa-solid fa-table text-indigo-600 mr-2"></i>ตารางคะแนนล่าสุด (ดึงตรงจาก Google Sheets)</span>
-                        <button type="button" onclick="loadStudentScores()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1 rounded-lg text-slate-700 transition">
-                            <i class="fa-solid fa-rotate mr-1"></i> รีเฟรชคะแนน
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead id="studentScoreHeader" class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">
-                            </thead>
-                            <tbody id="studentScoreBody" class="divide-y text-slate-700 text-sm">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+const $ = (id) => document.getElementById(id);
+const STUDENT_VIEWS = ["studentLoginForm", "studentRegisterForm", "otpForm", "studentDashboard"];
 
-        <!-- TEACHER (ADMIN) SECTION -->
-        <div id="teacherSection" class="hidden space-y-6">
-            <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับครูผู้สอน</h2>
-                <p class="text-slate-500 text-sm mb-6 text-center">กรอก Username และ รหัสผ่านแอดมิน</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (Username) <span class="text-red-500">*</span></label>
-                        <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-600">รหัสผ่าน (Password) <span class="text-red-500">*</span></label>
-                        <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1">
-                    </div>
-                    <button type="button" onclick="handleAdminLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
-                        เข้าสู่ระบบแอดมิน
-                    </button>
-                </div>
-            </div>
+/* ---------- UI helpers ---------- */
+function showView(id) {
+  STUDENT_VIEWS.forEach((v) => $(v).classList.toggle("hidden", v !== id));
+}
+const showStudentRegister = () => showView("studentRegisterForm");
+const showStudentLogin = () => showView("studentLoginForm");
 
-            <div id="adminDashboard" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>จัดการคะแนนผ่าน Google Sheets</h2>
-                        <p class="text-slate-500 text-sm">ครูสามารถเข้าไปกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="https://sheets.google.com" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1">
-                            <i class="fa-solid fa-file-excel"></i> เปิด Google Sheets กรอกคะแนน
-                        </a>
-                        <button type="button" onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
-                            ออกจากระบบ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+function toast(msg, type = "error") {
+  const colors = { error: "bg-red-600", success: "bg-emerald-600", info: "bg-slate-700" };
+  const el = document.createElement("div");
+  el.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[60] ${colors[type]} text-white text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90vw]`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
 
-    </div>
+/* ครอบทุกการกดปุ่ม: กันกดซ้ำ + แสดง spinner + คืนสถานะปุ่มเสมอ (finally) + จับ error ทุกกรณี */
+async function run(btn, loadingText, fn) {
+  if (!btn || btn.dataset.busy === "1") return false;
+  const label = btn.querySelector("span") || btn;
+  const original = label.innerHTML;
+  btn.dataset.busy = "1";
+  btn.disabled = true;
+  label.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>${loadingText}`;
+  try {
+    return (await fn()) === true;
+  } catch (err) {
+    toast(err.message || "เกิดข้อผิดพลาด กรุณาลองใหม่");
+    return false;
+  } finally {
+    label.innerHTML = original;
+    btn.disabled = false;
+    delete btn.dataset.busy;
+  }
+}
 
-    <script>
-        let currentUser = null;
-        let tempRegisterEmail = "";
-        let currentRole = 'student';
-        let resendTimer = null;
+/* ---------- API ---------- */
+async function postData(payload) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+  try {
+    // text/plain = "simple request" ไม่มี preflight จึงไม่ติด CORS กับ Apps Script
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+    });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (_) {
+      throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (ตรวจว่า Deploy เป็น Anyone และใช้ URL เวอร์ชันล่าสุด)");
+    }
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("การเชื่อมต่อหมดเวลา กรุณาลองใหม่อีกครั้ง");
+    if (err instanceof TypeError) throw new Error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตหรือ URL ของ Script");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-        function toggleRole() {
-            const studentSec = document.getElementById('studentSection');
-            const teacherSec = document.getElementById('teacherSection');
-            const toggleBtn = document.getElementById('navToggleBtn');
+/* ---------- Role toggle ---------- */
+function toggleRole() {
+  const toStudent = currentRole === "teacher";
+  currentRole = toStudent ? "student" : "teacher";
+  $("studentSection").classList.toggle("hidden", !toStudent);
+  $("teacherSection").classList.toggle("hidden", toStudent);
+  $("navToggleBtn").innerHTML = toStudent
+    ? '<i class="fa-solid fa-user-shield mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)'
+    : '<i class="fa-solid fa-user-graduate mr-1"></i> สลับไปหน้านักเรียน';
+}
 
-            if (currentRole === 'student') {
-                currentRole = 'teacher';
-                studentSec.classList.add('hidden');
-                teacherSec.classList.remove('hidden');
-                toggleBtn.innerHTML = '<i class="fa-solid fa-user-graduate mr-1"></i> สลับไปหน้านักเรียน';
-            } else {
-                currentRole = 'student';
-                teacherSec.classList.add('hidden');
-                studentSec.classList.remove('hidden');
-                toggleBtn.innerHTML = '<i class="fa-solid fa-user-shield mr-1"></i> เข้าสู่ระบบแอดมิน (ครู)';
-            }
-        }
+/* ---------- Register / OTP ---------- */
+function handleStudentRegister() {
+  const email = $("regEmail").value.trim();
+  const password = $("regPassword").value;
+  const confirm = $("regPasswordConfirm").value;
+  const name = $("regName").value.trim();
+  const studentId = $("regStudentId").value.trim();
 
-        function showStudentRegister() {
-            document.getElementById('studentLoginForm').classList.add('hidden');
-            document.getElementById('studentRegisterForm').classList.remove('hidden');
-        }
+  if (!email || !password || !confirm || !name || !studentId) return toast("กรุณากรอกข้อมูลให้ครบทุกช่องที่มี *");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("รูปแบบอีเมลไม่ถูกต้อง");
+  if (password.length < 4) return toast("รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร");
+  if (password !== confirm) return toast("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
 
-        function showStudentLogin() {
-            document.getElementById('studentRegisterForm').classList.add('hidden');
-            document.getElementById('studentLoginForm').classList.remove('hidden');
-        }
+  run($("btnRegister"), "กำลังส่ง OTP...", async () => {
+    const r = await postData({ action: "register", email, password, name, studentId });
+    if (r.status !== "success") {
+      if (r.code === "COOLDOWN") { tempRegisterEmail = email; showView("otpForm"); startCooldown(r.wait); }
+      toast(r.message);
+      return false;
+    }
+    tempRegisterEmail = email;
+    $("otpInput").value = "";
+    showView("otpForm");
+    startCooldown(RESEND_SECONDS);
+    toast("ส่งรหัส OTP ไปที่อีเมลแล้ว (ตรวจในกล่องสแปมด้วย)", "success");
+    return true;
+  });
+}
 
-        async function postData(payload) {
-            const response = await fetch(SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(payload)
-            });
-            return await response.json();
-        }
+function handleVerifyOtp() {
+  const otp = $("otpInput").value.trim();
+  if (!/^\d{6}$/.test(otp)) return toast("กรุณากรอกรหัส OTP 6 หลัก");
+  run($("btnVerifyOtp"), "กำลังตรวจสอบ...", async () => {
+    const r = await postData({ action: "verifyOtp", email: tempRegisterEmail, otp });
+    if (r.status !== "success") { toast(r.message); return false; }
+    toast("ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ", "success");
+    clearCooldown();
+    showView("studentLoginForm");
+    $("studentEmailInput").value = tempRegisterEmail;
+    $("studentPasswordInput").value = "";
+    return true;
+  });
+}
 
-        async function handleStudentRegister() {
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
-            const name = document.getElementById('regName').value.trim();
-            const studentId = document.getElementById('regStudentId').value.trim();
+function handleResendOtp() {
+  run($("btnResendOtp"), "กำลังส่ง...", async () => {
+    const r = await postData({ action: "resendOtp", email: tempRegisterEmail });
+    if (r.status !== "success") {
+      if (r.code === "COOLDOWN") startCooldown(r.wait);
+      toast(r.message);
+      return false;
+    }
+    toast("ส่งรหัส OTP ใหม่แล้ว", "success");
+    return true;
+  }).then((ok) => { if (ok) startCooldown(RESEND_SECONDS); });
+}
 
-            if(!email || !password || !passwordConfirm || !name || !studentId) {
-                alert("กรุณากรอกข้อมูลให้ครบทุกช่องที่มีเครื่องหมาย *");
-                return;
-            }
+/* นับถอยหลัง 60 วินาที อิงเวลาจริง (ไม่เพี้ยนเมื่อแท็บถูกพักบนมือถือ) */
+function startCooldown(seconds) {
+  clearCooldown();
+  const btn = $("btnResendOtp"), txt = $("resendTimerText"), sec = $("timerSec");
+  const end = Date.now() + seconds * 1000;
+  btn.disabled = true;
+  txt.classList.remove("hidden");
+  const tick = () => {
+    const left = Math.ceil((end - Date.now()) / 1000);
+    if (left <= 0) return clearCooldown();
+    sec.textContent = left;
+  };
+  tick();
+  cooldownTimer = setInterval(tick, 500);
+}
 
-            if (password !== passwordConfirm) {
-                alert("รหัสผ่าน และ ยืนยันรหัสผ่าน ไม่ตรงกัน! กรุณาตรวจสอบอีกครั้ง");
-                return;
-            }
+function clearCooldown() {
+  clearInterval(cooldownTimer);
+  cooldownTimer = null;
+  $("btnResendOtp").disabled = false;
+  $("resendTimerText").classList.add("hidden");
+}
 
-            const btn = document.getElementById('btnRegister');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังส่ง OTP...';
+/* ---------- Login / Class / Scores ---------- */
+function handleStudentLogin() {
+  const email = $("studentEmailInput").value.trim();
+  const password = $("studentPasswordInput").value;
+  if (!email || !password) return toast("กรุณากรอกอีเมลและรหัสผ่าน");
 
-            tempRegisterEmail = email;
-            const payload = { action: "register", email, password, name, studentId };
+  run($("btnLogin"), "กำลังเข้าสู่ระบบ...", async () => {
+    const r = await postData({ action: "login", email, password });
+    if (r.code === "NOT_VERIFIED") {
+      tempRegisterEmail = email;
+      showView("otpForm");
+      toast("บัญชียังไม่ยืนยัน กดขอรหัส OTP อีกครั้งเพื่อรับรหัสใหม่", "info");
+      return false;
+    }
+    if (r.status !== "success") { toast(r.message); return false; }
+    currentUser = { ...r.student, token: r.token };
+    if (!currentUser.class) $("classSelectionModal").classList.remove("hidden");
+    else enterDashboard();
+    return true;
+  });
+}
 
-            try {
-                const data = await postData(payload);
-                if (data.status === "success") {
-                    alert("ส่งรหัส OTP สำเร็จ! กรุณาตรวจสอบในกล่องข้อความของอีเมล");
-                    document.getElementById('studentRegisterForm').classList.add('hidden');
-                    document.getElementById('otpForm').classList.remove('hidden');
-                    startResendCountdown();
-                } else {
-                    alert(data.message || "เกิดข้อผิดพลาด");
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>ส่งรหัส OTP ไปยังอีเมล</span>';
-            }
-        }
+function handleSaveClass() {
+  const cls = $("selectClassInput").value.trim();
+  if (!cls) return toast("กรุณาระบุระดับชั้น/ห้องเรียน");
+  run($("btnSaveClass"), "กำลังบันทึก...", async () => {
+    const r = await postData({ action: "updateClass", email: currentUser.email, token: currentUser.token, class: cls });
+    if (r.status !== "success") { toast(r.message); return false; }
+    currentUser.class = r.class;
+    $("classSelectionModal").classList.add("hidden");
+    enterDashboard();
+    return true;
+  });
+}
 
-        async function handleResendOtp() {
-            if (!tempRegisterEmail) {
-                alert("ไม่พบข้อมูลอีเมล กรุณาลองสมัครใหม่อีกครั้ง");
-                return;
-            }
+function enterDashboard() {
+  $("stName").textContent = currentUser.name;
+  $("stId").textContent = currentUser.studentId;
+  $("stClass").textContent = currentUser.class;
+  $("stEmail").textContent = currentUser.email;
+  showView("studentDashboard");
+  loadStudentScores();
+}
 
-            const btn = document.getElementById('btnResendOtp');
-            btn.disabled = true;
-            btn.innerText = "กำลังส่งรหัสใหม่...";
+function loadStudentScores() {
+  const btn = document.querySelector("#studentDashboard button[onclick='loadStudentScores()']");
+  const body = $("studentScoreBody"), head = $("studentScoreHeader");
+  return run(btn, "กำลังโหลด...", async () => {
+    const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token });
+    if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
+    if (r.status !== "success") { toast(r.message); return false; }
 
-            const payload = { action: "resendOtp", email: tempRegisterEmail };
+    head.innerHTML = body.innerHTML = "";
+    const hr = document.createElement("tr");
+    r.headers.forEach((h) => { const th = document.createElement("th"); th.className = "px-4 py-3"; th.textContent = h; hr.appendChild(th); });
+    head.appendChild(hr);
 
-            try {
-                const data = await postData(payload);
-                if (data.status === "success") {
-                    alert("ส่งรหัส OTP ใหม่ไปยังอีเมลของคุณเรียบร้อยแล้ว!");
-                    startResendCountdown();
-                } else {
-                    alert(data.message || "เกิดข้อผิดพลาดในการส่ง OTP ใหม่");
-                    btn.disabled = false;
-                    btn.innerText = "ขอส่งรหัส OTP อีกครั้ง";
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-                btn.disabled = false;
-                btn.innerText = "ขอส่งรหัส OTP อีกครั้ง";
-            }
-        }
+    const tr = document.createElement("tr");
+    if (!r.scores) {
+      const td = document.createElement("td");
+      td.colSpan = r.headers.length; td.className = "px-4 py-6 text-center text-slate-400";
+      td.textContent = r.message || "ยังไม่มีคะแนน";
+      tr.appendChild(td);
+    } else {
+      r.scores.forEach((s) => { const td = document.createElement("td"); td.className = "px-4 py-3"; td.textContent = s; tr.appendChild(td); });
+    }
+    body.appendChild(tr);
+    return true;
+  });
+}
 
-        function startResendCountdown() {
-            const btn = document.getElementById('btnResendOtp');
-            const timerText = document.getElementById('resendTimerText');
-            const timerSec = document.getElementById('timerSec');
+function studentLogout() {
+  currentUser = null;
+  $("studentPasswordInput").value = "";
+  showView("studentLoginForm");
+}
 
-            btn.disabled = true;
-            timerText.classList.remove('hidden');
-            let timeLeft = 60;
-            timerSec.innerText = timeLeft;
+/* ---------- Admin ---------- */
+function handleAdminLogin() {
+  const username = $("adminUsernameInput").value.trim();
+  const password = $("adminPasswordInput").value;
+  if (!username || !password) return toast("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
+  run(document.querySelector("#adminLoginForm button"), "กำลังตรวจสอบ...", async () => {
+    const r = await postData({ action: "adminLogin", username, password });
+    if (r.status !== "success") { toast(r.message); return false; }
+    $("adminLoginForm").classList.add("hidden");
+    $("adminDashboard").classList.remove("hidden");
+    $("adminPasswordInput").value = "";
+    return true;
+  });
+}
 
-            if (resendTimer) clearInterval(resendTimer);
+function adminLogout() {
+  $("adminDashboard").classList.add("hidden");
+  $("adminLoginForm").classList.remove("hidden");
+}
 
-            resendTimer = setInterval(() => {
-                timeLeft--;
-                timerSec.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(resendTimer);
-                    btn.disabled = false;
-                    btn.innerText = "ขอส่งรหัส OTP อีกครั้ง";
-                    timerText.classList.add('hidden');
-                }
-            }, 1000);
-        }
-
-        async function handleVerifyOtp() {
-            const otp = document.getElementById('otpInput').value.trim();
-            if(!otp) {
-                alert("กรุณากรอกรหัส OTP 6 หลัก");
-                return;
-            }
-
-            const btn = document.getElementById('btnVerifyOtp');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
-
-            const payload = { action: "verifyOtp", email: tempRegisterEmail, otp };
-
-            try {
-                const data = await postData(payload);
-                if (data.status === "success") {
-                    alert("ยืนยันอีเมลเรียบร้อยแล้ว! กรุณาเข้าสู่ระบบ");
-                    document.getElementById('otpForm').classList.add('hidden');
-                    showStudentLogin();
-                } else {
-                    alert(data.message || "รหัส OTP ไม่ถูกต้อง");
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>ยืนยันรหัส OTP</span>';
-            }
-        }
-
-        async function handleStudentLogin() {
-            const email = document.getElementById('studentEmailInput').value.trim();
-            const password = document.getElementById('studentPasswordInput').value.trim();
-
-            if(!email || !password) {
-                alert("กรุณากรอกอีเมลและรหัสผ่าน");
-                return;
-            }
-
-            const btn = document.getElementById('btnLogin');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';
-
-            const payload = { action: "login", email, password };
-
-            try {
-                const data = await postData(payload);
-                if (data.status === "success") {
-                    currentUser = data.user;
-                    if (!currentUser.class) {
-                        document.getElementById('classSelectionModal').classList.remove('hidden');
-                    } else {
-                        showStudentDashboard();
-                    }
-                } else if (data.status === "need_verify") {
-                    alert("อีเมลนี้ยังไม่ได้ยืนยัน OTP");
-                    tempRegisterEmail = payload.email;
-                    document.getElementById('studentLoginForm').classList.add('hidden');
-                    document.getElementById('otpForm').classList.remove('hidden');
-                    startResendCountdown();
-                } else {
-                    alert(data.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>เข้าสู่ระบบ</span>';
-            }
-        }
-
-        async function handleSaveClass() {
-            const studentClass = document.getElementById('selectClassInput').value.trim();
-            if(!studentClass) {
-                alert("กรุณากรอกระดับชั้น/ห้องเรียน");
-                return;
-            }
-
-            const btn = document.getElementById('btnSaveClass');
-            btn.disabled = true;
-
-            const payload = { action: "updateClass", email: currentUser.email, studentClass };
-
-            try {
-                await postData(payload);
-                currentUser.class = studentClass;
-                document.getElementById('classSelectionModal').classList.add('hidden');
-                showStudentDashboard();
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการบันทึกห้องเรียน");
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function showStudentDashboard() {
-            document.getElementById('studentLoginForm').classList.add('hidden');
-            document.getElementById('studentDashboard').classList.remove('hidden');
-
-            document.getElementById('stName').innerText = currentUser.name;
-            document.getElementById('stId').innerText = currentUser.studentId;
-            document.getElementById('stClass').innerText = currentUser.class;
-            document.getElementById('stEmail').innerText = currentUser.email;
-
-            loadStudentScores();
-        }
-
-        async function loadStudentScores() {
-            const thead = document.getElementById('studentScoreHeader');
-            const tbody = document.getElementById('studentScoreBody');
-            tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดคะแนนจาก Google Sheets...</td></tr>';
-
-            const payload = { action: "getScores", studentId: currentUser.studentId };
-
-            try {
-                const data = await postData(payload);
-                if (data.status === "success" && data.headers) {
-                    let headerHtml = '<tr class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">';
-                    data.headers.forEach(h => {
-                        headerHtml += `<th class="p-4 text-center">${h}</th>`;
-                    });
-                    headerHtml += '</tr>';
-                    thead.innerHTML = headerHtml;
-
-                    if (data.scores) {
-                        let bodyHtml = '<tr class="hover:bg-slate-50 font-medium">';
-                        data.scores.forEach((sc, idx) => {
-                            if (idx === 0) {
-                                bodyHtml += `<td class="p-4 text-center font-bold text-indigo-600">${sc}</td>`;
-                            } else {
-                                bodyHtml += `<td class="p-4 text-center">${sc !== "" ? sc : "-"}</td>`;
-                            }
-                        });
-                        bodyHtml += '</tr>';
-                        tbody.innerHTML = bodyHtml;
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูลคะแนนของคุณในระบบ (รอครูกรอกคะแนนใน Google Sheets)</td></tr>';
-                    }
-                }
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูลคะแนน</td></tr>';
-            }
-        }
-
-        function studentLogout() {
-            currentUser = null;
-            document.getElementById('studentDashboard').classList.add('hidden');
-            document.getElementById('studentLoginForm').classList.remove('hidden');
-            document.getElementById('studentEmailInput').value = '';
-            document.getElementById('studentPasswordInput').value = '';
-        }
-
-        function handleAdminLogin() {
-            const username = document.getElementById('adminUsernameInput').value.trim();
-            const password = document.getElementById('adminPasswordInput').value.trim();
-
-            if (!username || !password) {
-                alert('กรุณากรอก Username และ Password');
-                return;
-            }
-
-            if (username === 'AdminJohn' && password === '254712') {
-                document.getElementById('adminLoginForm').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-            } else {
-                alert('ชื่อผู้ใช้ (Username) หรือ รหัสผ่าน ไม่ถูกต้อง!');
-            }
-        }
-
-        function adminLogout() {
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('adminLoginForm').classList.remove('hidden');
-            document.getElementById('adminUsernameInput').value = '';
-            document.getElementById('adminPasswordInput').value = '';
-        }
-    </script>
+</script>
 </body>
 </html>
