@@ -207,6 +207,10 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  <div id="adminPanel" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4"></div>
 </div>
 </main>
+<div id="roomDrawer" class="fixed inset-0 z-50 hidden">
+ <div class="absolute inset-0 bg-black/40" onclick="closeRoomDrawer()"></div>
+ <aside id="roomDrawerPanel" class="absolute right-0 top-0 h-full w-[88%] max-w-sm bg-white shadow-2xl p-4 overflow-y-auto translate-x-full transition-transform duration-200"><div id="roomDrawerBody"></div></aside>
+</div>
 <footer class="text-center text-xs text-slate-400 pb-6">© ห้องเรียนออนไลน์ ครูจอห์น</footer>
 
 <script>
@@ -513,6 +517,7 @@ function handleStudentLogin() {
     }
     if (r.status !== "success") { toast(r.message); return false; }
     currentUser = { ...r.student, token: r.token };
+    stRooms = r.rooms || [];
     enterDashboard();
     return true;
   });
@@ -559,7 +564,7 @@ function handleJoin(btn) {
     const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code, class: cls });
     if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
     if (r.status !== "success") { toast(r.message); return false; }
-    pendingCode = ""; stRoom = r.roomId || stRoom; stTab = "home"; toast(r.message, "success");
+    pendingCode = ""; stRoom = r.roomId || stRoom; stTab = "home"; stJoinMode = false; toast(r.message, "success");
     await fetchStudent();
     return true;
   });
@@ -575,32 +580,70 @@ function handleSetClass(btn) {
     return true;
   });
 }
-function switchRoom(id) { stRoom = id; stData = null; stTab = "home"; renderStudent(); fetchStudent().catch((e) => toast(e.message)); }
+let stRooms = [], stLoading = false, stJoinMode = false;
+function openRoomDrawer() {
+  renderRoomDrawer();
+  const dr = $("roomDrawer"), pn = $("roomDrawerPanel");
+  dr.classList.remove("hidden");
+  requestAnimationFrame(() => requestAnimationFrame(() => pn.classList.remove("translate-x-full")));
+}
+function closeRoomDrawer() {
+  const dr = $("roomDrawer"); if (dr.classList.contains("hidden")) return;
+  $("roomDrawerPanel").classList.add("translate-x-full");
+  setTimeout(() => { if ($("roomDrawerPanel").classList.contains("translate-x-full")) dr.classList.add("hidden"); }, 220);
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeRoomDrawer(); });
+function renderRoomDrawer() {
+  const curId = stData && stData.room ? stData.room.id : "";
+  const cards = stRooms.map((r) => `<button type="button" onclick="pickRoom('${esc(r.id)}')" class="w-full text-left border-2 rounded-2xl p-3 transition ${r.id === curId ? "border-indigo-600 bg-indigo-50" : "border-slate-200 hover:border-indigo-300 hover:bg-slate-50"}">
+      <div class="flex items-start justify-between gap-2"><div class="font-bold text-slate-800">${esc(r.name)}</div>${r.id === curId ? '<span class="text-[10px] bg-indigo-600 text-white rounded-full px-2 py-0.5 whitespace-nowrap">กำลังดู</span>' : '<i class="fa-solid fa-chevron-right text-slate-300 mt-1"></i>'}</div>
+      ${r.desc ? `<div class="text-xs text-slate-600 mt-0.5"><i class="fa-solid fa-chalkboard-user mr-1 text-indigo-500"></i>สอน: ${esc(r.desc)}</div>` : ""}
+      <div class="text-xs text-slate-500 mt-1">${r.teacher ? "ครู " + esc(r.teacher) : ""}${r.class ? (r.teacher ? " · " : "") + "ห้อง/กลุ่มของฉัน " + esc(r.class) : ""}</div></button>`).join("");
+  $("roomDrawerBody").innerHTML = `<div class="flex items-center justify-between mb-2"><h3 class="font-bold text-lg text-slate-800"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าห้องเรียน</h3><button type="button" onclick="closeRoomDrawer()" aria-label="ปิด" class="text-slate-400 hover:text-slate-700 text-2xl leading-none px-2">&times;</button></div>
+    <p class="text-xs text-slate-500 mb-3">เลือกวิชา/ห้องที่ต้องการดูคะแนน คุณอาจเรียนกับครูหลายวิชา คะแนนแต่ละห้องแยกกัน</p>
+    <div class="space-y-2">${cards || '<div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm">ยังไม่ได้เข้าห้องเรียนใด ๆ กดปุ่มด้านล่างแล้วกรอกรหัสห้องจากครู</div>'}</div>
+    <button type="button" onclick="goJoin()" class="mt-4 w-full border-2 border-dashed border-indigo-300 text-indigo-700 rounded-2xl py-3 text-sm font-semibold hover:bg-indigo-50"><i class="fa-solid fa-plus mr-1"></i>เข้าห้องใหม่ด้วยรหัสห้อง</button>`;
+}
+function pickRoom(id) {
+  closeRoomDrawer();
+  if (stData && stData.room && stData.room.id === id) { stTab = "home"; renderStudent(); return; }
+  stRoom = id; stData = null; stTab = "home"; stJoinMode = false; stLoading = true; renderStudent();
+  fetchStudent().catch((e) => toast(e.message)).finally(() => { stLoading = false; renderStudent(); });
+}
+function goJoin() {
+  closeRoomDrawer();
+  if (stData && !stData.noRoom && !stData.needClass) { stTab = "me"; renderStudent(); }
+  else { stJoinMode = true; renderStudent(); }
+}
 async function autoJoin() { // ลิงก์/QR เชิญ: เติมรหัสห้องให้ แล้วให้นักเรียนเลือกห้อง-กลุ่มของตัวเองก่อนเข้า
   try { pendingCode = sessionStorage.getItem("joinCode") || ""; sessionStorage.removeItem("joinCode"); } catch (_) {}
   if (pendingCode) { stTab = "me"; toast("เลือกห้องและกลุ่มของคุณ แล้วกด เข้าห้อง", "info"); }
 }
-const roomSwitch = (d) => d && d.rooms && d.rooms.length > 1 ? `<select onchange="switchRoom(this.value)" class="text-sm bg-white/90 text-slate-800 rounded-xl px-2 max-w-[10rem]">${d.rooms.map((r) => `<option value="${esc(r.id)}" ${d.room && d.room.id === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select>` : "";
+const roomSwitch = (d) => `<button type="button" onclick="openRoomDrawer()" class="text-sm bg-white text-indigo-800 hover:bg-indigo-50 font-semibold px-3 py-2 rounded-xl max-w-[13rem] truncate"><i class="fa-solid fa-door-open mr-1"></i>${d && d.room ? esc(d.room.name) : "เลือกห้องเรียน"} <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i></button>`;
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
 let stData = null, stTimer = null;
 
 function enterDashboard() {
-  stData = null; stTab = "home";
+  stData = null; stTab = "home"; stRoom = ""; stLoading = false; stJoinMode = false;
   resetNav("studentDashboard", "home");
-  autoJoin().then(() => fetchStudent()).catch((e) => toast(e.message));
+  autoJoin().then(() => {
+    if (pendingCode || !stRooms.length) return fetchStudent(); // มาจากลิงก์เชิญ หรือยังไม่มีห้อง -> ไปหน้าเข้าห้องเลย
+    renderStudent(); openRoomDrawer(); // มีห้องแล้ว -> ให้เลือกห้องก่อนดูคะแนน
+  }).catch((e) => toast(e.message));
   clearInterval(stTimer);
-  // อัปเดตอัตโนมัติทุก 30 วินาที (เรียลไทม์) เมื่อเปิดหน้าอยู่
+  // อัปเดตอัตโนมัติทุก 60 วินาที เมื่อเปิดดูห้องหนึ่งอยู่ (ไม่โหลดตอนกำลังเลือกห้อง/อยู่แท็บ ของฉัน)
   stTimer = setInterval(() => {
-    if (!currentUser || document.hidden || stTab === "me" || (stData && (stData.noRoom || stData.needClass)) || $("studentDashboard").classList.contains("hidden")) return;
+    if (!currentUser || !stData || document.hidden || stTab === "me" || stData.noRoom || stData.needClass || $("studentDashboard").classList.contains("hidden") || !$("roomDrawer").classList.contains("hidden")) return;
     fetchStudent().catch(() => {});
-  }, 30000);
+  }, 60000);
 }
 
 async function fetchStudent() {
   const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token, roomId: stRoom });
   if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
   if (r.status !== "success") throw new Error(r.message);
-  stData = r;
+  stData = r; stJoinMode = false;
+  stRooms = r.rooms || [];
   if (r.room) stRoom = r.room.id;
   Object.assign(currentUser, r.me);
   renderStudent();
@@ -611,7 +654,8 @@ const setStTab = (t) => showView("studentDashboard", t);
 
 function studentLogout() {
   clearInterval(stTimer);
-  currentUser = null; stData = null; stRoom = "";
+  currentUser = null; stData = null; stRoom = ""; stRooms = []; stLoading = false; stJoinMode = false;
+  $("roomDrawer").classList.add("hidden"); $("roomDrawerPanel").classList.add("translate-x-full");
   $("studentPasswordInput").value = "";
   navStack = [{ v: "roleSelect" }, { v: "studentLoginForm" }];
   render("studentLoginForm");
@@ -624,12 +668,15 @@ function renderStudent() {
     <div class="blob w-40 h-40 bg-white/10 -top-12 -right-10"></div>
     <div class="relative flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-4"><div class="w-16 h-16 text-4xl rounded-full bg-white/90 flex items-center justify-center shrink-0 overflow-hidden">${avSpan(me.avatar)}</div><div><div class="text-sm text-indigo-100">สวัสดี 👋</div><h2 class="text-2xl font-bold leading-tight">${esc(me.nick || me.name)}</h2>
-    <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)}${d && d.room ? " · " + esc(d.room.name) : ""}${me.no ? " · เลขที่ " + esc(me.no) : ""}${me.class ? " · ห้อง " + esc(me.class) : ""}</p>${d && d.room && d.room.desc ? `<p class="text-xs text-indigo-200">${esc(d.room.desc)}</p>` : ""}</div></div>
-    <div class="flex flex-wrap gap-2">${roomSwitch(d)}<button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>
+    <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)}${d && d.room ? " · " + esc(d.room.name) : ""}${me.no ? " · เลขที่ " + esc(me.no) : ""}${me.class ? " · ห้อง " + esc(me.class) : ""}</p>${d && d.room && (d.room.desc || d.room.teacher) ? `<p class="text-xs text-indigo-200">${d.room.teacher ? "ครู " + esc(d.room.teacher) : ""}${d.room.desc ? (d.room.teacher ? " · " : "") + "สอน: " + esc(d.room.desc) : ""}</p>` : ""}</div></div>
+    <div class="flex flex-wrap gap-2">${roomSwitch(d)}${d && d.room ? `<button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>` : ""}
     <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
   const unread = d && d.notes ? d.notes.length : 0;
-  $("stTabs").innerHTML = (d && (d.noRoom || d.needClass)) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
-  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : d.needClass ? classPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d)) : empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...');
+  $("stTabs").innerHTML = (!d || d.noRoom || d.needClass) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
+  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : d.needClass ? classPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d))
+    : stLoading ? empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูลห้องนี้...')
+    : stJoinMode ? joinPanel()
+    : `<div class="bg-white rounded-2xl shadow-md border p-8 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🚪</div><h3 class="text-xl font-bold text-slate-800">เลือกห้องเรียนก่อน</h3><p class="text-sm text-slate-500">เลือกวิชา/ห้องที่ต้องการดูคะแนน</p><button type="button" onclick="openRoomDrawer()" class="${btnP}"><i class="fa-solid fa-door-open mr-1"></i>เลือกห้องเรียน</button></div>`;
 }
 
 const attCards = (d) => { const c = d.attCounts, tot = c["มา"] + c["สาย"] + c["ลา"] + c["ขาด"];
