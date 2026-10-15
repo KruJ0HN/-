@@ -266,7 +266,7 @@ function initPasswordChecklist() {
 document.addEventListener("DOMContentLoaded", initPasswordChecklist);
 
 /* ---------- ตรวจสถานะเซิร์ฟเวอร์ (แถบด้านล่างจอ) ---------- */
-const EXPECTED_VERSION = "2026-10-15-v4";
+const EXPECTED_VERSION = "2026-10-15-v5";
 async function checkServer() {
   const el = document.createElement("div");
   const base = "fixed bottom-2 left-2 right-2 sm:right-auto sm:max-w-md z-40 text-xs px-3 py-2 rounded-lg shadow text-white ";
@@ -290,9 +290,34 @@ async function checkServer() {
 }
 document.addEventListener("DOMContentLoaded", checkServer);
 
+/* ---------- อีเมล: ล้างอักขระแปลก (เช่น วรรณยุกต์ไทยที่ติดมาจากแป้นพิมพ์ภาษาไทย) ---------- */
+function cleanEmail(v, inputId) {
+  const cleaned = String(v || "").normalize("NFKC").replace(/[^\x21-\x7E]/g, "").toLowerCase();
+  if (inputId) {
+    const el = $(inputId);
+    if (el && el.value !== cleaned) {
+      el.value = cleaned;
+      toast("ลบอักขระที่ไม่ใช่ภาษาอังกฤษ/ช่องว่างออกจากอีเมลแล้ว กรุณาตรวจสอบ: " + cleaned, "info");
+    }
+  }
+  return cleaned;
+}
+
+function initEmailInputs() {
+  ["regEmail", "studentEmailInput"].forEach((id) => {
+    const el = $(id);
+    el.setAttribute("autocapitalize", "off");
+    el.setAttribute("autocorrect", "off");
+    el.setAttribute("spellcheck", "false");
+    el.setAttribute("inputmode", "email");
+    el.addEventListener("blur", () => cleanEmail(el.value, id));
+  });
+}
+document.addEventListener("DOMContentLoaded", initEmailInputs);
+
 /* ---------- Register / OTP ---------- */
 function handleStudentRegister() {
-  const email = $("regEmail").value.trim();
+  const email = cleanEmail($("regEmail").value, "regEmail");
   const password = $("regPassword").value;
   const confirm = $("regPasswordConfirm").value;
   const name = $("regName").value.trim();
@@ -315,7 +340,7 @@ function handleStudentRegister() {
     $("otpInput").value = "";
     showView("otpForm");
     startCooldown(RESEND_SECONDS);
-    toast(r.message, "success");
+    toast("ส่งรหัส OTP ไปที่ " + (r.sentTo || email) + " แล้ว (โควตาวันนี้เหลือ " + r.quota + ") ตรวจกล่องสแปมด้วย", "success");
     return true;
   });
 }
@@ -343,7 +368,7 @@ function handleResendOtp() {
       toast(r.message);
       return false;
     }
-    toast("ส่งรหัส OTP ใหม่แล้ว", "success");
+    toast("ส่งรหัส OTP ใหม่ไปที่ " + (r.sentTo || tempRegisterEmail) + " แล้ว (โควตาวันนี้เหลือ " + r.quota + ")", "success");
     return true;
   }).then((ok) => { if (ok) startCooldown(RESEND_SECONDS); });
 }
@@ -373,7 +398,7 @@ function clearCooldown() {
 
 /* ---------- Login / Class / Scores ---------- */
 function handleStudentLogin() {
-  const email = $("studentEmailInput").value.trim();
+  const email = cleanEmail($("studentEmailInput").value, "studentEmailInput");
   const password = $("studentPasswordInput").value;
   if (!email || !password) return toast("กรุณากรอกอีเมลและรหัสผ่าน");
 
