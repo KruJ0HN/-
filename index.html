@@ -26,7 +26,7 @@ html{scroll-behavior:smooth}
 .lift{transition:transform .25s,box-shadow .25s}.lift:hover{transform:translateY(-3px);box-shadow:0 14px 24px -14px rgba(107,22,37,.45)}
 @keyframes ring{0%{box-shadow:0 0 0 0 rgba(251,191,36,.6)}70%{box-shadow:0 0 0 18px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
 .pulse-ring{animation:ring 2.2s infinite}
-#studentLoginForm,#studentRegisterForm,#otpForm,#adminLoginForm{border-top:5px solid #8a2033;border-radius:1.5rem;box-shadow:0 22px 40px -22px rgba(107,22,37,.4)}
+#studentLoginForm,#studentRegisterForm,#otpForm,#forgotForm,#adminLoginForm{border-top:5px solid #8a2033;border-radius:1.5rem;box-shadow:0 22px 40px -22px rgba(107,22,37,.4)}
 </style>
 </head>
 <body class="min-h-screen">
@@ -101,7 +101,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
     <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1">
     <label class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input type="checkbox" onchange="$('studentPasswordInput').type=this.checked?'text':'password'"> แสดงรหัสผ่าน</label></div>
    <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-500 hover:from-indigo-800 hover:to-indigo-600 disabled:opacity-60 text-white text-lg font-bold py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>เข้าสู่ระบบ</span></button>
-   <p class="text-xs text-slate-400 text-center">ลืมรหัสผ่าน? แจ้งครูเพื่อรีเซ็ตให้ได้เลย</p>
+   <button type="button" onclick="showView('forgotForm')" class="w-full text-sm text-indigo-600 hover:underline"><i class="fa-solid fa-key mr-1"></i>ลืมรหัสผ่าน?</button>
   </div>
   <div class="mt-6 pt-4 border-t text-sm text-slate-600 text-center">ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button></div>
  </div>
@@ -128,6 +128,29 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
    <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
   </div>
   <div class="mt-4 text-center text-sm">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button></div>
+ </div>
+
+<div id="forgotForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
+  <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-key"></i></div>
+  <h2 class="text-2xl font-bold text-slate-800 text-center">ลืมรหัสผ่าน</h2>
+  <p class="text-slate-500 text-sm mb-4 text-center">ขอโค้ดจากครู แล้วตั้งรหัสผ่านใหม่ได้เอง</p>
+  <div class="space-y-3">
+   <div class="p-3 rounded-xl bg-slate-50 border space-y-2">
+    <div class="font-semibold text-slate-700 text-sm"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">1</span>ส่งคำขอถึงครู</div>
+    <input type="email" id="fgEmail" placeholder="อีเมลที่สมัครไว้" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+    <input type="text" id="fgSid" inputmode="numeric" placeholder="รหัสนักเรียน" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+    <button type="button" id="btnReqReset" onclick="handleRequestReset()" class="w-full bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl"><span>ส่งคำขอให้ครู</span></button>
+    <p id="fgSent" class="hidden text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2">ส่งคำขอแล้ว ✓ ให้แจ้งครูเพื่อขอ <b>โค้ด 6 หลัก</b> แล้วกรอกในขั้นตอนที่ 2</p>
+   </div>
+   <div class="p-3 rounded-xl bg-slate-50 border space-y-2">
+    <div class="font-semibold text-slate-700 text-sm"><span class="inline-block w-6 h-6 rounded-full bg-emerald-600 text-white text-center text-xs leading-6 mr-1">2</span>ได้โค้ดจากครูแล้ว</div>
+    <input type="text" id="fgCode" maxlength="6" inputmode="numeric" placeholder="โค้ด 6 หลักจากครู" class="w-full px-3 py-2 border rounded-lg text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-emerald-500">
+    <input type="password" id="fgPw" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+    <input type="password" id="fgPw2" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+    <button type="button" id="btnConfirmReset" onclick="handleConfirmReset()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl"><span>ตั้งรหัสผ่านใหม่</span></button>
+   </div>
+  </div>
+  <div class="mt-4 text-center text-sm"><button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">กลับไปเข้าสู่ระบบ</button></div>
  </div>
 
  <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
@@ -208,7 +231,7 @@ let cooldownTimer = null;
 const $ = (id) => document.getElementById(id);
 
 /* ---------- การนำทาง + ย้อนกลับ (ปุ่มลูกศร และปุ่มย้อนกลับของเบราว์เซอร์/มือถือ) ---------- */
-const VIEWS_ALL = ["roleSelect", "studentLoginForm", "studentRegisterForm", "otpForm", "studentDashboard", "adminLoginForm", "adminDashboard"];
+const VIEWS_ALL = ["roleSelect", "studentLoginForm", "studentRegisterForm", "otpForm", "forgotForm", "studentDashboard", "adminLoginForm", "adminDashboard"];
 let navStack = [{ v: "roleSelect" }];
 let stTab = "home", adminTab = "home";
 
@@ -356,7 +379,7 @@ function cleanEmail(v, inputId) {
 }
 
 function initEmailInputs() {
-  ["regEmail", "studentEmailInput"].forEach((id) => {
+  ["regEmail", "studentEmailInput", "fgEmail"].forEach((id) => {
     const el = $(id);
     el.setAttribute("autocapitalize", "off");
     el.setAttribute("autocorrect", "off");
@@ -451,6 +474,37 @@ function clearCooldown() {
   cooldownTimer = null;
   $("btnResendOtp").disabled = false;
   $("resendTimerText").classList.add("hidden");
+}
+
+/* ---------- ลืมรหัสผ่าน (ขอโค้ดจากครู) ---------- */
+function handleRequestReset() {
+  const email = cleanEmail($("fgEmail").value, "fgEmail"), studentId = $("fgSid").value.normalize("NFKC").replace(/\s+/g, "");
+  if (!email || !studentId) return toast("กรุณากรอกอีเมลและรหัสนักเรียน");
+  run($("btnReqReset"), "กำลังส่ง...", async () => {
+    const r = await postData({ action: "requestReset", email, studentId });
+    if (r.status !== "success") { toast(r.message); return false; }
+    $("fgSent").classList.remove("hidden");
+    toast(r.message, "success");
+    return true;
+  });
+}
+function handleConfirmReset() {
+  const email = cleanEmail($("fgEmail").value, "fgEmail"), code = $("fgCode").value.trim(), pw = $("fgPw").value;
+  if (!email) return toast("กรุณากรอกอีเมลในขั้นตอนที่ 1");
+  if (!/^\d{6}$/.test(code)) return toast("กรุณากรอกโค้ด 6 หลักจากครู");
+  const pe = passwordError(pw);
+  if (pe) return toast(pe);
+  if (pw !== $("fgPw2").value) return toast("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+  run($("btnConfirmReset"), "กำลังบันทึก...", async () => {
+    const r = await postData({ action: "confirmReset", email, code, newPassword: pw });
+    if (r.status !== "success") { toast(r.message); return false; }
+    toast("ตั้งรหัสผ่านใหม่แล้ว เข้าสู่ระบบด้วยรหัสใหม่ได้เลย", "success");
+    ["fgCode", "fgPw", "fgPw2"].forEach((i) => { $(i).value = ""; });
+    $("fgSent").classList.add("hidden");
+    showView("studentLoginForm");
+    $("studentEmailInput").value = email; $("studentPasswordInput").value = "";
+    return true;
+  });
 }
 
 /* ---------- Login / Class ---------- */
@@ -670,7 +724,7 @@ const CATS = ["ใบงาน", "แบบทดสอบ", "แบบฝึก
 const STU_STATUS = ["ปกติ", "พักการเรียน", "ย้ายออก"];
 const PERIODS = ["ทั้งวัน"].concat([1, 2, 3, 4, 5, 6, 7, 8].map((n) => "คาบ " + n));
 const TABS = [["home", "หน้าหลัก", "fa-house"], ["students", "รายชื่อนักเรียน", "fa-users"], ["submit", "เช็คส่งงาน", "fa-clipboard-check"],
-  ["assign", "รายละเอียดงาน", "fa-book"], ["criteria", "เกณฑ์คะแนน", "fa-scale-balanced"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
+  ["assign", "รายละเอียดงาน", "fa-book"], ["criteria", "เกณฑ์คะแนน", "fa-scale-balanced"], ["resets", "คำขอรีเซ็ตรหัส", "fa-key"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
   ["rank", "จัดอันดับ", "fa-ranking-star"], ["summary", "สรุปผลการเรียน", "fa-file-lines"], ["news", "ประกาศ", "fa-bullhorn"], ["profile", "โปรไฟล์ครู", "fa-id-badge"]];
 const DEF_G = [80, 75, 70, 65, 60, 55, 50], DEF_A = [1, 0.5, 0.5, 0], GR = ["4", "3.5", "3", "2.5", "2", "1.5", "1"];
 function critOf(c) {
@@ -679,6 +733,8 @@ function critOf(c) {
   return { g: g.length === 7 && g.every((x) => !isNaN(x)) ? g : DEF_G, a: a.length === 4 && a.every((x) => !isNaN(x)) ? a : DEF_A, m: Math.max(0, Number(c.attMax) || 0) };
 }
 const gradeNote = (c) => { const k = critOf(c); return "เกณฑ์เกรด: " + GR.map((x, i) => k.g[i] + "%+ = " + x).join(", ") + ", ต่ำกว่า " + k.g[6] + "% = 0" + (k.m ? " · เช็คชื่อนับรวม " + k.m + " คะแนน" : ""); };
+const pendReset = () => ((adminData && adminData.resets) || []).filter((r) => r.status === "รอครู").length;
+const RS_CLS = { "รอครู": "bg-amber-100 text-amber-700", "ออกโค้ดแล้ว": "bg-sky-100 text-sky-700", "เสร็จสิ้น": "bg-emerald-100 text-emerald-700", "ปฏิเสธ": "bg-slate-200 text-slate-600" };
 const FILTER_TABS = ["students", "submit", "scores", "attend", "rank", "summary"];
 let adminToken = null, adminData = null, adminRoom = "", adminAssign = "", adminPeriod = "ทั้งวัน";
 let adminDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -722,7 +778,7 @@ const setAdminTab = (id) => showView("adminDashboard", id);
 function renderAdmin() {
   if (!adminData) return;
   if (!adminData.assignments.find((a) => a.id === adminAssign)) adminAssign = adminData.assignments.length ? adminData.assignments[0].id : "";
-  $("adminTabs").innerHTML = TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}</button>`).join("");
+  $("adminTabs").innerHTML = TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("");
   $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab));
   $("adminRoom").innerHTML = '<option value="">ทุกห้อง</option>' + ROOMS.map((r) => `<option value="${r}" ${adminRoom === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` + SUBS.map((s) => `<option value="${r}/${s}" ${adminRoom === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
   $("adminPanel").innerHTML = AVIEWS[adminTab]();
@@ -738,6 +794,7 @@ const AVIEWS = {
     const rooms = CLASS_OPTIONS.map((c) => [c, act.filter((s) => s.class === c).length]).filter((x) => x[1]);
     const top = withPct.slice().sort((a, b) => a.rank - b.rank).slice(0, 3);
     return `<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">${[card("นักเรียนที่ใช้งาน", act.length, "fa-users"), card("สมัครและยืนยันแล้ว", reg.length, "fa-user-check"), card("จำนวนงาน", adminData.assignments.length, "fa-book"), card("ร้อยละเฉลี่ย", avg(withPct, "pct"), "fa-percent"), card("เช็คชื่อเฉลี่ย", avg(withAtt, "attPct"), "fa-calendar-check")].join("")}</div>
+      ${pendReset() ? `<div class="mb-4 text-sm bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><span><i class="fa-solid fa-key mr-1"></i>มีนักเรียนขอรีเซ็ตรหัสผ่าน ${pendReset()} คน</span><button type="button" onclick="setAdminTab('resets')" class="${btnP}">ดูคำขอ</button></div>` : ""}
       ${noClass ? `<div class="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3">มีนักเรียน ${noClass} คนที่ยังไม่มีห้อง (ดูที่แท็บ รายชื่อนักเรียน)</div>` : ""}
       <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละห้อง</h3>
       <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนที่เลือกห้อง</span>'}</div>
@@ -835,6 +892,15 @@ const AVIEWS = {
     const rows = studs(true).map((s) => { const m = sumOf(s.studentId); return `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(m.max ? `${fmt(m.total)} / ${fmt(m.max)}` : "-")}${td(m.pct == null ? "-" : fmt(m.pct) + "%")}${td(esc(m.grade || "-"), "font-bold text-indigo-700")}${td(fmt(m.remaining))}${td(m.attPct == null ? "-" : fmt(m.attPct) + "%")}${td(`${m.subCount || 0} / ${m.assignCount || 0}`)}</tr>`; }).join("");
     return `<div class="mb-4 flex flex-wrap items-center justify-between gap-2 bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-sm"><span class="text-slate-600"><i class="fa-solid fa-scale-balanced text-indigo-600 mr-2"></i>${esc(gradeNote(adminData.config))}</span><button type="button" onclick="setAdminTab('criteria')" class="${btnP}">ตั้งเกณฑ์คะแนนเอง</button></div>
       <div class="mb-1">${searchBox()}</div><p class="text-xs text-slate-500 mb-3">(นับเฉพาะงานที่ให้คะแนนแล้ว)</p>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "คะแนนรวม", "ร้อยละ", "เกรด", "คงเหลือ", "เช็คชื่อ", "ส่งงาน"), rows, 9)}`;
+  },
+
+  resets() {
+    const l = (adminData.resets || []).slice().sort((a, b) => b.time - a.time), now = Date.now();
+    const rows = l.map((r) => `<tr>${td(dt(r.time), "whitespace-nowrap text-xs")}${td("<b>" + esc(r.sid) + "</b>")}${td(esc(r.name))}${td(esc(r.email), "text-xs text-slate-500")}${td(badge(r.status, RS_CLS) + (r.status === "ออกโค้ดแล้ว" ? `<div class="text-xs text-slate-400 mt-1">${r.expires > now ? "หมดอายุ " + dt(r.expires) : "โค้ดหมดอายุแล้ว"}</div>` : ""))}
+      <td class="px-3 py-2 whitespace-nowrap">${r.status === "รอครู" || r.status === "ออกโค้ดแล้ว" ? `<button type="button" onclick="issueReset('${esc(r.email)}')" class="${btnP}">${r.status === "รอครู" ? "ออกโค้ด" : "ออกโค้ดใหม่"}</button> <button type="button" onclick="rejectReset('${esc(r.email)}')" class="text-red-600 text-sm ml-2">ปฏิเสธ</button>` : ""}</td></tr>`).join("");
+    return `<div class="space-y-3"><div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>คำขอรีเซ็ตรหัสผ่าน</h3>
+      <p class="text-xs text-slate-500">นักเรียนกด "ลืมรหัสผ่าน" แล้วคำขอจะมาที่นี่ → กด "ออกโค้ด" ได้โค้ด 6 หลัก → แจ้งโค้ดให้นักเรียน (ใช้ได้ 60 นาที) → นักเรียนกรอกโค้ดและตั้งรหัสผ่านใหม่เอง · ตรวจให้แน่ใจว่าเป็นตัวนักเรียนจริงก่อนแจ้งโค้ด</p></div>
+      ${table(th("เวลาขอ", "รหัส", "ชื่อ", "อีเมล", "สถานะ", "จัดการ"), rows, 6)}</div>`;
   },
 
   criteria() {
@@ -1041,6 +1107,16 @@ function exportStudents() {
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "students.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
+async function issueReset(email) {
+  if (adminBusy) return;
+  adminBusy = true;
+  try {
+    const r = await adminCall({ action: "adminIssueResetCode", email });
+    await loadAdminData();
+    alert(`โค้ดรีเซ็ตรหัสผ่านคือ\n\n${r.code}\n\nแจ้งนักเรียนคนนี้เท่านั้น (ใช้ได้ ${r.minutes} นาที) แล้วให้นักเรียนกดลืมรหัสผ่าน > ขั้นตอนที่ 2`);
+  } catch (e) { toast(e.message); } finally { adminBusy = false; }
+}
+const rejectReset = (email) => adminDo("ปฏิเสธคำขอรีเซ็ตนี้ใช่ไหม?", { action: "adminRejectReset", email }, "ปฏิเสธคำขอแล้ว");
 async function resetPw(sid) {
   const s = stuOf(sid);
   if (adminBusy || !confirm(`รีเซ็ตรหัสผ่านของ ${s.name} (${sid}) เป็นรหัสชั่วคราวใช่ไหม?`)) return;
