@@ -203,7 +203,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  </div>
  <div id="adminRoomBar" class="flex flex-wrap items-center gap-2"></div>
  <div id="adminTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
- <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">แสดงกลุ่ม:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
+ <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">แสดงห้อง/กลุ่ม:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
  <div id="adminPanel" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4"></div>
 </div>
 </main>
@@ -545,29 +545,40 @@ const attScoreCard = (s, c) => {
   const n = s.attN || 0;
   return `<div class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-hand-holding-heart"></i></div><div class="min-w-0 flex-1"><div class="font-bold text-slate-700">คะแนนจิตพิสัย (จากเช็คชื่อ)</div><div class="text-3xl font-bold text-emerald-700">${n ? fmt(s.attGot) : "-"} <span class="text-base text-slate-400 font-normal">/ ${fmt(s.attFull)}</span></div><div class="text-xs text-slate-500">${n ? "ตอนนี้ได้ " + fmt(s.attGot) + " คะแนน จากเช็คชื่อ " + n + " ครั้ง · มา " + c["มา"] + " สาย " + c["สาย"] + " ลา " + c["ลา"] + " ขาด " + c["ขาด"] : "ยังไม่มีการเช็คชื่อ (เต็ม " + fmt(s.attFull) + " คะแนน)"}</div></div></div>`;
 };
-const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือสแกน QR / กดลิงก์เชิญจากครู)</p><div class="flex gap-2"><input id="joinCode" maxlength="8" placeholder="เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center"><button type="button" onclick="handleJoin(this)" class="${btnP} shrink-0"><span>เข้าห้อง</span></button></div></div>`;
-const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3>${joinBox()}</div>`;
+const classPick = (p) => `<div class="grid grid-cols-2 gap-2 text-left"><div><label class="text-xs font-semibold text-slate-600">ห้องของคุณ <span class="text-red-500">*</span></label><select id="${p}Room" class="${inC} bg-white"><option value="">เลือกห้อง</option>${["A", "B", "C", "D", "E"].map((x) => `<option value="${x}">ห้อง ${x}</option>`).join("")}</select></div><div><label class="text-xs font-semibold text-slate-600">กลุ่ม <span class="text-red-500">*</span></label><select id="${p}Sub" class="${inC} bg-white"><option value="">เลือกกลุ่ม</option>${["L1", "L2", "L3", "L4"].map((x) => `<option value="${x}">${x}</option>`).join("")}</select></div></div>`;
+const pickedClass = (p) => { const a = $(p + "Room").value, b = $(p + "Sub").value; if (!a || !b) throw new Error("กรุณาเลือกห้องและกลุ่มของคุณ"); return a + "/" + b; };
+let pendingCode = "";
+const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือกดลิงก์/สแกน QR จากครู) แล้วเลือกห้องและกลุ่มของคุณ ครูจะใช้แยกนักเรียนแต่ละห้องในวิชาเดียวกัน</p><input id="joinCode" maxlength="8" value="${esc(pendingCode)}" placeholder="รหัสห้อง เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center">${classPick("jn")}<button type="button" onclick="handleJoin(this)" class="${btnP} w-full"><span>เข้าห้อง</span></button></div>`;
+const classPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏷️</div><h3 class="text-xl font-bold text-slate-800">เลือกห้องและกลุ่มของคุณ</h3><p class="text-xs text-slate-500">เพื่อให้ครูแยกคะแนนและงานของแต่ละห้อง เลือกได้ครั้งเดียว หากผิดให้แจ้งครู</p>${classPick("sc")}<button type="button" onclick="handleSetClass(this)" class="${btnP} w-full"><span>บันทึก</span></button></div>`;
+const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3><p class="text-xs text-slate-500">สมัครบัญชีแล้ว ขั้นต่อไปคือกรอกรหัสห้องที่ครูให้ และเลือกห้อง/กลุ่มของคุณ</p>${joinBox()}</div>`;
 function handleJoin(btn) {
   run(btn, "กำลังเข้าห้อง...", async () => {
     const code = $("joinCode").value.trim();
     if (!code) throw new Error("กรุณากรอกรหัสห้อง");
-    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code });
+    const cls = pickedClass("jn");
+    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code, class: cls });
     if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
     if (r.status !== "success") { toast(r.message); return false; }
-    stRoom = r.roomId || stRoom; stTab = "home"; toast(r.message, "success");
+    pendingCode = ""; stRoom = r.roomId || stRoom; stTab = "home"; toast(r.message, "success");
+    await fetchStudent();
+    return true;
+  });
+}
+function handleSetClass(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    const cls = pickedClass("sc");
+    const r = await postData({ action: "setMyClass", email: currentUser.email, token: currentUser.token, roomId: stRoom, class: cls });
+    if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
+    if (r.status !== "success") { toast(r.message); return false; }
+    toast("บันทึกห้อง " + cls + " แล้ว", "success");
     await fetchStudent();
     return true;
   });
 }
 function switchRoom(id) { stRoom = id; stData = null; stTab = "home"; renderStudent(); fetchStudent().catch((e) => toast(e.message)); }
-async function autoJoin() {
-  let c = "";
-  try { c = sessionStorage.getItem("joinCode") || ""; sessionStorage.removeItem("joinCode"); } catch (_) {}
-  if (!c) return;
-  try {
-    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code: c });
-    if (r.status === "success") { stRoom = r.roomId || ""; toast(r.message, "success"); } else toast(r.message);
-  } catch (e) { toast(e.message); }
+async function autoJoin() { // ลิงก์/QR เชิญ: เติมรหัสห้องให้ แล้วให้นักเรียนเลือกห้อง-กลุ่มของตัวเองก่อนเข้า
+  try { pendingCode = sessionStorage.getItem("joinCode") || ""; sessionStorage.removeItem("joinCode"); } catch (_) {}
+  if (pendingCode) { stTab = "me"; toast("เลือกห้องและกลุ่มของคุณ แล้วกด เข้าห้อง", "info"); }
 }
 const roomSwitch = (d) => d && d.rooms && d.rooms.length > 1 ? `<select onchange="switchRoom(this.value)" class="text-sm bg-white/90 text-slate-800 rounded-xl px-2 max-w-[10rem]">${d.rooms.map((r) => `<option value="${esc(r.id)}" ${d.room && d.room.id === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select>` : "";
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
@@ -580,7 +591,7 @@ function enterDashboard() {
   clearInterval(stTimer);
   // อัปเดตอัตโนมัติทุก 30 วินาที (เรียลไทม์) เมื่อเปิดหน้าอยู่
   stTimer = setInterval(() => {
-    if (!currentUser || document.hidden || stTab === "me" || $("studentDashboard").classList.contains("hidden")) return;
+    if (!currentUser || document.hidden || stTab === "me" || (stData && (stData.noRoom || stData.needClass)) || $("studentDashboard").classList.contains("hidden")) return;
     fetchStudent().catch(() => {});
   }, 30000);
 }
@@ -617,8 +628,8 @@ function renderStudent() {
     <div class="flex flex-wrap gap-2">${roomSwitch(d)}<button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>
     <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
   const unread = d && d.notes ? d.notes.length : 0;
-  $("stTabs").innerHTML = (d && d.noRoom) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
-  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d)) : empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...');
+  $("stTabs").innerHTML = (d && (d.noRoom || d.needClass)) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
+  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : d.needClass ? classPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d)) : empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...');
 }
 
 const attCards = (d) => { const c = d.attCounts, tot = c["มา"] + c["สาย"] + c["ลา"] + c["ขาด"];
@@ -795,10 +806,10 @@ const table = (head, body, cols) => `<div class="overflow-x-auto"><table class="
 const searchBox = () => `<input oninput="filterRows(this.value)" placeholder="ค้นหาชื่อ/รหัส..." class="${selC} w-full md:w-64">`;
 const rowQ = (s) => esc((s.studentId + " " + s.name).toLowerCase());
 const opts = (list, cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + list.map((x) => `<option value="${esc(x)}" ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
-const targetOpts = (cur) => { const g = groupList(); if (cur && !g.includes(cur)) g.push(cur); return `<option value="">ทุกคนในห้อง</option>` + g.map((x) => `<option value="${esc(x)}" ${cur === x ? "selected" : ""}>กลุ่ม ${esc(x)}</option>`).join(""); };
+const targetOpts = (cur) => `<option value="">ทุกห้อง</option>` + ROOMS.map((r) => `<option value="${r}" ${cur === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` + SUBS.map((s) => `<option value="${r}/${s}" ${cur === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
 const matchT = (t, c) => !t || t === c || (c || "").indexOf(t + "/") === 0;
 
-const inRoom = (s) => !adminRoom || s.class === adminRoom;
+const inRoom = (s) => !adminRoom || s.class === adminRoom || (s.class || "").startsWith(adminRoom + "/");
 const studs = (active) => adminData.students.filter((s) => (!active || s.active) && inRoom(s));
 const sumOf = (sid) => adminData.summary.find((x) => x.sid === sid) || {};
 const recOf = (sid, aid) => adminData.records.find((r) => r.sid === sid && r.aid === aid);
@@ -820,6 +831,20 @@ function createRoom(btn) {
     return true;
   });
 }
+async function deleteRoom(id) {
+  if (adminBusy) return;
+  const rm = (adminData.rooms || []).find((x) => x.id === id);
+  if (!rm) return;
+  const t = prompt("ลบห้อง \"" + rm.name + "\" ถาวร?\nงาน ไฟล์แนบ คะแนน เช็คชื่อ ประกาศ และรายชื่อนักเรียนในห้องนี้จะถูกลบทั้งหมด ย้อนกลับไม่ได้\n(แนะนำให้รัน backupNow ใน Apps Script ก่อน บัญชีนักเรียนไม่ถูกลบ)\n\nพิมพ์ชื่อห้องให้ตรงเพื่อยืนยัน:");
+  if (t === null) return;
+  adminBusy = true;
+  try {
+    await adminCall({ action: "adminDeleteRoom", roomId: id, confirmName: t.trim() });
+    if (curRoom === id) { curRoom = ""; adminAssign = ""; asgFiles = []; adminRoom = ""; }
+    await loadAdminData();
+    toast("ลบห้องแล้ว", "success");
+  } catch (e) { toast(e.message); } finally { adminBusy = false; }
+}
 function renameRoom(id) {
   const n = prompt("ชื่อห้องใหม่");
   if (n && n.trim()) adminDo("", { action: "adminUpdateRoom", roomId: id, op: "rename", name: n.trim() }, "เปลี่ยนชื่อห้องแล้ว");
@@ -829,7 +854,8 @@ function roomOp(id, op, val) {
 }
 const roomLink = (code) => location.origin + location.pathname + "?join=" + code;
 function copyText(t) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast("คัดลอกแล้ว", "success")).catch(() => prompt("คัดลอกข้อความนี้", t)); }
-function showQr(code, name) {
+function showQr(code) {
+  const rm = (adminData.rooms || []).find((x) => x.code === code), name = rm ? rm.name : "";
   const box = $("qrBox"), link = roomLink(code);
   box.classList.remove("hidden");
   box.innerHTML = `<div class="font-bold mb-2">${esc(name)}</div><div id="qrCanvas" class="inline-block p-2 bg-white border rounded"></div><div class="text-sm mt-2">รหัสเข้าห้อง <b class="tracking-widest text-xl text-indigo-800">${esc(code)}</b></div><div class="text-xs text-slate-500 break-all">${esc(link)}</div>`;
@@ -926,9 +952,9 @@ function renderAdmin() {
   if (!adminData.assignments.find((a) => a.id === adminAssign)) adminAssign = adminData.assignments.length ? adminData.assignments[0].id : "";
   const rooms = adminData.rooms || [];
   $("adminRoomBar").innerHTML = rooms.length ? `<label class="text-sm text-slate-600"><i class="fa-solid fa-school mr-1"></i>ห้องเรียน:</label><select onchange="switchAdminRoom(this.value)" class="${selC} font-semibold">${rooms.map((r) => `<option value="${esc(r.id)}" ${r.id === curRoom ? "selected" : ""}>${esc(r.name)}${r.archived ? " (ซ่อน)" : ""}${adminRole === "main" && r.owner !== adminUser ? " · " + esc(r.owner) : ""}</option>`).join("")}</select><button type="button" onclick="setAdminTab('rooms')" class="text-sm text-indigo-700 underline">จัดการห้อง / รหัสเชิญ</button>` : "";
-  $("adminTabs").innerHTML = TABS.filter(([id]) => id !== "admins" || adminRole === "main").map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("");
+  $("adminTabs").innerHTML = TABS.filter(([id]) => (id !== "admins" || adminRole === "main") && (curRoom || ["rooms", "profile", "admins"].includes(id))).map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("");
   $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab) || !curRoom);
-  $("adminRoom").innerHTML = '<option value="">ทุกกลุ่ม</option>' + groupList().map((g) => `<option value="${esc(g)}" ${adminRoom === g ? "selected" : ""}>${esc(g)}</option>`).join("");
+  $("adminRoom").innerHTML = '<option value="">ทุกห้อง</option>' + ROOMS.map((x) => `<option value="${x}" ${adminRoom === x ? "selected" : ""}>ห้อง ${x} (ทุกกลุ่ม)</option>` + SUBS.map((y) => `<option value="${x}/${y}" ${adminRoom === x + "/" + y ? "selected" : ""}>ห้อง ${x}/${y}</option>`).join("")).join("");
   $("adminPanel").innerHTML = AVIEWS[adminTab]();
   if (adminTab === "criteria") critPreview();
   if (adminTab === "assign") renderAsgFiles();
@@ -941,14 +967,15 @@ const AVIEWS = {
       <div class="flex flex-wrap justify-between gap-2 items-start"><div><div class="font-bold text-slate-800">${esc(r.name)}${r.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่ นักเรียนเข้าไม่ได้)</span>' : ""}</div>${adminRole === "main" ? `<div class="text-xs text-slate-400">เจ้าของ: ${esc(r.owner)}</div>` : ""}</div>
        <div class="flex flex-wrap gap-2 items-center">${r.id !== curRoom ? `<button type="button" onclick="switchAdminRoom('${esc(r.id)}')" class="${btnP}">เปิดห้องนี้</button>` : '<span class="text-xs text-indigo-700 font-semibold">กำลังเปิดอยู่</span>'}
         <button type="button" onclick="renameRoom('${esc(r.id)}')" class="text-sm text-slate-600 underline">เปลี่ยนชื่อ</button>
-        <button type="button" onclick="roomOp('${esc(r.id)}','archive',${!r.archived})" class="text-sm text-amber-700 underline">${r.archived ? "เปิดห้องอีกครั้ง" : "ซ่อนห้อง"}</button></div></div>
+        <button type="button" onclick="roomOp('${esc(r.id)}','archive',${!r.archived})" class="text-sm text-amber-700 underline">${r.archived ? "เปิดห้องอีกครั้ง" : "ซ่อนห้อง"}</button>
+        <button type="button" onclick="deleteRoom('${esc(r.id)}')" class="text-sm text-red-600 underline"><i class="fa-solid fa-trash mr-1"></i>ลบห้อง</button></div></div>
       <div class="flex flex-wrap items-center gap-2 text-sm"><span class="text-slate-500">รหัสเข้าห้อง</span><b class="text-2xl tracking-widest text-indigo-800">${esc(r.code)}</b>
        <button type="button" onclick="copyText('${esc(r.code)}')" class="text-xs bg-slate-200 rounded px-2 py-1">คัดลอกรหัส</button>
        <button type="button" onclick="copyText('${esc(roomLink(r.code))}')" class="text-xs bg-slate-200 rounded px-2 py-1">คัดลอกลิงก์เชิญ</button>
-       <button type="button" onclick="showQr('${esc(r.code)}','${esc(r.name)}')" class="text-xs bg-slate-200 rounded px-2 py-1"><i class="fa-solid fa-qrcode"></i> QR</button>
+       <button type="button" onclick="showQr('${esc(r.code)}')" class="text-xs bg-slate-200 rounded px-2 py-1"><i class="fa-solid fa-qrcode"></i> QR</button>
        <button type="button" onclick="roomOp('${esc(r.id)}','newcode')" class="text-xs text-red-600 underline">สร้างรหัสใหม่</button></div></div>`).join("");
     return `<div class="space-y-4 max-w-3xl">
-      <div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-school text-indigo-600 mr-2"></i>ห้องเรียน</h3><p class="text-xs text-slate-500">สร้างห้องเรียนก่อน แล้วแจกรหัส / ลิงก์ / QR ให้นักเรียนเข้าห้อง · งาน คะแนน เช็คชื่อ ประกาศ และเกณฑ์เกรดแยกตามห้อง · นักเรียนคนหนึ่งเข้าได้หลายห้อง</p></div>
+      ${curRoom ? "" : '<div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm"><b>ขั้นแรก:</b> สร้างห้องเรียนก่อน แล้วเมนูจัดการนักเรียน งาน คะแนน และเช็คชื่อจะเปิดให้ใช้งาน</div>'}<div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-school text-indigo-600 mr-2"></i>ห้องเรียน</h3><p class="text-xs text-slate-500">สร้างห้องเรียนก่อน แล้วแจกรหัส / ลิงก์ / QR ให้นักเรียนเข้าห้อง · งาน คะแนน เช็คชื่อ ประกาศ และเกณฑ์เกรดแยกตามห้อง · นักเรียนคนหนึ่งเข้าได้หลายห้อง</p></div>
       <div class="p-3 bg-slate-50 border rounded-xl flex flex-wrap gap-2 items-end"><div class="flex-1 min-w-[12rem]"><label class="text-xs font-semibold text-slate-600">ชื่อห้องเรียนใหม่</label><input id="newRoomName" maxlength="60" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4/1"></div><button type="button" onclick="createRoom(this)" class="${btnP}"><span><i class="fa-solid fa-plus mr-1"></i>สร้างห้อง</span></button></div>
       <div id="qrBox" class="hidden text-center p-4 border rounded-2xl bg-white"></div>
       <div class="space-y-3">${cards || '<div class="text-slate-400 text-sm p-4 text-center">ยังไม่มีห้องเรียน สร้างห้องแรกด้านบนได้เลย</div>'}</div></div>`;
@@ -966,13 +993,13 @@ const AVIEWS = {
     const withPct = adminData.summary.filter((x) => x.pct !== null), withAtt = adminData.summary.filter((x) => x.attPct !== null);
     const avg = (l, k) => (l.length ? fmt(l.reduce((a, x) => a + x[k], 0) / l.length) + "%" : "-");
     const noClass = 0;
-    const rooms = groupList().map((c) => [c, act.filter((s) => s.class === c).length]);
+    const rooms = CLASS_OPTIONS.map((c) => [c, act.filter((s) => s.class === c).length]).filter((x) => x[1]);
     const top = withPct.slice().sort((a, b) => a.rank - b.rank).slice(0, 3);
     return `<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">${[card("นักเรียนที่ใช้งาน", act.length, "fa-users"), card("สมัครและยืนยันแล้ว", reg.length, "fa-user-check"), card("จำนวนงาน", adminData.assignments.length, "fa-book"), card("ร้อยละเฉลี่ย", avg(withPct, "pct"), "fa-percent"), card("เช็คชื่อเฉลี่ย", avg(withAtt, "attPct"), "fa-calendar-check")].join("")}</div>
       ${pendReset() ? `<div class="mb-4 text-sm bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><span><i class="fa-solid fa-key mr-1"></i>มีนักเรียนขอรีเซ็ตรหัสผ่าน ${pendReset()} คน</span><button type="button" onclick="setAdminTab('resets')" class="${btnP}">ดูคำขอ</button></div>` : ""}
       ${noClass ? `<div class="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3">มีนักเรียน ${noClass} คนที่ยังไม่มีห้อง (ดูที่แท็บ รายชื่อนักเรียน)</div>` : ""}
-      <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละกลุ่ม</h3>
-      <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีการแบ่งกลุ่ม (ตั้งกลุ่มได้ที่แท็บ รายชื่อนักเรียน)</span>'}</div>
+      <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละห้อง/กลุ่ม</h3>
+      <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนที่เลือกห้อง</span>'}</div>
       <h3 class="font-bold text-slate-700 mb-2">3 อันดับแรก (ทุกห้อง)</h3>
       <div class="mb-5">${top.length ? top.map((x) => `<div class="py-1 text-sm">อันดับ ${x.rank}: <b>${esc(nameOf(x.sid))}</b> (${esc(x.class)}) ${fmt(x.pct)}%</div>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีคะแนน</span>'}</div>
       <h3 class="font-bold text-slate-700 mb-2">ประกาศล่าสุด</h3>
@@ -983,20 +1010,20 @@ const AVIEWS = {
     const l = studs(false);
     const rows = l.map((s) => `<tr data-q="${rowQ(s)}" data-sid="${esc(s.studentId)}">
       <td class="px-2 py-1"><input class="st-no w-14 px-2 py-1 border rounded text-center" value="${esc(s.no)}" maxlength="6"></td>${td("<b class=\"text-indigo-800 bg-amber-50 px-2 py-0.5 rounded\">" + esc(s.studentId) + "</b>", "whitespace-nowrap")}${td(esc(s.name))}${td(esc(s.email || "-"), "text-xs text-slate-500")}
-      <td class="px-2 py-1"><input class="st-cls ${inC} w-28" list="grpList" maxlength="20" value="${esc(s.class)}" placeholder="กลุ่ม"></td>
+      <td class="px-2 py-1"><select class="st-cls ${selC}">${opts(CLASS_OPTIONS, s.class, "- ยังไม่เลือก -")}</select></td>
       <td class="px-2 py-1"><select class="st-sts ${selC}">${opts(STU_STATUS, s.status)}</select></td>
       ${td(!s.registered ? '<span class="text-slate-400">ยังไม่สมัคร</span>' : s.verified ? '<span class="text-emerald-600">ยืนยันแล้ว</span>' : '<span class="text-amber-600">รอยืนยัน OTP</span>')}
       <td class="px-3 py-2 whitespace-nowrap"><button type="button" title="บันทึก" onclick="saveStudent('${esc(s.studentId)}',this)" class="text-indigo-700 mr-3"><i class="fa-solid fa-floppy-disk"></i></button>
       ${s.registered ? `<button type="button" title="รีเซ็ตรหัสผ่าน" onclick="resetPw('${esc(s.studentId)}')" class="text-sky-600 mr-3"><i class="fa-solid fa-key"></i></button>` : ""}
       <button type="button" title="ลบออกจากห้อง" onclick="removeFromRoom('${esc(s.studentId)}')" class="text-amber-600 mr-3"><i class="fa-solid fa-door-open"></i></button>
       <button type="button" title="ลบนักเรียนออกจากห้องพร้อมคะแนน" onclick="deleteStudent('${esc(s.studentId)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button>${adminRole === "main" ? `<button type="button" title="ลบบัญชีถาวร (ทุกห้อง)" onclick="purgeStudent('${esc(s.studentId)}')" class="text-slate-500 ml-3"><i class="fa-solid fa-skull-crossbones"></i></button>` : ""}</td></tr>`).join("");
-    return `<div class="flex flex-wrap items-center gap-3 mb-2"><datalist id="grpList">${groupList().map((g) => `<option value="${esc(g)}">`).join("")}</datalist><span class="text-sm text-slate-500">ทั้งหมด ${l.length} คน</span>${searchBox()}
+    return `<div class="flex flex-wrap items-center gap-3 mb-2"><span class="text-sm text-slate-500">ทั้งหมด ${l.length} คน</span>${searchBox()}
       <input type="file" id="csvFile" accept=".csv,.txt" class="hidden" onchange="importCsv(this)">
       <button type="button" onclick="$('csvFile').click()" class="${btnP}"><i class="fa-solid fa-file-import mr-1"></i> นำเข้า CSV</button>
       <button type="button" onclick="downloadTemplate()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ดาวน์โหลดแม่แบบ</button>
       <button type="button" onclick="exportStudents()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-file-export mr-1"></i> ส่งออกรายชื่อ (CSV)</button></div>
-      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, กลุ่ม (ไม่บังคับ เช่น L1) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = นำออกจากห้อง (เก็บคะแนน) · ถังขยะ = ลบออกจากห้องพร้อมคะแนนของห้องนี้</p>
-      ${table(th("เลขที่", "รหัสนักเรียน", "ชื่อ-นามสกุล", "อีเมล", "กลุ่ม", "สถานะ", "บัญชี", "จัดการ"), rows, 8)}`;
+      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, ห้อง (เช่น A/L1) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = นำออกจากห้อง (เก็บคะแนน) · ถังขยะ = ลบออกจากห้องพร้อมคะแนนของห้องนี้</p>
+      ${table(th("เลขที่", "รหัสนักเรียน", "ชื่อ-นามสกุล", "อีเมล", "ห้อง/กลุ่ม", "สถานะ", "บัญชี", "จัดการ"), rows, 8)}`;
   },
 
   submit() {
@@ -1289,7 +1316,7 @@ function saveCriteria(btn) {
 function exportStudents() {
   const l = studs(false);
   const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
-  const csv = "\uFEFF" + ["เลขที่,รหัสนักเรียน,ชื่อ-นามสกุล,กลุ่ม,อีเมล,สถานะบัญชี"].concat(l.map((s) => [s.no, s.studentId, s.name, s.class, s.email, !s.registered ? "ยังไม่สมัคร" : s.verified ? "ยืนยันแล้ว" : "รอยืนยัน OTP"].map(q).join(","))).join("\n");
+  const csv = "\uFEFF" + ["เลขที่,รหัสนักเรียน,ชื่อ-นามสกุล,ห้อง,อีเมล,สถานะบัญชี"].concat(l.map((s) => [s.no, s.studentId, s.name, s.class, s.email, !s.registered ? "ยังไม่สมัคร" : s.verified ? "ยืนยันแล้ว" : "รอยืนยัน OTP"].map(q).join(","))).join("\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "students.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -1350,8 +1377,10 @@ async function importCsv(inp) {
     try { txt = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (_) { txt = new TextDecoder("windows-874").decode(buf); }
     const rows = parseCsv(txt.replace(/^\uFEFF/, "")).filter((r) => r.some((c) => c.trim()));
     if (rows.length && /รหัส|เลขที่|ชื่อ|id|name/i.test(rows[0].join(" "))) rows.shift();
-    const items = rows.map((r) => ({ no: (r[0] || "").trim(), sid: (r[1] || "").trim(), name: (r[2] || "").trim(), class: (r[3] || "").trim() })).filter((x) => x.sid && x.name);
+    const items = rows.map((r) => ({ no: (r[0] || "").trim(), sid: (r[1] || "").trim(), name: (r[2] || "").trim(), class: (r[3] || "").trim().toUpperCase() })).filter((x) => x.sid && x.name);
     if (!items.length) return toast("ไม่พบข้อมูลที่นำเข้าได้ (ต้องมีรหัสและชื่อ)");
+    const bad = items.find((x) => x.class && !VALID_CLASS.test(x.class));
+    if (bad) return toast("ห้องไม่ถูกต้อง: " + bad.class + " (ต้องเป็นรูปแบบ เช่น A/L1)");
     if (!confirm("นำเข้า " + items.length + " รายชื่อ ใช่ไหม?")) return;
     await adminCall({ action: "adminImportRoster", items });
     await loadAdminData();
@@ -1360,7 +1389,7 @@ async function importCsv(inp) {
 }
 
 function downloadTemplate() {
-  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,กลุ่ม(ไม่บังคับ)\n1,660001,นายตัวอย่าง ใจดี,L1\n2,660002,นางสาวตัวอย่าง รักเรียน,L2\n"], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,ห้อง\n1,660001,นายตัวอย่าง ใจดี,A/L1\n2,660002,นางสาวตัวอย่าง รักเรียน,A/L2\n"], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = "student_template.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
