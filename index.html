@@ -5,11 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบตรวจสอบผลการเรียน - ครูจอห์น</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: { colors: { indigo: {
+  50:"#fdf2f4",100:"#fbe3e7",200:"#f4c4cd",300:"#e898a6",400:"#c4566a",500:"#a42a3f",
+  600:"#8a2033",700:"#6b1625",800:"#560f1e",900:"#43101a" } } } } };
+</script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>body{font-family:'Sarabun',sans-serif}</style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-rose-50 min-h-screen">
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1-YgAt91Jujj5VX2DV7EFymFS_eQI9IKxigj1Pc8WZjAa9bxHg/exec";
 </script>
@@ -24,7 +29,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  </div>
 </nav>
 
-<div class="max-w-5xl mx-auto p-4 md:p-6">
+<div class="max-w-6xl mx-auto p-4 md:p-6">
 <div id="studentSection" class="space-y-6">
 
  <div id="studentLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
@@ -43,7 +48,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
 
  <div id="studentRegisterForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
   <div class="text-center mb-6">
-   <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl"><i class="fa-solid fa-id-card"></i></div>
+   <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl"><i class="fa-solid fa-id-card"></i></div>
    <h2 class="text-2xl font-bold text-slate-800">ลงทะเบียนนักเรียน</h2>
    <p class="text-slate-500 text-sm">กรอกอีเมลจริงเพื่อรับรหัสยืนยัน OTP</p>
   </div>
@@ -60,19 +65,19 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
     <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
    <div><label class="text-xs font-semibold text-slate-600">รหัสนักเรียน/นักศึกษา <span class="text-red-500">*</span></label>
     <input type="text" id="regStudentId" placeholder="เช่น 660123" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
+   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
   </div>
   <div class="mt-4 text-center text-sm">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button></div>
  </div>
 
  <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
-  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-key"></i></div>
+  <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-key"></i></div>
   <h2 class="text-2xl font-bold text-slate-800 mb-2">กรอกรหัสยืนยัน OTP</h2>
-  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของคุณแล้ว (ตรวจกล่องสแปมด้วย)</p>
+  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของคุณแล้ว หากไม่พบในกล่องจดหมาย ให้ดูที่ <b>จดหมายขยะ/สแปม</b> และกด “ไม่ใช่จดหมายขยะ”</p>
   <div class="space-y-4">
    <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
-    <input type="text" id="otpInput" maxlength="6" inputmode="numeric" placeholder="------" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold text-xl tracking-widest"></div>
-   <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ยืนยันรหัส OTP</span></button>
+    <input type="text" id="otpInput" maxlength="6" inputmode="numeric" placeholder="------" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-center font-bold text-xl tracking-widest"></div>
+   <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ยืนยันรหัส OTP</span></button>
    <div class="pt-2">
     <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="text-sm font-semibold text-indigo-600 hover:underline disabled:text-slate-400 disabled:no-underline"><span>ขอส่งรหัส OTP อีกครั้ง</span></button>
     <p id="resendTimerText" class="text-xs text-slate-400 mt-1 hidden">สามารถขอรหัสใหม่ได้ในอีก <span id="timerSec" class="font-bold text-slate-600">60</span> วินาที</p>
@@ -86,8 +91,12 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
    <h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น/ห้องเรียนของคุณ</h3>
    <p class="text-xs text-slate-500">เพื่อจัดหมวดหมู่การเข้าดูคะแนนให้ถูกต้อง</p>
    <div class="space-y-3">
-    <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">ระดับชั้น/ห้องเรียน <span class="text-red-500">*</span></label>
-     <input type="text" id="selectClassInput" placeholder="เช่น ม.3/1 หรือ ปวช.1/2" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-center font-medium"></div>
+    <div class="grid grid-cols-2 gap-3 text-left">
+     <div><label class="text-xs font-semibold text-slate-600 block mb-1">ห้อง <span class="text-red-500">*</span></label>
+      <select id="selectRoom" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"><option value="">เลือกห้อง</option><option value="A">ห้อง A</option><option value="B">ห้อง B</option><option value="C">ห้อง C</option><option value="D">ห้อง D</option><option value="E">ห้อง E</option></select></div>
+     <div><label class="text-xs font-semibold text-slate-600 block mb-1">กลุ่มย่อย <span class="text-red-500">*</span></label>
+      <select id="selectSub" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"><option value="">เลือกกลุ่ม</option><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option><option value="L4">L4</option></select></div>
+    </div>
     <button type="button" id="btnSaveClass" onclick="handleSaveClass()" class="w-full bg-indigo-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl shadow hover:bg-indigo-700"><span>เข้าสู่หน้าระบบ</span></button>
    </div>
   </div>
@@ -106,40 +115,35 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
     <span><i class="fa-solid fa-table text-indigo-600 mr-2"></i>ตารางคะแนนล่าสุด</span>
     <button type="button" onclick="loadStudentScores()" class="text-xs bg-slate-200 hover:bg-slate-300 disabled:opacity-60 px-3 py-1 rounded-lg text-slate-700 transition"><span><i class="fa-solid fa-rotate mr-1"></i> รีเฟรชคะแนน</span></button>
    </div>
-   <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-     <thead id="studentScoreHeader" class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase"></thead>
-     <tbody id="studentScoreBody" class="divide-y text-slate-700 text-sm"></tbody>
-    </table>
-   </div>
+   <div id="studentContent" class="p-4"></div>
   </div>
  </div>
 </div>
 
 <div id="teacherSection" class="hidden space-y-6">
  <div id="adminLoginForm" class="bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
+  <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
   <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับครูผู้สอน</h2>
   <p class="text-slate-500 text-sm mb-6 text-center">กรอก Username และ รหัสผ่านแอดมิน</p>
   <div class="space-y-4">
    <div><label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (Username) <span class="text-red-500">*</span></label>
-    <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
+    <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1"></div>
    <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน (Password) <span class="text-red-500">*</span></label>
-    <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
-   <button type="button" onclick="handleAdminLogin()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md"><span>เข้าสู่ระบบแอดมิน</span></button>
+    <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1"></div>
+   <button type="button" onclick="handleAdminLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md"><span>เข้าสู่ระบบแอดมิน</span></button>
   </div>
  </div>
- <div id="adminDashboard" class="hidden space-y-6">
-  <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-4">
-   <div>
-    <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i>จัดการคะแนนผ่าน Google Sheets</h2>
-    <p class="text-slate-500 text-sm">ครูสามารถกรอกคะแนน เพิ่มช่องคะแนน หรือแก้ชื่องานได้ใน Google Sheets โดยตรง</p>
-   </div>
+ <div id="adminDashboard" class="hidden space-y-4">
+  <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+   <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-sliders text-indigo-600 mr-2"></i>แผงควบคุมครู</h2>
    <div class="flex gap-2">
-    <a href="https://sheets.google.com" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1"><i class="fa-solid fa-file-excel"></i> เปิด Google Sheets กรอกคะแนน</a>
-    <button type="button" onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">ออกจากระบบ</button>
+    <button type="button" onclick="refreshAdmin(this)" class="bg-slate-200 hover:bg-slate-300 disabled:opacity-60 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium"><span><i class="fa-solid fa-rotate mr-1"></i> รีเฟรช</span></button>
+    <button type="button" onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium">ออกจากระบบ</button>
    </div>
   </div>
+  <div id="adminTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
+  <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">แสดงห้อง:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
+  <div id="adminPanel" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4"></div>
  </div>
 </div>
 </div>
@@ -266,7 +270,7 @@ function initPasswordChecklist() {
 document.addEventListener("DOMContentLoaded", initPasswordChecklist);
 
 /* ---------- ตรวจสถานะเซิร์ฟเวอร์ (แถบด้านล่างจอ) ---------- */
-const EXPECTED_VERSION = "2026-10-15-v5";
+const EXPECTED_VERSION = "2026-10-15-v7";
 async function checkServer() {
   const el = document.createElement("div");
   const base = "fixed bottom-2 left-2 right-2 sm:right-auto sm:max-w-md z-40 text-xs px-3 py-2 rounded-lg shadow text-white ";
@@ -412,15 +416,16 @@ function handleStudentLogin() {
     }
     if (r.status !== "success") { toast(r.message); return false; }
     currentUser = { ...r.student, token: r.token };
-    if (!currentUser.class) $("classSelectionModal").classList.remove("hidden");
+    if (!VALID_CLASS.test(currentUser.class || "")) $("classSelectionModal").classList.remove("hidden");
     else enterDashboard();
     return true;
   });
 }
 
 function handleSaveClass() {
-  const cls = $("selectClassInput").value.trim();
-  if (!cls) return toast("กรุณาระบุระดับชั้น/ห้องเรียน");
+  const room = $("selectRoom").value, sub = $("selectSub").value;
+  if (!room || !sub) return toast("กรุณาเลือกห้องและกลุ่มย่อย");
+  const cls = room + "/" + sub;
   run($("btnSaveClass"), "กำลังบันทึก...", async () => {
     const r = await postData({ action: "updateClass", email: currentUser.email, token: currentUser.token, class: cls });
     if (r.status !== "success") { toast(r.message); return false; }
@@ -442,29 +447,38 @@ function enterDashboard() {
 
 function loadStudentScores() {
   const btn = document.querySelector("#studentDashboard button[onclick='loadStudentScores()']");
-  const body = $("studentScoreBody"), head = $("studentScoreHeader");
   return run(btn, "กำลังโหลด...", async () => {
     const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token });
     if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
     if (r.status !== "success") { toast(r.message); return false; }
-
-    head.innerHTML = body.innerHTML = "";
-    const hr = document.createElement("tr");
-    r.headers.forEach((h) => { const th = document.createElement("th"); th.className = "px-4 py-3"; th.textContent = h; hr.appendChild(th); });
-    head.appendChild(hr);
-
-    const tr = document.createElement("tr");
-    if (!r.scores) {
-      const td = document.createElement("td");
-      td.colSpan = r.headers.length; td.className = "px-4 py-6 text-center text-slate-400";
-      td.textContent = r.message || "ยังไม่มีคะแนน";
-      tr.appendChild(td);
-    } else {
-      r.scores.forEach((s) => { const td = document.createElement("td"); td.className = "px-4 py-3"; td.textContent = s; tr.appendChild(td); });
-    }
-    body.appendChild(tr);
+    renderStudent(r);
     return true;
   });
+}
+
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => (n === null || n === undefined || isNaN(n) ? "-" : String(Math.round(Number(n) * 10) / 10));
+const card = (label, value, icon) => `<div class="bg-slate-50 border rounded-xl p-3 text-center"><div class="text-xs text-slate-500"><i class="fa-solid ${icon} mr-1 text-indigo-600"></i>${label}</div><div class="text-xl font-bold text-slate-800 mt-1">${value}</div></div>`;
+
+function renderStudent(r) {
+  const s = r.summary || {}, at = r.attendance || {};
+  const cards = [
+    card("คะแนนรวม", s.max ? `${fmt(s.total)} / ${fmt(s.max)}` : "-", "fa-star"),
+    card("ร้อยละ", s.pct == null ? "-" : fmt(s.pct) + "%", "fa-percent"),
+    card("เกรด", s.grade || "-", "fa-award"),
+    card("อันดับในห้อง", s.classRank ? `${s.classRank} / ${s.classSize}` : "-", "fa-ranking-star"),
+    card("เช็คชื่อ", s.attPct == null ? "-" : fmt(s.attPct) + "%", "fa-calendar-check"),
+  ].join("");
+  const rows = (r.assignments || []).map((a) => `<tr>
+    <td class="px-3 py-2"><div class="font-medium">${esc(a.name)}</div>${a.detail ? `<div class="text-xs text-slate-500">${esc(a.detail)}</div>` : ""}</td>
+    <td class="px-3 py-2 whitespace-nowrap">${esc(a.due || "-")}</td>
+    <td class="px-3 py-2">${a.sub ? '<span class="text-emerald-600">ส่งแล้ว</span>' : '<span class="text-amber-600">ยังไม่ส่ง</span>'}</td>
+    <td class="px-3 py-2 font-semibold whitespace-nowrap">${a.score == null ? '<span class="text-slate-400 font-normal">รอตรวจ</span>' : `${fmt(a.score)} / ${fmt(a.max)}`}</td></tr>`).join("");
+  $("studentContent").innerHTML = `
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">${cards}</div>
+    <p class="text-xs text-slate-500 mb-3">เช็คชื่อ: มา ${at["มา"] || 0} | สาย ${at["สาย"] || 0} | ลา ${at["ลา"] || 0} | ขาด ${at["ขาด"] || 0} วัน</p>
+    <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-slate-100 text-slate-600 text-xs"><tr><th class="px-3 py-2">งาน</th><th class="px-3 py-2">กำหนดส่ง</th><th class="px-3 py-2">สถานะ</th><th class="px-3 py-2">คะแนน</th></tr></thead>
+    <tbody class="divide-y">${rows || '<tr><td colspan="4" class="p-6 text-center text-slate-400">ครูยังไม่ได้เพิ่มงาน</td></tr>'}</tbody></table></div>`;
 }
 
 function studentLogout() {
@@ -474,6 +488,219 @@ function studentLogout() {
 }
 
 /* ---------- Admin ---------- */
+const ROOMS = ["A", "B", "C", "D", "E"], SUBS = ["L1", "L2", "L3", "L4"];
+const CLASS_OPTIONS = ROOMS.flatMap((r) => SUBS.map((s) => `${r}/${s}`));
+const VALID_CLASS = /^[A-E]\/L[1-4]$/;
+const ATT = ["มา", "สาย", "ลา", "ขาด"];
+const TABS = [["home", "หน้าหลัก", "fa-house"], ["students", "รายชื่อนักเรียน", "fa-users"], ["submit", "เช็คส่งงาน", "fa-clipboard-check"],
+  ["assign", "รายละเอียดงาน", "fa-book"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
+  ["rank", "จัดอันดับ", "fa-ranking-star"], ["summary", "สรุปผลการเรียน", "fa-file-lines"]];
+let adminToken = null, adminData = null, adminTab = "home", adminRoom = "", adminAssign = "";
+let adminDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+const btnP = "bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-medium";
+const selC = "px-3 py-2 border rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-500";
+const inC = "w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500";
+const td = (v, c) => `<td class="px-3 py-2 ${c || ""}">${v}</td>`;
+const th = (...c) => `<tr>${c.map((x) => `<th class="px-3 py-2 text-left whitespace-nowrap">${x}</th>`).join("")}</tr>`;
+const table = (head, body, cols) => `<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-100 text-slate-600 text-xs">${head}</thead><tbody class="divide-y">${body || `<tr><td colspan="${cols || 9}" class="p-6 text-center text-slate-400">ไม่มีข้อมูล</td></tr>`}</tbody></table></div>`;
+const searchBox = () => `<input oninput="filterRows(this.value)" placeholder="ค้นหาชื่อ/รหัส..." class="${selC} w-full md:w-64">`;
+const rowQ = (s) => esc((s.studentId + " " + s.name).toLowerCase());
+const empty = (m) => `<div class="p-8 text-center text-slate-400">${m}</div>`;
+
+const studs = (verifiedOnly) => adminData.students.filter((s) => (!verifiedOnly || s.verified) && (!adminRoom || s.class === adminRoom || (s.class || "").startsWith(adminRoom + "/")));
+const sumOf = (sid) => adminData.summary.find((x) => x.sid === sid) || {};
+const recOf = (sid, aid) => adminData.records.find((r) => r.sid === sid && r.aid === aid);
+const nameOf = (sid) => (adminData.students.find((s) => s.studentId === sid) || {}).name || sid;
+const assignSelect = () => `<select onchange="adminAssign=this.value;renderAdmin()" class="${selC}">${adminData.assignments.map((a) => `<option value="${esc(a.id)}" ${a.id === adminAssign ? "selected" : ""}>${esc(a.name)} (เต็ม ${a.max})</option>`).join("")}</select>`;
+const noAssign = () => empty('ยังไม่มีงาน ไปเพิ่มที่แท็บ "รายละเอียดงาน" ก่อน');
+
+function filterRows(v) {
+  v = v.toLowerCase();
+  document.querySelectorAll("#adminPanel tr[data-q]").forEach((tr) => tr.classList.toggle("hidden", !tr.dataset.q.includes(v)));
+}
+
+async function adminCall(payload) {
+  const r = await postData({ ...payload, adminToken });
+  if (r.code === "AUTH") { toast(r.message); adminLogout(); throw new Error(r.message); }
+  if (r.status !== "success") throw new Error(r.message || "เกิดข้อผิดพลาด");
+  return r;
+}
+
+async function loadAdminData() {
+  adminData = await adminCall({ action: "adminLoad" });
+  renderAdmin();
+}
+
+function refreshAdmin(btn) { run(btn, "กำลังโหลด...", async () => { await loadAdminData(); return true; }); }
+function setAdminTab(id) { adminTab = id; renderAdmin(); }
+
+function renderAdmin() {
+  if (!adminData) return;
+  if (!adminData.assignments.find((a) => a.id === adminAssign)) adminAssign = adminData.assignments.length ? adminData.assignments[0].id : "";
+  $("adminTabs").innerHTML = TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}</button>`).join("");
+  $("adminFilterBar").classList.toggle("hidden", adminTab === "home" || adminTab === "assign");
+  $("adminRoom").innerHTML = '<option value="">ทุกห้อง</option>' + ROOMS.map((r) =>
+    `<option value="${r}" ${adminRoom === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` +
+    SUBS.map((s) => `<option value="${r}/${s}" ${adminRoom === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
+  $("adminPanel").innerHTML = VIEWS[adminTab]();
+}
+
+const VIEWS = {
+  home() {
+    const ver = adminData.students.filter((s) => s.verified);
+    const withPct = adminData.summary.filter((x) => x.pct !== null);
+    const withAtt = adminData.summary.filter((x) => x.attPct !== null);
+    const avg = (l, k) => (l.length ? fmt(l.reduce((a, x) => a + x[k], 0) / l.length) + "%" : "-");
+    const cards = [card("นักเรียนที่ยืนยันแล้ว", `${ver.length} / ${adminData.students.length}`, "fa-users"), card("จำนวนงาน", adminData.assignments.length, "fa-book"),
+      card("ร้อยละเฉลี่ย", avg(withPct, "pct"), "fa-percent"), card("เช็คชื่อเฉลี่ย", avg(withAtt, "attPct"), "fa-calendar-check")].join("");
+    const rooms = CLASS_OPTIONS.map((c) => [c, ver.filter((s) => s.class === c).length]).filter((x) => x[1]);
+    const top = withPct.slice().sort((a, b) => a.rank - b.rank).slice(0, 3);
+    return `<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">${cards}</div>
+      <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละห้อง</h3>
+      <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนที่เลือกห้อง</span>'}</div>
+      <h3 class="font-bold text-slate-700 mb-2">3 อันดับแรก</h3>
+      ${top.length ? top.map((x) => `<div class="py-1 text-sm">อันดับ ${x.rank}: <b>${esc(nameOf(x.sid))}</b> (${esc(x.class)}) ${fmt(x.pct)}%</div>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีคะแนน</span>'}`;
+  },
+
+  students() {
+    const l = studs(false);
+    const rows = l.map((s) => `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(esc(s.email))}${td(s.verified ? '<span class="text-emerald-600">ยืนยันแล้ว</span>' : '<span class="text-amber-600">รอยืนยัน</span>')}</tr>`).join("");
+    return `<div class="flex flex-wrap items-center gap-3 mb-3"><span class="text-sm text-slate-500">ทั้งหมด ${l.length} คน</span>${searchBox()}</div>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "อีเมล", "สถานะ"), rows, 5)}`;
+  },
+
+  submit() {
+    if (!adminData.assignments.length) return noAssign();
+    const rows = studs(true).map((s) => {
+      const r = recOf(s.studentId, adminAssign), on = r && r.sub;
+      return `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}<td class="px-3 py-2 text-center"><input type="checkbox" class="sub-chk w-5 h-5 accent-indigo-700" data-sid="${esc(s.studentId)}" data-orig="${on ? 1 : 0}" ${on ? "checked" : ""}></td></tr>`;
+    }).join("");
+    return `<div class="flex flex-wrap items-center gap-3 mb-3">${assignSelect()}${searchBox()}<button type="button" onclick="saveSubmits(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก</span></button></div>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "ส่งงานแล้ว"), rows, 4)}`;
+  },
+
+  assign() {
+    const rows = adminData.assignments.map((a) => `<tr>${td(esc(a.name))}${td(a.max)}${td(esc(a.due || "-"), "whitespace-nowrap")}${td(esc(a.detail || "-"), "max-w-xs")}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="editAssign('${esc(a.id)}')" class="text-indigo-700 mr-3"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="deleteAssign('${esc(a.id)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
+    return `<div id="asgForm" class="grid md:grid-cols-4 gap-3 mb-4 p-3 bg-slate-50 rounded-xl border">
+      <input type="hidden" id="asgId">
+      <div><label class="text-xs font-semibold text-slate-600">ชื่องาน <span class="text-red-500">*</span></label><input id="asgName" class="${inC}" placeholder="เช่น ใบงานที่ 1"></div>
+      <div><label class="text-xs font-semibold text-slate-600">คะแนนเต็ม <span class="text-red-500">*</span></label><input id="asgMax" type="number" min="1" step="0.5" class="${inC}" placeholder="10"></div>
+      <div><label class="text-xs font-semibold text-slate-600">กำหนดส่ง</label><input id="asgDue" type="date" class="${inC}"></div>
+      <div class="flex items-end"><button type="button" onclick="saveAssign(this)" class="${btnP} w-full"><span>บันทึกงาน</span></button></div>
+      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">รายละเอียดงาน</label><textarea id="asgDetail" rows="2" class="${inC}" placeholder="คำอธิบาย / วิธีส่งงาน"></textarea></div></div>
+      ${table(th("ชื่องาน", "เต็ม", "กำหนดส่ง", "รายละเอียด", "จัดการ"), rows, 5)}`;
+  },
+
+  scores() {
+    const as = adminData.assignments;
+    if (!as.length) return noAssign();
+    const rows = studs(true).map((s) => `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name), "whitespace-nowrap")}${as.map((a) => {
+      const r = recOf(s.studentId, a.id), v = r && r.score !== null ? r.score : "";
+      return `<td class="px-2 py-1"><input type="number" step="0.5" min="0" max="${a.max}" value="${v}" data-orig="${v}" data-sid="${esc(s.studentId)}" data-aid="${esc(a.id)}" class="score-in w-20 px-2 py-1 border rounded text-center"></td>`;
+    }).join("")}${td(fmt(sumOf(s.studentId).total), "font-semibold")}</tr>`).join("");
+    return `<div class="flex flex-wrap items-center gap-3 mb-3">${searchBox()}<button type="button" onclick="saveScores(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกคะแนน</span></button></div>${table(th("รหัส", "ชื่อ-นามสกุล", ...as.map((a) => `${esc(a.name)}<br><span class="font-normal">/${a.max}</span>`), "รวม"), rows, as.length + 3)}`;
+  },
+
+  attend() {
+    const day = {};
+    adminData.attendance.filter((a) => a.date === adminDate).forEach((a) => { day[a.sid] = a.st; });
+    const rows = studs(true).map((s) => `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}<td class="px-3 py-2"><select class="att-sel ${selC}" data-sid="${esc(s.studentId)}" data-orig="${esc(day[s.studentId] || "")}"><option value="">-</option>${ATT.map((x) => `<option ${day[s.studentId] === x ? "selected" : ""}>${x}</option>`).join("")}</select></td>${td(sumOf(s.studentId).attPct == null ? "-" : fmt(sumOf(s.studentId).attPct) + "%")}</tr>`).join("");
+    return `<div class="flex flex-wrap items-center gap-3 mb-1"><input type="date" value="${adminDate}" onchange="adminDate=this.value;renderAdmin()" class="${selC}">${searchBox()}<button type="button" onclick="saveAttend(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกเช็คชื่อ</span></button></div>
+      <p class="text-xs text-slate-500 mb-3">คะแนนเช็คชื่อ: มา = 1, สาย = 0.5, ลา = 0.5, ขาด = 0 ต่อวัน (คิดเป็นร้อยละจากจำนวนวันที่เช็คทั้งหมด)</p>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "สถานะวันนี้", "เช็คชื่อรวม"), rows, 5)}`;
+  },
+
+  rank() {
+    const list = studs(true).map((s) => ({ s, m: sumOf(s.studentId) })).sort((a, b) => (a.m.rank || 9999) - (b.m.rank || 9999));
+    const rows = list.map(({ s, m }) => `<tr data-q="${rowQ(s)}">${td(["🥇", "🥈", "🥉"][m.rank - 1] || m.rank || "-", "font-bold")}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(m.max ? `${fmt(m.total)} / ${fmt(m.max)}` : "-")}${td(m.pct == null ? "-" : fmt(m.pct) + "%", "font-semibold")}${td(m.classRank ? `${m.classRank} / ${m.classSize}` : "-")}</tr>`).join("");
+    return `<div class="mb-3">${searchBox()}</div>${table(th("อันดับรวม", "ชื่อ-นามสกุล", "ห้อง", "คะแนน", "ร้อยละ", "อันดับในห้อง"), rows, 6)}`;
+  },
+
+  summary() {
+    const rows = studs(true).map((s) => { const m = sumOf(s.studentId); return `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(m.max ? `${fmt(m.total)} / ${fmt(m.max)}` : "-")}${td(m.pct == null ? "-" : fmt(m.pct) + "%")}${td(esc(m.grade || "-"), "font-bold text-indigo-700")}${td(m.attPct == null ? "-" : fmt(m.attPct) + "%")}${td(`${m.subCount || 0} / ${m.assignCount || 0}`)}</tr>`; }).join("");
+    return `<div class="mb-1">${searchBox()}</div><p class="text-xs text-slate-500 mb-3">เกณฑ์เกรด: 80+ = 4, 75+ = 3.5, 70+ = 3, 65+ = 2.5, 60+ = 2, 55+ = 1.5, 50+ = 1, ต่ำกว่า 50 = 0 (นับเฉพาะงานที่ให้คะแนนแล้ว)</p>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "คะแนนรวม", "ร้อยละ", "เกรด", "เช็คชื่อ", "ส่งงาน"), rows, 8)}`;
+  },
+};
+
+/* ----- บันทึกข้อมูล (ทุกปุ่มผ่าน run() กันกดซ้ำ/ค้าง) ----- */
+function saveSubmits(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    const items = [];
+    document.querySelectorAll(".sub-chk").forEach((c) => {
+      if ((c.checked ? "1" : "0") === c.dataset.orig) return;
+      const r = recOf(c.dataset.sid, adminAssign);
+      items.push({ sid: c.dataset.sid, aid: adminAssign, score: r && r.score !== null ? r.score : "", sub: c.checked });
+    });
+    if (!items.length) { toast("ไม่มีการเปลี่ยนแปลง", "info"); return false; }
+    await adminCall({ action: "adminSaveRecords", items });
+    await loadAdminData();
+    toast("บันทึกแล้ว " + items.length + " รายการ", "success");
+    return true;
+  });
+}
+
+function saveScores(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    const items = [];
+    for (const el of document.querySelectorAll(".score-in")) {
+      if (el.value === el.dataset.orig) continue;
+      const n = Number(el.value);
+      if (el.value !== "" && (isNaN(n) || n < 0 || n > Number(el.max))) throw new Error("คะแนนต้องอยู่ระหว่าง 0 ถึง " + el.max);
+      const r = recOf(el.dataset.sid, el.dataset.aid);
+      items.push({ sid: el.dataset.sid, aid: el.dataset.aid, score: el.value, sub: r ? r.sub : false });
+    }
+    if (!items.length) { toast("ไม่มีการเปลี่ยนแปลง", "info"); return false; }
+    await adminCall({ action: "adminSaveRecords", items });
+    await loadAdminData();
+    toast("บันทึกคะแนนแล้ว " + items.length + " รายการ", "success");
+    return true;
+  });
+}
+
+function saveAttend(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    if (!adminDate) throw new Error("กรุณาเลือกวันที่");
+    const items = [];
+    document.querySelectorAll(".att-sel").forEach((s) => { if (s.value !== s.dataset.orig) items.push({ sid: s.dataset.sid, st: s.value }); });
+    if (!items.length) { toast("ไม่มีการเปลี่ยนแปลง", "info"); return false; }
+    await adminCall({ action: "adminSaveAttendance", date: adminDate, items });
+    await loadAdminData();
+    toast("บันทึกเช็คชื่อแล้ว", "success");
+    return true;
+  });
+}
+
+function editAssign(id) {
+  const a = adminData.assignments.find((x) => x.id === id);
+  if (!a) return;
+  $("asgId").value = a.id; $("asgName").value = a.name; $("asgMax").value = a.max; $("asgDue").value = a.due || ""; $("asgDetail").value = a.detail || "";
+  $("asgForm").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function saveAssign(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    const assignment = { id: $("asgId").value, name: $("asgName").value.trim(), max: $("asgMax").value, due: $("asgDue").value, detail: $("asgDetail").value.trim() };
+    if (!assignment.name || !(Number(assignment.max) > 0)) throw new Error("กรุณากรอกชื่องานและคะแนนเต็ม");
+    await adminCall({ action: "adminSaveAssignment", assignment });
+    await loadAdminData();
+    toast("บันทึกงานแล้ว", "success");
+    return true;
+  });
+}
+
+let adminBusy = false;
+async function deleteAssign(id) {
+  if (adminBusy || !confirm("ลบงานนี้และคะแนนทั้งหมดของงานนี้ใช่ไหม?")) return;
+  adminBusy = true;
+  try {
+    await adminCall({ action: "adminDeleteAssignment", id });
+    await loadAdminData();
+    toast("ลบงานแล้ว", "success");
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    adminBusy = false;
+  }
+}
+
 function handleAdminLogin() {
   const username = $("adminUsernameInput").value.trim();
   const password = $("adminPasswordInput").value;
@@ -481,14 +708,17 @@ function handleAdminLogin() {
   run(document.querySelector("#adminLoginForm button"), "กำลังตรวจสอบ...", async () => {
     const r = await postData({ action: "adminLogin", username, password });
     if (r.status !== "success") { toast(r.message); return false; }
+    adminToken = r.adminToken;
+    $("adminPasswordInput").value = "";
+    await loadAdminData();
     $("adminLoginForm").classList.add("hidden");
     $("adminDashboard").classList.remove("hidden");
-    $("adminPasswordInput").value = "";
     return true;
   });
 }
 
 function adminLogout() {
+  adminToken = null; adminData = null;
   $("adminDashboard").classList.add("hidden");
   $("adminLoginForm").classList.remove("hidden");
 }
