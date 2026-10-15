@@ -269,7 +269,7 @@ function renderNavUser(v) {
   else if (v === "adminDashboard" && adminData) { const c = adminData.config || {}; who = { a: c.avatar, n: c.nick || c.name || "ครู" }; }
   el.classList.toggle("hidden", !who);
   el.classList.toggle("flex", !!who);
-  if (who) el.innerHTML = `<span class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">${esc(who.a || "🎓")}</span><span class="truncate">${esc(who.n)}</span>`;
+  if (who) el.innerHTML = `<span class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center overflow-hidden">${avSpan(who.a)}</span><span class="truncate">${esc(who.n)}</span>`;
 }
 function openProfile() { if (navStack[navStack.length - 1].v === "adminDashboard") showView("adminDashboard", "profile"); else showView("studentDashboard", "me"); }
 
@@ -552,7 +552,12 @@ const AVATARS = ["😀", "😎", "🤓", "🦊", "🐱", "🐶", "🐼", "🦁",
 const STATUS_CLS = { "ยังไม่ส่ง": "bg-red-100 text-red-700", "ส่งแล้ว": "bg-sky-100 text-sky-700", "ส่งช้า": "bg-amber-100 text-amber-700", "ตรวจแล้ว": "bg-emerald-100 text-emerald-700", "ต้องแก้ไข": "bg-orange-100 text-orange-700" };
 const ATT_CLS = { "มา": "bg-emerald-100 text-emerald-700", "สาย": "bg-amber-100 text-amber-700", "ลา": "bg-sky-100 text-sky-700", "ขาด": "bg-red-100 text-red-700" };
 const badge = (s, map) => `<span class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${(map || STATUS_CLS)[s] || "bg-slate-100 text-slate-600"}">${esc(s)}</span>`;
-const avatarEl = (a, size) => `<div class="${size || "w-14 h-14 text-3xl"} rounded-full bg-indigo-100 flex items-center justify-center shrink-0">${esc(a || "🎓")}</div>`;
+const isImg = (a) => String(a || "").indexOf("data:image/") === 0;
+const avSpan = (a, fb) => isImg(a) ? `<img src="${esc(a)}" class="w-full h-full object-cover" alt="">` : esc(a || fb || "🎓");
+const avatarEl = (a, size) => `<div class="${size || "w-14 h-14 text-3xl"} rounded-full bg-indigo-100 flex items-center justify-center shrink-0 overflow-hidden">${avSpan(a)}</div>`;
+const gradeBubble = (s) => s.final
+  ? `<div class="w-20 h-20 rounded-full ${s.grade === "0" ? "bg-red-100 text-red-700" : "bg-white text-indigo-800"} text-4xl font-bold flex items-center justify-center shadow-lg">${esc(s.grade)}</div>${s.grade === "0" ? '<div class="text-[11px] text-red-200 mt-1">ไม่ผ่านเกณฑ์</div>' : ""}`
+  : `<div class="w-20 h-20 rounded-full bg-white/15 border-2 border-dashed border-white/60 text-white text-[11px] leading-tight flex items-center justify-center p-2"><span><i class="fa-solid fa-hourglass-half block text-base mb-0.5"></i>กำลังประมวลผล</span></div>`;
 const dt = (t) => new Date(Number(t)).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" });
 const daysTo = (due, today) => Math.round((Date.parse(due) - Date.parse(today)) / 864e5);
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
@@ -596,7 +601,7 @@ function renderStudent() {
   $("stHeader").innerHTML = `<div class="relative overflow-hidden bg-gradient-to-r from-indigo-800 to-indigo-600 text-white p-5 rounded-3xl shadow-lg">
     <div class="blob w-40 h-40 bg-white/10 -top-12 -right-10"></div>
     <div class="relative flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-4"><div class="w-16 h-16 text-4xl rounded-full bg-white/90 flex items-center justify-center shrink-0">${esc(me.avatar || "🎓")}</div><div><div class="text-sm text-indigo-100">สวัสดี 👋</div><h2 class="text-2xl font-bold leading-tight">${esc(me.nick || me.name)}</h2>
+    <div class="flex items-center gap-4"><div class="w-16 h-16 text-4xl rounded-full bg-white/90 flex items-center justify-center shrink-0 overflow-hidden">${avSpan(me.avatar)}</div><div><div class="text-sm text-indigo-100">สวัสดี 👋</div><h2 class="text-2xl font-bold leading-tight">${esc(me.nick || me.name)}</h2>
     <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)} · เลขที่ ${esc(me.no || "-")} · ห้อง ${esc(me.class)}</p></div></div>
     <div class="flex gap-2"><button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>
     <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
@@ -629,8 +634,9 @@ const ST_VIEWS = {
        <div class="min-w-0 flex-1"><div class="text-sm text-indigo-100">คะแนนของฉัน (งานที่ตรวจแล้ว)</div>
         <div class="text-5xl font-bold">${s.max ? fmt(s.total) : "-"} <span class="text-xl text-indigo-200">/ ${s.max ? fmt(s.max) : "-"}</span></div>
         <div class="mt-3 h-3 rounded-full bg-white/20 overflow-hidden"><div class="h-full rounded-full bg-amber-300" style="width:${pct}%"></div></div>
-        <div class="text-sm text-indigo-100 mt-2">${s.pct == null ? "ยังไม่มีคะแนน" : "ร้อยละ " + fmt(s.pct) + "%"}${s.classRank ? " · อันดับ " + s.classRank + "/" + s.classSize + " ในห้อง" : ""}</div></div>
-       <div class="text-center shrink-0"><div class="text-xs text-indigo-100 mb-1">เกรด</div><div class="w-20 h-20 rounded-full bg-white text-indigo-800 text-4xl font-bold flex items-center justify-center shadow-lg">${esc(s.grade || "-")}</div></div>
+        <div class="text-sm text-indigo-100 mt-2">${s.pct == null ? "ยังไม่มีคะแนน" : "ร้อยละ " + fmt(s.pct) + "% ของงานที่ตรวจแล้ว"}${s.classRank ? " · อันดับ " + s.classRank + "/" + s.classSize + " ในห้อง" : ""}</div>
+        ${!s.final && s.courseMax ? `<div class="text-xs text-indigo-200 mt-1">ตรวจแล้ว ${fmt(s.max)} จากคะแนนเต็มรวม ${fmt(s.courseMax)}</div>` : ""}</div>
+       <div class="text-center shrink-0"><div class="text-xs text-indigo-100 mb-1">เกรด</div>${gradeBubble(s)}</div>
       </div></div>
      <div class="grid grid-cols-3 gap-3">
       ${card("เข้าเรียน", s.attPct == null ? "-" : fmt(s.attPct) + "%", "fa-calendar-check", `มา ${c["มา"]} · ขาด ${c["ขาด"]}`)}
@@ -654,7 +660,7 @@ const ST_VIEWS = {
        ${a.history.length ? `<div class="mt-2 text-xs text-slate-500">${a.history.map((h) => `<div class="py-0.5">${dt(h.t)} — ${esc(h.st)}${h.score !== "" ? " · คะแนน " + esc(h.score) : ""}${h.fb ? " · " + esc(h.fb) : ""}</div>`).join("")}</div>` : ""}</details>` : ""}</div>`;
     const catRows = cats.map((c) => { const x = s.byCat[c]; return `<tr>${td(esc(c))}${td(x.max ? fmt(x.got) + " / " + fmt(x.max) : "-")}${td(fmt(x.all))}</tr>`; }).join("");
     return `<div class="space-y-4">
-      <div class="grid grid-cols-3 gap-3">${card("ได้แล้ว", fmt(s.total), "fa-star")}${card("เต็ม (ที่ตรวจแล้ว)", fmt(s.max), "fa-list-check")}${card("เกรดตอนนี้", s.grade || "-", "fa-award", s.pct == null ? "" : fmt(s.pct) + "%")}</div>
+      <div class="grid grid-cols-3 gap-3">${card("ได้แล้ว", fmt(s.total), "fa-star")}${card("เต็ม (ที่ตรวจแล้ว)", fmt(s.max), "fa-list-check")}${card("เกรด", s.final ? s.grade : "รอประมวลผล", "fa-award", s.pct == null ? "" : fmt(s.pct) + "%")}</div>
       <p class="text-xs text-slate-500 px-1">งานสั่งและส่งนอกระบบ หน้านี้แสดงสถานะ คะแนน และข้อเสนอแนะที่ครูบันทึกให้</p>
       ${keys.map((u) => `<div class="space-y-2">${one ? "" : `<h3 class="font-bold text-slate-700 px-1 mt-2"><i class="fa-solid fa-folder-open text-indigo-600 mr-2"></i>${esc(u)}</h3>`}${groups[u].map(item).join("")}</div>`).join("")}
       <details class="bg-white rounded-2xl shadow-sm border p-4"><summary class="cursor-pointer font-semibold text-slate-700"><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i>ดูคะแนนแยกตามหมวด และเกณฑ์เกรด</summary>
@@ -671,7 +677,12 @@ const ST_VIEWS = {
   me(d) {
     const m = d.me;
     return `<div class="bg-white rounded-2xl shadow-md border p-5 space-y-4 max-w-xl mx-auto"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-user-pen text-indigo-600 mr-2"></i>ตกแต่งโปรไฟล์</h3>
-     <div><label class="text-xs font-semibold text-slate-600">เลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === m.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="pfAvatar" value="${esc(m.avatar)}"></div>
+     <div class="flex items-center gap-3">
+      <div id="pfAvatarPrev" class="w-16 h-16 text-3xl rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">${avSpan(m.avatar)}</div>
+      <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-camera mr-1"></i>อัปโหลดรูปจากเครื่อง<input type="file" accept="image/*" class="hidden" onchange="pickPhoto(this,'pfAvatar')"></label>
+      <button type="button" onclick="clearPhoto('pfAvatar')" class="text-sm text-slate-500 underline">ลบรูป</button>
+     </div>
+     <div><label class="text-xs font-semibold text-slate-600">หรือเลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === m.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="pfAvatar" value="${esc(m.avatar)}"></div>
      <div><label class="text-xs font-semibold text-slate-600">ชื่อเล่น / ชื่อที่ต้องการแสดง</label><input id="pfNick" maxlength="30" value="${esc(m.nick)}" class="${inC}"></div>
      <div><label class="text-xs font-semibold text-slate-600">แนะนำตัวสั้น ๆ</label><textarea id="pfBio" maxlength="200" rows="3" class="${inC}">${esc(m.bio)}</textarea></div>
      <div class="grid grid-cols-2 gap-2 text-sm text-slate-500 bg-slate-50 rounded-xl p-3"><div>ชื่อ: ${esc(m.name)}</div><div>รหัส: <b>${esc(m.studentId)}</b></div><div>ห้อง: ${esc(m.class)}</div><div class="break-all">อีเมล: ${esc(m.email)}</div><div class="col-span-2 text-xs">หากข้อมูลห้อง/ชื่อ/รหัสไม่ถูกต้อง กรุณาแจ้งครูผู้สอน</div></div>
@@ -682,9 +693,31 @@ const ST_VIEWS = {
   },
 };
 
+/* ----- รูปโปรไฟล์: ย่อรูปจากมือถือเป็น 160x160 (ครอบตัดกลาง) แล้วเก็บเป็น data URL ----- */
+function pickPhoto(inp, hid) {
+  const f = inp.files[0]; inp.value = "";
+  if (!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => {
+    const S = 160, c = document.createElement("canvas"); c.width = c.height = S;
+    const side = Math.min(img.width, img.height);
+    c.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+    URL.revokeObjectURL(url);
+    let q = 0.8, d = c.toDataURL("image/jpeg", q);
+    while (d.length > 40000 && q > 0.3) { q -= 0.1; d = c.toDataURL("image/jpeg", q); }
+    $(hid).value = d;
+    $(hid + "Prev").innerHTML = `<img src="${d}" class="w-full h-full object-cover" alt="">`;
+    document.querySelectorAll(".av-opt").forEach((b) => b.classList.remove("ring-2", "ring-indigo-600"));
+    toast('เลือกรูปแล้ว กด "บันทึกโปรไฟล์" เพื่อใช้งาน', "info");
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast("เปิดรูปนี้ไม่ได้ ลองรูปอื่น"); };
+  img.src = url;
+}
+function clearPhoto(hid) { $(hid).value = ""; $(hid + "Prev").textContent = "🎓"; }
 function pickAvatar(a, btn) {
-  const w = btn.parentElement;
-  w.nextElementSibling.value = a;
+  const w = btn.parentElement, h = w.nextElementSibling;
+  h.value = a;
+  const p = $(h.id + "Prev"); if (p) p.textContent = a;
   [...w.children].forEach((b) => { b.classList.toggle("ring-2", b.dataset.a === a); b.classList.toggle("ring-indigo-600", b.dataset.a === a); });
 }
 function changePw(btn) {
@@ -889,9 +922,9 @@ const AVIEWS = {
   },
 
   summary() {
-    const rows = studs(true).map((s) => { const m = sumOf(s.studentId); return `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(m.max ? `${fmt(m.total)} / ${fmt(m.max)}` : "-")}${td(m.pct == null ? "-" : fmt(m.pct) + "%")}${td(esc(m.grade || "-"), "font-bold text-indigo-700")}${td(fmt(m.remaining))}${td(m.attPct == null ? "-" : fmt(m.attPct) + "%")}${td(`${m.subCount || 0} / ${m.assignCount || 0}`)}</tr>`; }).join("");
+    const rows = studs(true).map((s) => { const m = sumOf(s.studentId); return `<tr data-q="${rowQ(s)}">${td(esc(s.studentId))}${td(esc(s.name))}${td(esc(s.class || "-"))}${td(m.max ? `${fmt(m.total)} / ${fmt(m.max)}` : "-")}${td(m.pct == null ? "-" : fmt(m.pct) + "%")}${td(m.final ? esc(m.grade) : '<span class="text-slate-400 text-xs">รอ (ยังตรวจไม่ครบ)</span>', "font-bold text-indigo-700")}${td(fmt(m.remaining))}${td(m.attPct == null ? "-" : fmt(m.attPct) + "%")}${td(`${m.subCount || 0} / ${m.assignCount || 0}`)}</tr>`; }).join("");
     return `<div class="mb-4 flex flex-wrap items-center justify-between gap-2 bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-sm"><span class="text-slate-600"><i class="fa-solid fa-scale-balanced text-indigo-600 mr-2"></i>${esc(gradeNote(adminData.config))}</span><button type="button" onclick="setAdminTab('criteria')" class="${btnP}">ตั้งเกณฑ์คะแนนเอง</button></div>
-      <div class="mb-1">${searchBox()}</div><p class="text-xs text-slate-500 mb-3">(นับเฉพาะงานที่ให้คะแนนแล้ว)</p>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "คะแนนรวม", "ร้อยละ", "เกรด", "คงเหลือ", "เช็คชื่อ", "ส่งงาน"), rows, 9)}`;
+      <div class="mb-1">${searchBox()}</div><p class="text-xs text-slate-500 mb-3">(นับเฉพาะงานที่ให้คะแนนแล้ว · เกรดจะแสดงเมื่อคะแนนเต็มรวมครบ 100 และตรวจครบทุกงาน)</p>${table(th("รหัส", "ชื่อ-นามสกุล", "ห้อง", "คะแนนรวม", "ร้อยละ", "เกรด", "คงเหลือ", "เช็คชื่อ", "ส่งงาน"), rows, 9)}`;
   },
 
   resets() {
@@ -918,7 +951,7 @@ const AVIEWS = {
       <div class="p-4 bg-slate-50 border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">3) ให้คะแนนเช็คชื่อรวมในคะแนนรวมไหม?</h4>
        <p class="text-xs text-slate-500 mb-2">ใส่คะแนนเต็มของเช็คชื่อ เช่น 10 = เช็คชื่อ 100% ได้ 10 คะแนนเต็ม · ใส่ 0 = ไม่นับรวม (แสดงเป็นร้อยละแยกเฉย ๆ)</p>
        <div class="w-40"><label class="text-xs font-semibold text-slate-600">คะแนนเต็มเช็คชื่อ</label><input id="cam" type="number" min="0" max="100" step="0.5" value="${k.m}" class="${inC}"></div></div>
-      <div class="p-4 bg-white border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">คะแนนเต็มรวมที่วางไว้ (งานทั้งหมด + เช็คชื่อ)</h4><p class="text-xs text-slate-500 mb-2">เขียวคือครบ 100 พอดี · เหลืองคือยังไม่ถึง/เกิน 100</p><div class="flex flex-wrap gap-2">${totals}</div></div>
+      <div class="p-4 bg-white border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">คะแนนเต็มรวมที่วางไว้ (งานทั้งหมด + เช็คชื่อ)</h4><p class="text-xs text-slate-500 mb-2">เขียวคือครบ 100 พอดี · เหลืองคือยังไม่ถึง/เกิน 100 (เกรดจริงจะแสดงให้นักเรียนเมื่อคะแนนเต็มครบ 100 และตรวจครบทุกงาน)</p><div class="flex flex-wrap gap-2">${totals}</div></div>
       <div class="flex flex-wrap gap-2"><button type="button" onclick="saveCriteria(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกเกณฑ์</span></button>
        <button type="button" onclick="resetCriteriaInputs()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ใช้ค่ามาตรฐาน (80/75/70/65/60/55/50)</button></div></div>`;
   },
@@ -938,7 +971,12 @@ const AVIEWS = {
   profile() {
     const c = adminData.config || {};
     return `<div class="space-y-4 max-w-xl"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-id-badge text-indigo-600 mr-2"></i>โปรไฟล์ครู (นักเรียนจะเห็นในหน้าหลัก)</h3>
-      <div><label class="text-xs font-semibold text-slate-600">รูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === c.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="tfAvatar" value="${esc(c.avatar)}"></div>
+      <div class="flex items-center gap-3">
+       <div id="tfAvatarPrev" class="w-16 h-16 text-3xl rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">${avSpan(c.avatar)}</div>
+       <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-camera mr-1"></i>อัปโหลดรูปจากเครื่อง<input type="file" accept="image/*" class="hidden" onchange="pickPhoto(this,'tfAvatar')"></label>
+       <button type="button" onclick="clearPhoto('tfAvatar')" class="text-sm text-slate-500 underline">ลบรูป</button>
+      </div>
+      <div><label class="text-xs font-semibold text-slate-600">หรือเลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === c.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="tfAvatar" value="${esc(c.avatar)}"></div>
       <div class="grid md:grid-cols-2 gap-3"><div><label class="text-xs font-semibold text-slate-600">ชื่อ-นามสกุลครู</label><input id="tfName" value="${esc(c.name)}" class="${inC}"></div>
       <div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง (เช่น ครูจอห์น)</label><input id="tfNick" value="${esc(c.nick)}" class="${inC}"></div></div>
       <div><label class="text-xs font-semibold text-slate-600">รายวิชา</label><input id="tfSubject" value="${esc(c.subject)}" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4"></div>
@@ -1113,7 +1151,8 @@ async function issueReset(email) {
   try {
     const r = await adminCall({ action: "adminIssueResetCode", email });
     await loadAdminData();
-    alert(`โค้ดรีเซ็ตรหัสผ่านคือ\n\n${r.code}\n\nแจ้งนักเรียนคนนี้เท่านั้น (ใช้ได้ ${r.minutes} นาที) แล้วให้นักเรียนกดลืมรหัสผ่าน > ขั้นตอนที่ 2`);
+    const q = (adminData.resets || []).find((x) => x.email === email);
+    alert(`โค้ดรีเซ็ตรหัสผ่านของ ${q ? q.name + " (" + q.sid + ")" : email}\n\n${r.code}\n\nแจ้งนักเรียนคนนี้เท่านั้น (ใช้ได้ ${r.minutes} นาที) แล้วให้นักเรียนกดลืมรหัสผ่าน > ขั้นตอนที่ 2`);
   } catch (e) { toast(e.message); } finally { adminBusy = false; }
 }
 const rejectReset = (email) => adminDo("ปฏิเสธคำขอรีเซ็ตนี้ใช่ไหม?", { action: "adminRejectReset", email }, "ปฏิเสธคำขอแล้ว");
