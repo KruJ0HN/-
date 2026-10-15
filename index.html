@@ -11,6 +11,7 @@ tailwind.config = { theme: { extend: { colors: { indigo: {
   600:"#8a2033",700:"#6b1625",800:"#560f1e",900:"#43101a" } } } } };
 </script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 body{font-family:'Sarabun',sans-serif;background:radial-gradient(circle at 8% 0%,#fbe3e7 0,transparent 42%),radial-gradient(circle at 95% 100%,#f4c4cd 0,transparent 38%),#fff7f8;background-attachment:fixed}
@@ -141,8 +142,10 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
     <input type="text" id="fgSid" inputmode="numeric" placeholder="รหัสนักเรียน" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
     <button type="button" id="btnReqReset" onclick="handleRequestReset()" class="w-full bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl"><span>ส่งคำขอให้ครู</span></button>
     <p id="fgSent" class="hidden text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2">ส่งคำขอแล้ว ✓ ให้แจ้งครูเพื่อขอ <b>โค้ด 6 หลัก</b> แล้วกรอกในขั้นตอนที่ 2</p>
+    <p id="fgNoAcc" class="hidden text-xs text-red-700 bg-red-50 rounded-lg p-2">ไม่พบบัญชีนี้ในระบบ <button type="button" onclick="showStudentRegister()" class="text-indigo-700 font-bold underline">กรุณาสมัครบัญชี</button></p>
+    <button type="button" onclick="$('fgStep2').classList.remove('hidden')" class="w-full text-xs text-indigo-600 underline">ได้รับโค้ดจากครูแล้ว? กรอกโค้ดที่นี่</button>
    </div>
-   <div class="p-3 rounded-xl bg-slate-50 border space-y-2">
+   <div id="fgStep2" class="hidden p-3 rounded-xl bg-slate-50 border space-y-2">
     <div class="font-semibold text-slate-700 text-sm"><span class="inline-block w-6 h-6 rounded-full bg-emerald-600 text-white text-center text-xs leading-6 mr-1">2</span>ได้โค้ดจากครูแล้ว</div>
     <input type="text" id="fgCode" maxlength="6" inputmode="numeric" placeholder="โค้ด 6 หลักจากครู" class="w-full px-3 py-2 border rounded-lg text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-emerald-500">
     <input type="password" id="fgPw" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
@@ -156,7 +159,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
   <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-key"></i></div>
   <h2 class="text-2xl font-bold text-slate-800 mb-2">กรอกรหัสยืนยัน OTP</h2>
-  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของคุณแล้ว (ตรวจกล่องสแปมด้วย)</p>
+  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่ <b id="otpTo" class="text-slate-700"></b> แล้ว (ตรวจกล่องสแปมด้วย)<br><button type="button" onclick="showStudentRegister()" class="text-indigo-600 underline text-xs mt-1">พิมพ์อีเมลผิด? กลับไปแก้ไข</button></p>
   <div class="space-y-4">
    <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
     <input type="text" id="otpInput" maxlength="6" inputmode="numeric" placeholder="------" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold text-xl tracking-widest"></div>
@@ -168,22 +171,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
   </div>
  </div>
 
- <div id="classSelectionModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-  <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl text-center space-y-4">
-   <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-door-open"></i></div>
-   <h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น/ห้องเรียนของคุณ</h3>
-   <p class="text-xs text-slate-500">เพื่อจัดหมวดหมู่การเข้าดูคะแนนให้ถูกต้อง</p>
-   <div class="space-y-3">
-    <div class="grid grid-cols-2 gap-3 text-left">
-     <div><label class="text-xs font-semibold text-slate-600 block mb-1">ห้อง <span class="text-red-500">*</span></label>
-      <select id="selectRoom" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"><option value="">เลือกห้อง</option><option value="A">ห้อง A</option><option value="B">ห้อง B</option><option value="C">ห้อง C</option><option value="D">ห้อง D</option><option value="E">ห้อง E</option></select></div>
-     <div><label class="text-xs font-semibold text-slate-600 block mb-1">กลุ่มย่อย <span class="text-red-500">*</span></label>
-      <select id="selectSub" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"><option value="">เลือกกลุ่ม</option><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option><option value="L4">L4</option></select></div>
-    </div>
-    <button type="button" id="btnSaveClass" onclick="handleSaveClass()" class="w-full bg-indigo-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl shadow hover:bg-indigo-700"><span>เข้าสู่หน้าระบบ</span></button>
-   </div>
-  </div>
- </div>
 
  
 
@@ -214,8 +201,9 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
    <button type="button" onclick="adminLogout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium">ออกจากระบบ</button>
   </div>
  </div>
+ <div id="adminRoomBar" class="flex flex-wrap items-center gap-2"></div>
  <div id="adminTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
- <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">แสดงห้อง:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
+ <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">แสดงกลุ่ม:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
  <div id="adminPanel" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4"></div>
 </div>
 </main>
@@ -229,6 +217,7 @@ let tempRegisterEmail = "";
 let cooldownTimer = null;
 
 const $ = (id) => document.getElementById(id);
+const maskEmailJs = (e) => { const p = String(e).split("@"); return p[0].slice(0, 2) + "***@" + (p[1] || ""); };
 
 /* ---------- การนำทาง + ย้อนกลับ (ปุ่มลูกศร และปุ่มย้อนกลับของเบราว์เซอร์/มือถือ) ---------- */
 const VIEWS_ALL = ["roleSelect", "studentLoginForm", "studentRegisterForm", "otpForm", "forgotForm", "studentDashboard", "adminLoginForm", "adminDashboard"];
@@ -243,6 +232,7 @@ function render(v, tab) {
   if (v === "adminDashboard") { adminTab = tab || adminTab || "home"; renderAdmin(); }
   $(v).classList.remove("fade"); void $(v).offsetWidth; $(v).classList.add("fade");
   $("btnBack").classList.toggle("hidden", navStack.length < 2);
+  if (v === "otpForm") $("otpTo").textContent = maskEmailJs(tempRegisterEmail);
   renderNavUser(v);
   window.scrollTo(0, 0);
 }
@@ -266,7 +256,7 @@ function renderNavUser(v) {
   const el = $("navUser");
   let who = null;
   if (v === "studentDashboard" && currentUser) who = { a: currentUser.avatar, n: currentUser.nick || currentUser.name };
-  else if (v === "adminDashboard" && adminData) { const c = adminData.config || {}; who = { a: c.avatar, n: c.nick || c.name || "ครู" }; }
+  else if (v === "adminDashboard" && adminData) { const c = adminData.profile || {}; who = { a: c.avatar, n: c.nick || c.name || "ครู" }; }
   el.classList.toggle("hidden", !who);
   el.classList.toggle("flex", !!who);
   if (who) el.innerHTML = `<span class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center overflow-hidden">${avSpan(who.a)}</span><span class="truncate">${esc(who.n)}</span>`;
@@ -306,9 +296,9 @@ async function run(btn, loadingText, fn) {
 }
 
 /* ---------- API ---------- */
-async function postData(payload) {
+async function postData(payload, timeoutMs) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || API_TIMEOUT_MS);
   try {
     // text/plain = "simple request" ไม่มี preflight จึงไม่ติด CORS กับ Apps Script
     const res = await fetch(SCRIPT_URL, {
@@ -482,8 +472,8 @@ function handleRequestReset() {
   if (!email || !studentId) return toast("กรุณากรอกอีเมลและรหัสนักเรียน");
   run($("btnReqReset"), "กำลังส่ง...", async () => {
     const r = await postData({ action: "requestReset", email, studentId });
-    if (r.status !== "success") { toast(r.message); return false; }
-    $("fgSent").classList.remove("hidden");
+    if (r.status !== "success") { $("fgNoAcc").classList.toggle("hidden", r.code !== "NO_ACCOUNT"); toast(r.message); return false; }if (r.status !== "success") { $("fgNoAcc").classList.toggle("hidden", r.code !== "NO_ACCOUNT"); toast(r.message); return false; }
+    $("fgNoAcc").classList.add("hidden"); $("fgSent").classList.remove("hidden"); $("fgStep2").classList.remove("hidden");
     toast(r.message, "success");
     return true;
   });
@@ -500,7 +490,7 @@ function handleConfirmReset() {
     if (r.status !== "success") { toast(r.message); return false; }
     toast("ตั้งรหัสผ่านใหม่แล้ว เข้าสู่ระบบด้วยรหัสใหม่ได้เลย", "success");
     ["fgCode", "fgPw", "fgPw2"].forEach((i) => { $(i).value = ""; });
-    $("fgSent").classList.add("hidden");
+    $("fgSent").classList.add("hidden"); $("fgStep2").classList.add("hidden");
     showView("studentLoginForm");
     $("studentEmailInput").value = email; $("studentPasswordInput").value = "";
     return true;
@@ -523,24 +513,11 @@ function handleStudentLogin() {
     }
     if (r.status !== "success") { toast(r.message); return false; }
     currentUser = { ...r.student, token: r.token };
-    if (!VALID_CLASS.test(currentUser.class || "")) $("classSelectionModal").classList.remove("hidden");
-    else enterDashboard();
-    return true;
-  });
-}
-
-function handleSaveClass() {
-  const room = $("selectRoom").value, sub = $("selectSub").value;
-  if (!room || !sub) return toast("กรุณาเลือกห้องและกลุ่มย่อย");
-  run($("btnSaveClass"), "กำลังบันทึก...", async () => {
-    const r = await postData({ action: "updateClass", email: currentUser.email, token: currentUser.token, class: room + "/" + sub });
-    if (r.status !== "success") { toast(r.message); return false; }
-    currentUser.class = r.class;
-    $("classSelectionModal").classList.add("hidden");
     enterDashboard();
     return true;
   });
 }
+
 
 /* ---------- ฝั่งนักเรียน (ดูอย่างเดียว) ---------- */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -560,13 +537,46 @@ const gradeBubble = (s) => s.final
   : `<div class="w-20 h-20 rounded-full bg-white/15 border-2 border-dashed border-white/60 text-white text-[11px] leading-tight flex items-center justify-center p-2"><span><i class="fa-solid fa-hourglass-half block text-base mb-0.5"></i>กำลังประมวลผล</span></div>`;
 const dt = (t) => new Date(Number(t)).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" });
 const daysTo = (due, today) => Math.round((Date.parse(due) - Date.parse(today)) / 864e5);
+let stRoom = "";
+const fileUrl = (f) => f.t === "link" ? (/^https?:\/\//i.test(f.u) ? f.u : "#") : "https://drive.google.com/file/d/" + encodeURIComponent(f.i) + "/view";
+const filesHtml = (fs) => !fs || !fs.length ? "" : `<div class="mt-2 space-y-2"><div class="text-xs font-semibold text-slate-600"><i class="fa-solid fa-paperclip mr-1"></i>ไฟล์/ลิงก์แนบจากครู</div>${fs.map((f) => (f.t === "file" && /^image\//.test(f.m || "")) ? `<a href="${esc(fileUrl(f))}" target="_blank" rel="noopener"><img src="https://drive.google.com/thumbnail?id=${esc(f.i)}&sz=w900" alt="${esc(f.n)}" class="max-h-64 rounded-lg border"></a>` : `<a href="${esc(fileUrl(f))}" target="_blank" rel="noopener" class="flex items-center gap-2 text-sm text-indigo-700 underline"><i class="fa-solid ${f.t === "link" ? "fa-link" : "fa-file"}"></i>${esc(f.n || "ไฟล์แนบ")}</a>`).join("")}</div>`;
+const attScoreCard = (s, c) => {
+  if (!s || !s.attFull) return "";
+  const n = s.attN || 0;
+  return `<div class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-hand-holding-heart"></i></div><div class="min-w-0 flex-1"><div class="font-bold text-slate-700">คะแนนจิตพิสัย (จากเช็คชื่อ)</div><div class="text-3xl font-bold text-emerald-700">${n ? fmt(s.attGot) : "-"} <span class="text-base text-slate-400 font-normal">/ ${fmt(s.attFull)}</span></div><div class="text-xs text-slate-500">${n ? "ตอนนี้ได้ " + fmt(s.attGot) + " คะแนน จากเช็คชื่อ " + n + " ครั้ง · มา " + c["มา"] + " สาย " + c["สาย"] + " ลา " + c["ลา"] + " ขาด " + c["ขาด"] : "ยังไม่มีการเช็คชื่อ (เต็ม " + fmt(s.attFull) + " คะแนน)"}</div></div></div>`;
+};
+const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือสแกน QR / กดลิงก์เชิญจากครู)</p><div class="flex gap-2"><input id="joinCode" maxlength="8" placeholder="เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center"><button type="button" onclick="handleJoin(this)" class="${btnP} shrink-0"><span>เข้าห้อง</span></button></div></div>`;
+const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3>${joinBox()}</div>`;
+function handleJoin(btn) {
+  run(btn, "กำลังเข้าห้อง...", async () => {
+    const code = $("joinCode").value.trim();
+    if (!code) throw new Error("กรุณากรอกรหัสห้อง");
+    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code });
+    if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
+    if (r.status !== "success") { toast(r.message); return false; }
+    stRoom = r.roomId || stRoom; stTab = "home"; toast(r.message, "success");
+    await fetchStudent();
+    return true;
+  });
+}
+function switchRoom(id) { stRoom = id; stData = null; stTab = "home"; renderStudent(); fetchStudent().catch((e) => toast(e.message)); }
+async function autoJoin() {
+  let c = "";
+  try { c = sessionStorage.getItem("joinCode") || ""; sessionStorage.removeItem("joinCode"); } catch (_) {}
+  if (!c) return;
+  try {
+    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code: c });
+    if (r.status === "success") { stRoom = r.roomId || ""; toast(r.message, "success"); } else toast(r.message);
+  } catch (e) { toast(e.message); }
+}
+const roomSwitch = (d) => d && d.rooms && d.rooms.length > 1 ? `<select onchange="switchRoom(this.value)" class="text-sm bg-white/90 text-slate-800 rounded-xl px-2 max-w-[10rem]">${d.rooms.map((r) => `<option value="${esc(r.id)}" ${d.room && d.room.id === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select>` : "";
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
 let stData = null, stTimer = null;
 
 function enterDashboard() {
   stData = null; stTab = "home";
   resetNav("studentDashboard", "home");
-  fetchStudent().catch((e) => toast(e.message));
+  autoJoin().then(() => fetchStudent()).catch((e) => toast(e.message));
   clearInterval(stTimer);
   // อัปเดตอัตโนมัติทุก 30 วินาที (เรียลไทม์) เมื่อเปิดหน้าอยู่
   stTimer = setInterval(() => {
@@ -576,10 +586,11 @@ function enterDashboard() {
 }
 
 async function fetchStudent() {
-  const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token });
+  const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token, roomId: stRoom });
   if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
   if (r.status !== "success") throw new Error(r.message);
   stData = r;
+  if (r.room) stRoom = r.room.id;
   Object.assign(currentUser, r.me);
   renderStudent();
   return true;
@@ -589,7 +600,7 @@ const setStTab = (t) => showView("studentDashboard", t);
 
 function studentLogout() {
   clearInterval(stTimer);
-  currentUser = null; stData = null;
+  currentUser = null; stData = null; stRoom = "";
   $("studentPasswordInput").value = "";
   navStack = [{ v: "roleSelect" }, { v: "studentLoginForm" }];
   render("studentLoginForm");
@@ -602,12 +613,12 @@ function renderStudent() {
     <div class="blob w-40 h-40 bg-white/10 -top-12 -right-10"></div>
     <div class="relative flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-4"><div class="w-16 h-16 text-4xl rounded-full bg-white/90 flex items-center justify-center shrink-0 overflow-hidden">${avSpan(me.avatar)}</div><div><div class="text-sm text-indigo-100">สวัสดี 👋</div><h2 class="text-2xl font-bold leading-tight">${esc(me.nick || me.name)}</h2>
-    <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)} · เลขที่ ${esc(me.no || "-")} · ห้อง ${esc(me.class)}</p></div></div>
-    <div class="flex gap-2"><button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>
+    <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)}${d && d.room ? " · " + esc(d.room.name) : ""}${me.no ? " · เลขที่ " + esc(me.no) : ""}${me.class ? " · กลุ่ม " + esc(me.class) : ""}</p></div></div>
+    <div class="flex flex-wrap gap-2">${roomSwitch(d)}<button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>
     <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
-  const unread = d ? d.notes.length : 0;
-  $("stTabs").innerHTML = `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
-  $("stBody").innerHTML = d ? (ST_VIEWS[stTab] || ST_VIEWS.home)(d) : empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...');
+  const unread = d && d.notes ? d.notes.length : 0;
+  $("stTabs").innerHTML = (d && d.noRoom) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
+  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d)) : empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...');
 }
 
 const attCards = (d) => { const c = d.attCounts, tot = c["มา"] + c["สาย"] + c["ลา"] + c["ขาด"];
@@ -643,6 +654,7 @@ const ST_VIEWS = {
       ${card("ส่งงานแล้ว", `${sent}/${A.length}`, "fa-circle-check", wait ? "รอตรวจ " + wait : "")}
       ${card("ค้างส่ง", pend.length, "fa-circle-exclamation")}
      </div>
+     ${attScoreCard(s, c)}
      ${box("สิ่งที่ต้องทำ", "fa-list-check", todo.length ? todo.join("") : '<p class="text-slate-400 py-2">ไม่มีอะไรค้าง เยี่ยมมาก 🎉</p>')}
      ${news.length ? box("ประกาศจากครู", "fa-bullhorn", `<div class="space-y-2">${news.slice(0, 3).map(newsItem).join("")}</div>${news.length > 3 ? `<details class="mt-2"><summary class="text-sm text-indigo-700 cursor-pointer">ดูประกาศเก่า (${news.length - 3})</summary><div class="space-y-2 mt-2">${news.slice(3).map(newsItem).join("")}</div></details>` : ""}`) : ""}
      <div class="flex items-center gap-3 text-sm text-slate-500 px-1">${avatarEl(t.avatar, "w-10 h-10 text-xl")}<div>ครูผู้สอน: <b class="text-slate-700">${esc(t.name || "ครูจอห์น")}</b>${t.subject ? " · " + esc(t.subject) : ""}<br><span class="text-xs">ข้อมูลอัปเดตอัตโนมัติ</span></div></div></div>`;
@@ -654,8 +666,9 @@ const ST_VIEWS = {
     const keys = Object.keys(groups), one = keys.length === 1 && keys[0] === "งานทั่วไป";
     const item = (a) => `<div class="border rounded-2xl p-3 bg-white"><div class="flex justify-between gap-3 items-start"><div class="min-w-0"><div class="font-semibold text-slate-800">${esc(a.name)}</div><div class="text-xs text-slate-500 mt-0.5">${esc(a.cat)}${a.due ? " · ส่ง " + esc(a.due) : ""}</div></div>
       <div class="text-right shrink-0">${badge(a.status)}<div class="text-lg font-bold mt-1">${a.score == null ? '<span class="text-slate-400 font-normal text-sm">รอคะแนน</span>' : fmt(a.score) + '<span class="text-slate-400 text-sm font-normal"> / ' + fmt(a.max) + "</span>"}</div></div></div>
-      ${a.detail || a.feedback || a.history.length ? `<details class="mt-2 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs">ดูรายละเอียด</summary>
+      ${a.detail || a.feedback || a.history.length || (a.files || []).length ? `<details class="mt-2 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs">ดูรายละเอียด</summary>
        ${a.detail ? `<div class="text-slate-600 mt-2">${esc(a.detail)}</div>` : ""}
+       ${filesHtml(a.files)}
        ${a.feedback ? `<div class="mt-2 bg-indigo-50 border border-indigo-100 rounded-lg p-2"><i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i>ครู: ${esc(a.feedback)}</div>` : ""}
        ${a.history.length ? `<div class="mt-2 text-xs text-slate-500">${a.history.map((h) => `<div class="py-0.5">${dt(h.t)} — ${esc(h.st)}${h.score !== "" ? " · คะแนน " + esc(h.score) : ""}${h.fb ? " · " + esc(h.fb) : ""}</div>`).join("")}</div>` : ""}</details>` : ""}</div>`;
     const catRows = cats.map((c) => { const x = s.byCat[c]; return `<tr>${td(esc(c))}${td(x.max ? fmt(x.got) + " / " + fmt(x.max) : "-")}${td(fmt(x.all))}</tr>`; }).join("");
@@ -670,7 +683,7 @@ const ST_VIEWS = {
     const s = d.summary || {};
     const rows = d.attList.map((a) => `<tr><td class="px-3 py-2 whitespace-nowrap">${esc(a.date)}</td><td class="px-3 py-2">${esc(a.period)}</td><td class="px-3 py-2">${badge(a.st, ATT_CLS)}</td><td class="px-3 py-2 text-slate-500">${esc(a.note || "-")}</td></tr>`).join("");
     return `<div class="space-y-4">
-      <div class="rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-6 text-center shadow-lg"><div class="text-sm text-emerald-100">เข้าเรียนรวม</div><div class="text-5xl font-bold my-1">${s.attPct == null ? "-" : fmt(s.attPct) + "%"}</div></div>
+      ${attScoreCard(s, d.attCounts)}<div class="rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-6 text-center shadow-lg"><div class="text-sm text-emerald-100">เข้าเรียนรวม</div><div class="text-5xl font-bold my-1">${s.attPct == null ? "-" : fmt(s.attPct) + "%"}</div></div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${card("มาเรียน", d.attCounts["มา"], "fa-check")}${card("มาสาย", d.attCounts["สาย"], "fa-clock")}${card("ลา", d.attCounts["ลา"], "fa-envelope")}${card("ขาดเรียน", d.attCounts["ขาด"], "fa-xmark")}</div>
       ${box("ประวัติการเข้าเรียนของฉัน", "fa-clock-rotate-left", table(th("วันที่", "คาบ", "สถานะ", "หมายเหตุ"), rows, 4))}</div>`;
   },
@@ -687,7 +700,7 @@ const ST_VIEWS = {
      <div><label class="text-xs font-semibold text-slate-600">แนะนำตัวสั้น ๆ</label><textarea id="pfBio" maxlength="200" rows="3" class="${inC}">${esc(m.bio)}</textarea></div>
      <div class="grid grid-cols-2 gap-2 text-sm text-slate-500 bg-slate-50 rounded-xl p-3"><div>ชื่อ: ${esc(m.name)}</div><div>รหัส: <b>${esc(m.studentId)}</b></div><div>ห้อง: ${esc(m.class)}</div><div class="break-all">อีเมล: ${esc(m.email)}</div><div class="col-span-2 text-xs">หากข้อมูลห้อง/ชื่อ/รหัสไม่ถูกต้อง กรุณาแจ้งครูผู้สอน</div></div>
      <button type="button" onclick="saveStudentProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button>
-     <hr><h3 class="font-bold text-slate-700"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>เปลี่ยนรหัสผ่าน</h3>
+     <hr>${joinBox()}<hr><h3 class="font-bold text-slate-700"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>เปลี่ยนรหัสผ่าน</h3>
      <input id="pwOld" type="password" placeholder="รหัสผ่านเดิม" class="${inC}"><input id="pwNew" type="password" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="${inC}">
      <button type="button" onclick="changePw(this)" class="${btnP}"><span>เปลี่ยนรหัสผ่าน</span></button></div>`;
   },
@@ -756,19 +769,20 @@ const STATUSES = ["ยังไม่ส่ง", "ส่งแล้ว", "ส�
 const CATS = ["ใบงาน", "แบบทดสอบ", "แบบฝึกหัด", "ปฏิบัติ/ชิ้นงาน", "สอบกลางภาค", "สอบปลายภาค", "จิตพิสัย"];
 const STU_STATUS = ["ปกติ", "พักการเรียน", "ย้ายออก"];
 const PERIODS = ["ทั้งวัน"].concat([1, 2, 3, 4, 5, 6, 7, 8].map((n) => "คาบ " + n));
-const TABS = [["home", "หน้าหลัก", "fa-house"], ["students", "รายชื่อนักเรียน", "fa-users"], ["submit", "เช็คส่งงาน", "fa-clipboard-check"],
+const TABS = [["home", "หน้าหลัก", "fa-house"], ["rooms", "ห้องเรียน", "fa-school"], ["students", "รายชื่อนักเรียน", "fa-users"], ["submit", "เช็คส่งงาน", "fa-clipboard-check"],
   ["assign", "รายละเอียดงาน", "fa-book"], ["criteria", "เกณฑ์คะแนน", "fa-scale-balanced"], ["resets", "คำขอรีเซ็ตรหัส", "fa-key"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
-  ["rank", "จัดอันดับ", "fa-ranking-star"], ["summary", "สรุปผลการเรียน", "fa-file-lines"], ["news", "ประกาศ", "fa-bullhorn"], ["profile", "โปรไฟล์ครู", "fa-id-badge"]];
+  ["rank", "จัดอันดับ", "fa-ranking-star"], ["summary", "สรุปผลการเรียน", "fa-file-lines"], ["news", "ประกาศ", "fa-bullhorn"], ["profile", "โปรไฟล์ครู", "fa-id-badge"], ["admins", "จัดการแอดมิน", "fa-user-shield"]];
 const DEF_G = [80, 75, 70, 65, 60, 55, 50], DEF_A = [1, 0.5, 0.5, 0], GR = ["4", "3.5", "3", "2.5", "2", "1.5", "1"];
 function critOf(c) {
   c = c || {};
   const g = String(c.grades || "").split(",").map(Number), a = String(c.attPts || "").split(",").map(Number);
-  return { g: g.length === 7 && g.every((x) => !isNaN(x)) ? g : DEF_G, a: a.length === 4 && a.every((x) => !isNaN(x)) ? a : DEF_A, m: Math.max(0, Number(c.attMax) || 0) };
+  return { g: g.length === 7 && g.every((x) => !isNaN(x)) ? g : DEF_G, a: a.length === 4 && a.every((x) => !isNaN(x)) ? a : DEF_A, m: (c.attMax === undefined || c.attMax === "") ? 10 : Math.max(0, Number(c.attMax) || 0) };
 }
-const gradeNote = (c) => { const k = critOf(c); return "เกณฑ์เกรด: " + GR.map((x, i) => k.g[i] + "%+ = " + x).join(", ") + ", ต่ำกว่า " + k.g[6] + "% = 0" + (k.m ? " · เช็คชื่อนับรวม " + k.m + " คะแนน" : ""); };
+const gradeNote = (c) => { const k = critOf(c); return "เกณฑ์เกรด: " + GR.map((x, i) => k.g[i] + "%+ = " + x).join(", ") + ", ต่ำกว่า " + k.g[6] + "% = 0" + (k.m ? " · จิตพิสัย (เช็คชื่อ) เต็ม " + k.m + " คะแนน" : ""); };
 const pendReset = () => ((adminData && adminData.resets) || []).filter((r) => r.status === "รอครู").length;
 const RS_CLS = { "รอครู": "bg-amber-100 text-amber-700", "ออกโค้ดแล้ว": "bg-sky-100 text-sky-700", "เสร็จสิ้น": "bg-emerald-100 text-emerald-700", "ปฏิเสธ": "bg-slate-200 text-slate-600" };
 const FILTER_TABS = ["students", "submit", "scores", "attend", "rank", "summary"];
+let curRoom = "", adminRole = "", adminUser = "", asgFiles = [];
 let adminToken = null, adminData = null, adminRoom = "", adminAssign = "", adminPeriod = "ทั้งวัน";
 let adminDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
@@ -781,10 +795,10 @@ const table = (head, body, cols) => `<div class="overflow-x-auto"><table class="
 const searchBox = () => `<input oninput="filterRows(this.value)" placeholder="ค้นหาชื่อ/รหัส..." class="${selC} w-full md:w-64">`;
 const rowQ = (s) => esc((s.studentId + " " + s.name).toLowerCase());
 const opts = (list, cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + list.map((x) => `<option value="${esc(x)}" ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
-const targetOpts = (cur) => `<option value="">ทุกห้อง</option>` + ROOMS.map((r) => `<option value="${r}" ${cur === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` + SUBS.map((s) => `<option value="${r}/${s}" ${cur === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
+const targetOpts = (cur) => { const g = groupList(); if (cur && !g.includes(cur)) g.push(cur); return `<option value="">ทุกคนในห้อง</option>` + g.map((x) => `<option value="${esc(x)}" ${cur === x ? "selected" : ""}>กลุ่ม ${esc(x)}</option>`).join(""); };
 const matchT = (t, c) => !t || t === c || (c || "").indexOf(t + "/") === 0;
 
-const inRoom = (s) => !adminRoom || s.class === adminRoom || (s.class || "").startsWith(adminRoom + "/");
+const inRoom = (s) => !adminRoom || s.class === adminRoom;
 const studs = (active) => adminData.students.filter((s) => (!active || s.active) && inRoom(s));
 const sumOf = (sid) => adminData.summary.find((x) => x.sid === sid) || {};
 const recOf = (sid, aid) => adminData.records.find((r) => r.sid === sid && r.aid === aid);
@@ -793,44 +807,172 @@ const asgOf = () => adminData.assignments.find((a) => a.id === adminAssign);
 const assignSelect = () => `<select onchange="adminAssign=this.value;renderAdmin()" class="${selC}">${adminData.assignments.map((a) => `<option value="${esc(a.id)}" ${a.id === adminAssign ? "selected" : ""}>${esc(a.name)} (เต็ม ${a.max}${a.target ? " · ห้อง " + esc(a.target) : ""})</option>`).join("")}</select>`;
 const noAssign = () => empty('ยังไม่มีงาน ไปเพิ่มที่แท็บ "รายละเอียดงาน" ก่อน');
 
+const groupList = () => [...new Set(((adminData && adminData.students) || []).map((s) => s.class).filter(Boolean))].sort();
+function switchAdminRoom(id) { curRoom = id; adminRoom = ""; adminAssign = ""; asgFiles = []; loadAdminData().catch((e) => toast(e.message)); }
+function createRoom(btn) {
+  run(btn, "กำลังสร้าง...", async () => {
+    const name = $("newRoomName").value.trim();
+    if (!name) throw new Error("กรุณากรอกชื่อห้องเรียน");
+    const r = await adminCall({ action: "adminCreateRoom", name });
+    curRoom = r.roomId; asgFiles = []; adminRoom = "";
+    await loadAdminData();
+    toast("สร้างห้องแล้ว แจกรหัส/ลิงก์/QR ให้นักเรียนได้เลย", "success");
+    return true;
+  });
+}
+function renameRoom(id) {
+  const n = prompt("ชื่อห้องใหม่");
+  if (n && n.trim()) adminDo("", { action: "adminUpdateRoom", roomId: id, op: "rename", name: n.trim() }, "เปลี่ยนชื่อห้องแล้ว");
+}
+function roomOp(id, op, val) {
+  adminDo(op === "newcode" ? "สร้างรหัสใหม่? รหัสเดิมและลิงก์/QR เดิมจะใช้ไม่ได้อีก (นักเรียนที่อยู่ในห้องแล้วไม่กระทบ)" : "", { action: "adminUpdateRoom", roomId: id, op, archived: val }, "ทำรายการแล้ว");
+}
+const roomLink = (code) => location.origin + location.pathname + "?join=" + code;
+function copyText(t) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast("คัดลอกแล้ว", "success")).catch(() => prompt("คัดลอกข้อความนี้", t)); }
+function showQr(code, name) {
+  const box = $("qrBox"), link = roomLink(code);
+  box.classList.remove("hidden");
+  box.innerHTML = `<div class="font-bold mb-2">${esc(name)}</div><div id="qrCanvas" class="inline-block p-2 bg-white border rounded"></div><div class="text-sm mt-2">รหัสเข้าห้อง <b class="tracking-widest text-xl text-indigo-800">${esc(code)}</b></div><div class="text-xs text-slate-500 break-all">${esc(link)}</div>`;
+  if (window.QRCode) new QRCode($("qrCanvas"), { text: link, width: 220, height: 220 }); else $("qrCanvas").textContent = "โหลดตัวสร้าง QR ไม่ได้ ใช้รหัสหรือลิงก์แทน";
+  box.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function createAdminAcc(btn) {
+  run(btn, "กำลังสร้าง...", async () => {
+    await adminCall({ action: "adminCreateAdmin", username: $("adUser").value.trim(), name: $("adName").value.trim(), password: $("adPw").value });
+    await loadAdminData();
+    toast("สร้างบัญชีแอดมินแล้ว แจ้งชื่อผู้ใช้และรหัสผ่านให้เขา", "success");
+    return true;
+  });
+}
+const toggleAdmin = (u) => adminDo("", { action: "adminUpdateAdmin", username: u, op: "toggle" }, "เปลี่ยนสถานะแล้ว");
+async function resetAdminPw(u) {
+  if (adminBusy || !confirm("รีเซ็ตรหัสผ่านของแอดมิน " + u + " เป็นรหัสชั่วคราวใช่ไหม?")) return;
+  adminBusy = true;
+  try { const r = await adminCall({ action: "adminUpdateAdmin", username: u, op: "resetpw" }); alert("รหัสผ่านชั่วคราวของ " + u + " คือ\n\n" + r.password + "\n\nแจ้งเขาแล้วให้เข้าระบบและเปลี่ยนรหัสที่แท็บ โปรไฟล์ครู"); }
+  catch (e) { toast(e.message); } finally { adminBusy = false; }
+}
+const adminPwBlock = () => adminRole === "main"
+  ? '<p class="text-xs text-slate-500 pt-2 border-t">รหัสผ่านผู้ดูแลหลักตั้งที่ Apps Script > Project Settings > Script Properties (ADMIN_USER / ADMIN_PASS)</p>'
+  : `<div class="pt-3 border-t space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>เปลี่ยนรหัสผ่านแอดมิน</h3><input id="apOld" type="password" placeholder="รหัสผ่านเดิม" class="${inC}"><input id="apNew" type="password" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="${inC}"><button type="button" onclick="changeAdminPw(this)" class="${btnP}"><span>เปลี่ยนรหัสผ่าน</span></button></div>`;
+function changeAdminPw(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    await adminCall({ action: "adminChangePassword", oldPassword: $("apOld").value, newPassword: $("apNew").value });
+    $("apOld").value = ""; $("apNew").value = "";
+    toast("เปลี่ยนรหัสผ่านแล้ว", "success");
+    return true;
+  });
+}
+function renderAsgFiles() {
+  const el = $("asgFiles"); if (!el) return;
+  el.innerHTML = asgFiles.length ? asgFiles.map((f, i) => `<div class="flex items-center gap-2 text-sm bg-white border rounded-lg px-2 py-1"><i class="fa-solid ${f.t === "link" ? "fa-link" : "fa-file"} text-indigo-600"></i><span class="truncate flex-1">${esc(f.n)}</span><button type="button" onclick="asgFiles.splice(${i},1);renderAsgFiles()" class="text-red-600"><i class="fa-solid fa-xmark"></i></button></div>`).join("") : '<div class="text-xs text-slate-400">ยังไม่มีไฟล์แนบ</div>';
+}
+const fileToB64 = (blob) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = () => no(new Error("อ่านไฟล์ไม่ได้")); r.readAsDataURL(blob); });
+function shrinkImage(file) {
+  return new Promise((ok) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); c.toBlob((b) => ok(b || file), "image/jpeg", 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ok(file); };
+    img.src = url;
+  });
+}
+async function attachFiles(inp) {
+  const list = [...inp.files]; inp.value = "";
+  for (const f0 of list) {
+    try {
+      let f = f0, name = f0.name, mime = f0.type || "application/octet-stream";
+      if (/^image\/(jpeg|png|webp)$/.test(mime)) { f = await shrinkImage(f0); mime = f.type || "image/jpeg"; name = name.replace(/\.\w+$/, "") + ".jpg"; }
+      if (f.size > 5 * 1024 * 1024) throw new Error(name + " ใหญ่เกิน 5 MB");
+      if (asgFiles.length >= 8) throw new Error("แนบได้ไม่เกิน 8 รายการ");
+      toast("กำลังอัปโหลด " + name + "...", "info");
+      const r = await adminCall({ action: "adminUploadFile", name, mime, data: await fileToB64(f) }, 120000);
+      asgFiles.push({ t: "file", i: r.id, n: r.name, m: r.mime });
+      renderAsgFiles();
+      toast("แนบ " + r.name + " แล้ว (กด บันทึกงาน เพื่อยืนยัน)" + (r.shared === false ? " · แต่ตั้งแชร์ไม่ได้ นักเรียนอาจเปิดไม่ได้" : ""), r.shared === false ? "info" : "success");
+    } catch (e) { toast(e.message); }
+  }
+}
+function addLink() {
+  const u = $("asgLink").value.trim();
+  if (!/^https?:\/\/\S+$/i.test(u)) return toast("ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https://");
+  if (asgFiles.length >= 8) return toast("แนบได้ไม่เกิน 8 รายการ");
+  asgFiles.push({ t: "link", u, n: u.replace(/^https?:\/\//i, "").slice(0, 60) });
+  $("asgLink").value = ""; renderAsgFiles();
+}
+
 function filterRows(v) {
   v = v.toLowerCase();
   document.querySelectorAll("#adminPanel tr[data-q]").forEach((tr) => tr.classList.toggle("hidden", !tr.dataset.q.includes(v)));
 }
 
-async function adminCall(payload) {
-  const r = await postData({ ...payload, adminToken });
+async function adminCall(payload, timeoutMs) {
+  const r = await postData({ roomId: curRoom, ...payload, adminToken }, timeoutMs);
   if (r.code === "AUTH") { toast(r.message); adminLogout(); throw new Error(r.message); }
   if (r.status !== "success") throw new Error(r.message || "เกิดข้อผิดพลาด");
   return r;
 }
-async function loadAdminData() { adminData = await adminCall({ action: "adminLoad" }); renderAdmin(); renderNavUser(navStack[navStack.length - 1].v); }
+async function loadAdminData() { adminData = await adminCall({ action: "adminLoad" }); curRoom = adminData.roomId || ""; renderAdmin(); renderNavUser(navStack[navStack.length - 1].v); }
 function refreshAdmin(btn) { run(btn, "กำลังโหลด...", async () => { await loadAdminData(); return true; }); }
 const setAdminTab = (id) => showView("adminDashboard", id);
 
 function renderAdmin() {
   if (!adminData) return;
+  if (!curRoom && !["rooms", "admins", "profile"].includes(adminTab)) adminTab = "rooms";
+  if (adminTab === "admins" && adminRole !== "main") adminTab = "home";
   if (!adminData.assignments.find((a) => a.id === adminAssign)) adminAssign = adminData.assignments.length ? adminData.assignments[0].id : "";
-  $("adminTabs").innerHTML = TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("");
-  $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab));
-  $("adminRoom").innerHTML = '<option value="">ทุกห้อง</option>' + ROOMS.map((r) => `<option value="${r}" ${adminRoom === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` + SUBS.map((s) => `<option value="${r}/${s}" ${adminRoom === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
+  const rooms = adminData.rooms || [];
+  $("adminRoomBar").innerHTML = rooms.length ? `<label class="text-sm text-slate-600"><i class="fa-solid fa-school mr-1"></i>ห้องเรียน:</label><select onchange="switchAdminRoom(this.value)" class="${selC} font-semibold">${rooms.map((r) => `<option value="${esc(r.id)}" ${r.id === curRoom ? "selected" : ""}>${esc(r.name)}${r.archived ? " (ซ่อน)" : ""}${adminRole === "main" && r.owner !== adminUser ? " · " + esc(r.owner) : ""}</option>`).join("")}</select><button type="button" onclick="setAdminTab('rooms')" class="text-sm text-indigo-700 underline">จัดการห้อง / รหัสเชิญ</button>` : "";
+  $("adminTabs").innerHTML = TABS.filter(([id]) => id !== "admins" || adminRole === "main").map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("");
+  $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab) || !curRoom);
+  $("adminRoom").innerHTML = '<option value="">ทุกกลุ่ม</option>' + groupList().map((g) => `<option value="${esc(g)}" ${adminRoom === g ? "selected" : ""}>${esc(g)}</option>`).join("");
   $("adminPanel").innerHTML = AVIEWS[adminTab]();
   if (adminTab === "criteria") critPreview();
+  if (adminTab === "assign") renderAsgFiles();
 }
 
 const AVIEWS = {
+  rooms() {
+    const rs = adminData.rooms || [];
+    const cards = rs.map((r) => `<div class="border rounded-2xl p-3 ${r.id === curRoom ? "border-indigo-500 bg-indigo-50" : "bg-white"} space-y-2">
+      <div class="flex flex-wrap justify-between gap-2 items-start"><div><div class="font-bold text-slate-800">${esc(r.name)}${r.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่ นักเรียนเข้าไม่ได้)</span>' : ""}</div>${adminRole === "main" ? `<div class="text-xs text-slate-400">เจ้าของ: ${esc(r.owner)}</div>` : ""}</div>
+       <div class="flex flex-wrap gap-2 items-center">${r.id !== curRoom ? `<button type="button" onclick="switchAdminRoom('${esc(r.id)}')" class="${btnP}">เปิดห้องนี้</button>` : '<span class="text-xs text-indigo-700 font-semibold">กำลังเปิดอยู่</span>'}
+        <button type="button" onclick="renameRoom('${esc(r.id)}')" class="text-sm text-slate-600 underline">เปลี่ยนชื่อ</button>
+        <button type="button" onclick="roomOp('${esc(r.id)}','archive',${!r.archived})" class="text-sm text-amber-700 underline">${r.archived ? "เปิดห้องอีกครั้ง" : "ซ่อนห้อง"}</button></div></div>
+      <div class="flex flex-wrap items-center gap-2 text-sm"><span class="text-slate-500">รหัสเข้าห้อง</span><b class="text-2xl tracking-widest text-indigo-800">${esc(r.code)}</b>
+       <button type="button" onclick="copyText('${esc(r.code)}')" class="text-xs bg-slate-200 rounded px-2 py-1">คัดลอกรหัส</button>
+       <button type="button" onclick="copyText('${esc(roomLink(r.code))}')" class="text-xs bg-slate-200 rounded px-2 py-1">คัดลอกลิงก์เชิญ</button>
+       <button type="button" onclick="showQr('${esc(r.code)}','${esc(r.name)}')" class="text-xs bg-slate-200 rounded px-2 py-1"><i class="fa-solid fa-qrcode"></i> QR</button>
+       <button type="button" onclick="roomOp('${esc(r.id)}','newcode')" class="text-xs text-red-600 underline">สร้างรหัสใหม่</button></div></div>`).join("");
+    return `<div class="space-y-4 max-w-3xl">
+      <div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-school text-indigo-600 mr-2"></i>ห้องเรียน</h3><p class="text-xs text-slate-500">สร้างห้องเรียนก่อน แล้วแจกรหัส / ลิงก์ / QR ให้นักเรียนเข้าห้อง · งาน คะแนน เช็คชื่อ ประกาศ และเกณฑ์เกรดแยกตามห้อง · นักเรียนคนหนึ่งเข้าได้หลายห้อง</p></div>
+      <div class="p-3 bg-slate-50 border rounded-xl flex flex-wrap gap-2 items-end"><div class="flex-1 min-w-[12rem]"><label class="text-xs font-semibold text-slate-600">ชื่อห้องเรียนใหม่</label><input id="newRoomName" maxlength="60" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4/1"></div><button type="button" onclick="createRoom(this)" class="${btnP}"><span><i class="fa-solid fa-plus mr-1"></i>สร้างห้อง</span></button></div>
+      <div id="qrBox" class="hidden text-center p-4 border rounded-2xl bg-white"></div>
+      <div class="space-y-3">${cards || '<div class="text-slate-400 text-sm p-4 text-center">ยังไม่มีห้องเรียน สร้างห้องแรกด้านบนได้เลย</div>'}</div></div>`;
+  },
+
+  admins() {
+    const rows = (adminData.admins || []).map((a) => `<tr>${td("<b>" + esc(a.user) + "</b>")}${td(esc(a.name))}${td(a.active ? '<span class="text-emerald-600">ใช้งานได้</span>' : '<span class="text-red-600">ปิดอยู่</span>')}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="toggleAdmin('${esc(a.user)}')" class="text-amber-700 text-sm mr-3 underline">${a.active ? "ปิดใช้งาน" : "เปิดใช้งาน"}</button><button type="button" onclick="resetAdminPw('${esc(a.user)}')" class="text-sky-600 text-sm underline">รีเซ็ตรหัส</button></td></tr>`).join("");
+    return `<div class="space-y-4 max-w-3xl"><div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-user-shield text-indigo-600 mr-2"></i>จัดการแอดมิน (เฉพาะผู้ดูแลหลัก)</h3><p class="text-xs text-slate-500">นักเรียนสมัครเป็นแอดมินเองไม่ได้ ต้องให้ผู้ดูแลหลักสร้างบัญชีให้ที่นี่ · แอดมินแต่ละคนเห็นและจัดการได้เฉพาะห้องของตัวเอง ส่วนผู้ดูแลหลักเห็นทุกห้อง</p></div>
+      <div class="grid md:grid-cols-4 gap-3 p-3 bg-slate-50 border rounded-xl"><div><label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (อังกฤษ/ตัวเลข)</label><input id="adUser" maxlength="20" class="${inC}"></div><div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง</label><input id="adName" maxlength="60" class="${inC}"></div><div><label class="text-xs font-semibold text-slate-600">รหัสผ่านเริ่มต้น</label><input id="adPw" type="text" class="${inC}" placeholder="เช่น Teacher123"></div><div class="flex items-end"><button type="button" onclick="createAdminAcc(this)" class="${btnP} w-full"><span>สร้างแอดมิน</span></button></div></div>
+      ${table(th("ชื่อผู้ใช้", "ชื่อ", "สถานะ", "จัดการ"), rows, 4)}</div>`;
+  },
+
   home() {
     const act = adminData.students.filter((s) => s.active), reg = adminData.students.filter((s) => s.registered && s.verified);
     const withPct = adminData.summary.filter((x) => x.pct !== null), withAtt = adminData.summary.filter((x) => x.attPct !== null);
     const avg = (l, k) => (l.length ? fmt(l.reduce((a, x) => a + x[k], 0) / l.length) + "%" : "-");
-    const noClass = adminData.students.filter((s) => !s.class && s.status === "ปกติ").length;
-    const rooms = CLASS_OPTIONS.map((c) => [c, act.filter((s) => s.class === c).length]).filter((x) => x[1]);
+    const noClass = 0;
+    const rooms = groupList().map((c) => [c, act.filter((s) => s.class === c).length]);
     const top = withPct.slice().sort((a, b) => a.rank - b.rank).slice(0, 3);
     return `<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">${[card("นักเรียนที่ใช้งาน", act.length, "fa-users"), card("สมัครและยืนยันแล้ว", reg.length, "fa-user-check"), card("จำนวนงาน", adminData.assignments.length, "fa-book"), card("ร้อยละเฉลี่ย", avg(withPct, "pct"), "fa-percent"), card("เช็คชื่อเฉลี่ย", avg(withAtt, "attPct"), "fa-calendar-check")].join("")}</div>
       ${pendReset() ? `<div class="mb-4 text-sm bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><span><i class="fa-solid fa-key mr-1"></i>มีนักเรียนขอรีเซ็ตรหัสผ่าน ${pendReset()} คน</span><button type="button" onclick="setAdminTab('resets')" class="${btnP}">ดูคำขอ</button></div>` : ""}
       ${noClass ? `<div class="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3">มีนักเรียน ${noClass} คนที่ยังไม่มีห้อง (ดูที่แท็บ รายชื่อนักเรียน)</div>` : ""}
-      <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละห้อง</h3>
-      <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนที่เลือกห้อง</span>'}</div>
+      <h3 class="font-bold text-slate-700 mb-2">จำนวนนักเรียนแต่ละกลุ่ม</h3>
+      <div class="flex flex-wrap gap-2 mb-5">${rooms.length ? rooms.map(([c, n]) => `<span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm">${c}: ${n} คน</span>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีการแบ่งกลุ่ม (ตั้งกลุ่มได้ที่แท็บ รายชื่อนักเรียน)</span>'}</div>
       <h3 class="font-bold text-slate-700 mb-2">3 อันดับแรก (ทุกห้อง)</h3>
       <div class="mb-5">${top.length ? top.map((x) => `<div class="py-1 text-sm">อันดับ ${x.rank}: <b>${esc(nameOf(x.sid))}</b> (${esc(x.class)}) ${fmt(x.pct)}%</div>`).join("") : '<span class="text-slate-400 text-sm">ยังไม่มีคะแนน</span>'}</div>
       <h3 class="font-bold text-slate-700 mb-2">ประกาศล่าสุด</h3>
@@ -841,20 +983,20 @@ const AVIEWS = {
     const l = studs(false);
     const rows = l.map((s) => `<tr data-q="${rowQ(s)}" data-sid="${esc(s.studentId)}">
       <td class="px-2 py-1"><input class="st-no w-14 px-2 py-1 border rounded text-center" value="${esc(s.no)}" maxlength="6"></td>${td("<b class=\"text-indigo-800 bg-amber-50 px-2 py-0.5 rounded\">" + esc(s.studentId) + "</b>", "whitespace-nowrap")}${td(esc(s.name))}${td(esc(s.email || "-"), "text-xs text-slate-500")}
-      <td class="px-2 py-1"><select class="st-cls ${selC}">${opts(CLASS_OPTIONS, s.class, "- ไม่มีห้อง -")}</select></td>
+      <td class="px-2 py-1"><input class="st-cls ${inC} w-28" list="grpList" maxlength="20" value="${esc(s.class)}" placeholder="กลุ่ม"></td>
       <td class="px-2 py-1"><select class="st-sts ${selC}">${opts(STU_STATUS, s.status)}</select></td>
       ${td(!s.registered ? '<span class="text-slate-400">ยังไม่สมัคร</span>' : s.verified ? '<span class="text-emerald-600">ยืนยันแล้ว</span>' : '<span class="text-amber-600">รอยืนยัน OTP</span>')}
       <td class="px-3 py-2 whitespace-nowrap"><button type="button" title="บันทึก" onclick="saveStudent('${esc(s.studentId)}',this)" class="text-indigo-700 mr-3"><i class="fa-solid fa-floppy-disk"></i></button>
       ${s.registered ? `<button type="button" title="รีเซ็ตรหัสผ่าน" onclick="resetPw('${esc(s.studentId)}')" class="text-sky-600 mr-3"><i class="fa-solid fa-key"></i></button>` : ""}
       <button type="button" title="ลบออกจากห้อง" onclick="removeFromRoom('${esc(s.studentId)}')" class="text-amber-600 mr-3"><i class="fa-solid fa-door-open"></i></button>
-      <button type="button" title="ลบนักเรียนออกจากระบบ" onclick="deleteStudent('${esc(s.studentId)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
-    return `<div class="flex flex-wrap items-center gap-3 mb-2"><span class="text-sm text-slate-500">ทั้งหมด ${l.length} คน</span>${searchBox()}
+      <button type="button" title="ลบนักเรียนออกจากห้องพร้อมคะแนน" onclick="deleteStudent('${esc(s.studentId)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button>${adminRole === "main" ? `<button type="button" title="ลบบัญชีถาวร (ทุกห้อง)" onclick="purgeStudent('${esc(s.studentId)}')" class="text-slate-500 ml-3"><i class="fa-solid fa-skull-crossbones"></i></button>` : ""}</td></tr>`).join("");
+    return `<div class="flex flex-wrap items-center gap-3 mb-2"><datalist id="grpList">${groupList().map((g) => `<option value="${esc(g)}">`).join("")}</datalist><span class="text-sm text-slate-500">ทั้งหมด ${l.length} คน</span>${searchBox()}
       <input type="file" id="csvFile" accept=".csv,.txt" class="hidden" onchange="importCsv(this)">
       <button type="button" onclick="$('csvFile').click()" class="${btnP}"><i class="fa-solid fa-file-import mr-1"></i> นำเข้า CSV</button>
       <button type="button" onclick="downloadTemplate()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ดาวน์โหลดแม่แบบ</button>
       <button type="button" onclick="exportStudents()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-file-export mr-1"></i> ส่งออกรายชื่อ (CSV)</button></div>
-      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, ห้อง (เช่น A/L1) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = ลบออกจากห้อง · ถังขยะ = ลบนักเรียนและคะแนนทั้งหมด</p>
-      ${table(th("เลขที่", "รหัสนักเรียน", "ชื่อ-นามสกุล", "อีเมล", "ห้อง", "สถานะ", "บัญชี", "จัดการ"), rows, 8)}`;
+      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, กลุ่ม (ไม่บังคับ เช่น L1) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = นำออกจากห้อง (เก็บคะแนน) · ถังขยะ = ลบออกจากห้องพร้อมคะแนนของห้องนี้</p>
+      ${table(th("เลขที่", "รหัสนักเรียน", "ชื่อ-นามสกุล", "อีเมล", "กลุ่ม", "สถานะ", "บัญชี", "จัดการ"), rows, 8)}`;
   },
 
   submit() {
@@ -873,7 +1015,7 @@ const AVIEWS = {
   },
 
   assign() {
-    const rows = adminData.assignments.map((a) => `<tr>${td(esc(a.name))}${td(esc(a.cat))}${td(esc(a.unit || "-"))}${td(esc(a.target || "ทุกห้อง"))}${td(a.max)}${td(esc(a.due || "-"), "whitespace-nowrap")}${td(esc(a.detail || "-"), "max-w-xs")}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="editAssign('${esc(a.id)}')" class="text-indigo-700 mr-3"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="deleteAssign('${esc(a.id)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
+    const rows = adminData.assignments.map((a) => `<tr>${td(esc(a.name))}${td(esc(a.cat))}${td(esc(a.unit || "-"))}${td(esc(a.target || "ทุกห้อง"))}${td(a.max)}${td(esc(a.due || "-"), "whitespace-nowrap")}${td(esc(a.detail || "-") + ((a.files || []).length ? ' <span class="text-xs text-indigo-600"><i class="fa-solid fa-paperclip"></i> ' + a.files.length + "</span>" : ""), "max-w-xs")}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="editAssign('${esc(a.id)}')" class="text-indigo-700 mr-3"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="deleteAssign('${esc(a.id)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
     return `<p class="text-xs text-slate-500 mb-2">บันทึกรายการงานที่สั่งนอกระบบไว้ที่นี่ เพื่อให้นักเรียนเห็นกำหนดส่ง สถานะ และคะแนน (นักเรียนไม่ได้ส่งงานผ่านเว็บ)</p>
       <div id="asgForm" class="grid md:grid-cols-4 gap-3 mb-4 p-3 bg-slate-50 rounded-xl border"><input type="hidden" id="asgId">
       <div><label class="text-xs font-semibold text-slate-600">ชื่องาน <span class="text-red-500">*</span></label><input id="asgName" class="${inC}" placeholder="เช่น ใบงานที่ 1"></div>
@@ -883,7 +1025,12 @@ const AVIEWS = {
       <div><label class="text-xs font-semibold text-slate-600">หน่วยการเรียน / สัปดาห์ / บทเรียน</label><input id="asgUnit" class="${inC}" placeholder="เช่น สัปดาห์ที่ 1"></div>
       <div><label class="text-xs font-semibold text-slate-600">มอบให้ห้อง</label><select id="asgTarget" class="${inC}">${targetOpts("")}</select></div>
       <div class="md:col-span-2 flex items-end"><button type="button" onclick="saveAssign(this)" class="${btnP} w-full"><span>บันทึกงาน</span></button></div>
-      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">รายละเอียดงาน</label><textarea id="asgDetail" rows="2" class="${inC}" placeholder="คำอธิบาย / วิธีส่งงานนอกระบบ"></textarea></div></div>
+      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">รายละเอียดงาน</label><textarea id="asgDetail" rows="2" class="${inC}" placeholder="คำอธิบาย / วิธีส่งงานนอกระบบ"></textarea></div>
+      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">ไฟล์ / รูปภาพ / ลิงก์แนบ (ให้นักเรียนศึกษาเพิ่มเติม)</label>
+       <div id="asgFiles" class="space-y-1 my-1"></div>
+       <div class="flex flex-wrap gap-2 items-center"><label class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm"><i class="fa-solid fa-paperclip mr-1"></i>แนบไฟล์/รูป<input type="file" multiple class="hidden" onchange="attachFiles(this)"></label>
+        <input id="asgLink" placeholder="หรือวางลิงก์ (YouTube, Google Drive ฯลฯ)" class="${inC} flex-1 min-w-[12rem]"><button type="button" onclick="addLink()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm">เพิ่มลิงก์</button></div>
+       <p class="text-xs text-slate-400 mt-1">ไฟล์ละไม่เกิน 5 MB · รูปภาพจะถูกย่อให้อัตโนมัติ · ไฟล์เก็บใน Google Drive ของครู (ใครมีลิงก์เปิดดูได้) · แนบแล้วต้องกด "บันทึกงาน"</p></div></div>
       ${table(th("ชื่องาน", "หมวด", "หน่วย/สัปดาห์", "ห้อง", "เต็ม", "กำหนดส่ง", "รายละเอียด", "จัดการ"), rows, 8)}`;
   },
 
@@ -939,8 +1086,8 @@ const AVIEWS = {
   criteria() {
     const k = critOf(adminData.config);
     const asgSum = (cls) => adminData.assignments.filter((a) => matchT(a.target, cls)).reduce((x, a) => x + a.max, 0);
-    const clsList = [...new Set(adminData.students.filter((s) => s.active && s.class).map((s) => s.class))].sort();
-    const totals = clsList.map((c) => { const t = asgSum(c) + k.m; return `<span class="px-3 py-1 rounded-full text-sm ${t === 100 ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${esc(c)}: ${fmt(t)} คะแนน</span>`; }).join("") || '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนที่เลือกห้อง</span>';
+    const clsList = [...new Set(adminData.students.filter((s) => s.active).map((s) => s.class || ""))].sort();
+    const totals = clsList.map((c) => { const t = asgSum(c) + k.m; return `<span class="px-3 py-1 rounded-full text-sm ${t === 100 ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${esc(c || "ทั้งห้อง")}: ${fmt(t)} คะแนน</span>`; }).join("") || '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนในห้อง</span>';
     return `<div class="max-w-3xl space-y-5">
       <div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-scale-balanced text-indigo-600 mr-2"></i>ตั้งเกณฑ์คะแนนเอง</h3><p class="text-xs text-slate-500">ตั้งแล้วกด "บันทึกเกณฑ์" นักเรียนทุกคนจะเห็นเกรดตามเกณฑ์ใหม่ทันที</p></div>
       <div class="p-4 bg-slate-50 border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">1) เกณฑ์เกรด (ร้อยละขั้นต่ำ)</h4><p class="text-xs text-slate-500 mb-2">เรียงจากมากไปน้อย ต่ำกว่าเกรด 1 = เกรด 0</p>
@@ -948,9 +1095,9 @@ const AVIEWS = {
        <p id="critPreview" class="text-xs text-indigo-700 mt-2"></p></div>
       <div class="p-4 bg-slate-50 border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">2) คะแนนเช็คชื่อต่อครั้ง (0 – 1)</h4>
        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">${ATT.map((x, i) => `<div><label class="text-xs font-semibold text-slate-600">${x}</label><input id="ca${i}" type="number" min="0" max="1" step="0.25" value="${k.a[i]}" class="${inC}"></div>`).join("")}</div></div>
-      <div class="p-4 bg-slate-50 border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">3) ให้คะแนนเช็คชื่อรวมในคะแนนรวมไหม?</h4>
-       <p class="text-xs text-slate-500 mb-2">ใส่คะแนนเต็มของเช็คชื่อ เช่น 10 = เช็คชื่อ 100% ได้ 10 คะแนนเต็ม · ใส่ 0 = ไม่นับรวม (แสดงเป็นร้อยละแยกเฉย ๆ)</p>
-       <div class="w-40"><label class="text-xs font-semibold text-slate-600">คะแนนเต็มเช็คชื่อ</label><input id="cam" type="number" min="0" max="100" step="0.5" value="${k.m}" class="${inC}"></div></div>
+      <div class="p-4 bg-slate-50 border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">3) คะแนนจิตพิสัย (จากเช็คชื่อ) เต็มเท่าไหร่?</h4>
+       <p class="text-xs text-slate-500 mb-2">ใส่คะแนนเต็มของเช็คชื่อ เช่น 10 = เช็คชื่อ 100% ได้ 10 คะแนนเต็ม · ใส่ 0 = ไม่นับรวม · นักเรียนจะเห็นคะแนนจิตพิสัยปัจจุบัน เช่น 7.5 / 10 (ค่าเริ่มต้น 10)</p>
+       <div class="w-40"><label class="text-xs font-semibold text-slate-600">คะแนนเต็มจิตพิสัย</label><input id="cam" type="number" min="0" max="100" step="0.5" value="${k.m}" class="${inC}"></div></div>
       <div class="p-4 bg-white border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">คะแนนเต็มรวมที่วางไว้ (งานทั้งหมด + เช็คชื่อ)</h4><p class="text-xs text-slate-500 mb-2">เขียวคือครบ 100 พอดี · เหลืองคือยังไม่ถึง/เกิน 100 (เกรดจริงจะแสดงให้นักเรียนเมื่อคะแนนเต็มครบ 100 และตรวจครบทุกงาน)</p><div class="flex flex-wrap gap-2">${totals}</div></div>
       <div class="flex flex-wrap gap-2"><button type="button" onclick="saveCriteria(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกเกณฑ์</span></button>
        <button type="button" onclick="resetCriteriaInputs()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ใช้ค่ามาตรฐาน (80/75/70/65/60/55/50)</button></div></div>`;
@@ -969,7 +1116,7 @@ const AVIEWS = {
   },
 
   profile() {
-    const c = adminData.config || {};
+    const c = adminData.profile || {};
     return `<div class="space-y-4 max-w-xl"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-id-badge text-indigo-600 mr-2"></i>โปรไฟล์ครู (นักเรียนจะเห็นในหน้าหลัก)</h3>
       <div class="flex items-center gap-3">
        <div id="tfAvatarPrev" class="w-16 h-16 text-3xl rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">${avSpan(c.avatar)}</div>
@@ -981,7 +1128,7 @@ const AVIEWS = {
       <div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง (เช่น ครูจอห์น)</label><input id="tfNick" value="${esc(c.nick)}" class="${inC}"></div></div>
       <div><label class="text-xs font-semibold text-slate-600">รายวิชา</label><input id="tfSubject" value="${esc(c.subject)}" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4"></div>
       <div><label class="text-xs font-semibold text-slate-600">แนะนำตัว</label><textarea id="tfBio" rows="3" class="${inC}">${esc(c.bio)}</textarea></div>
-      <button type="button" onclick="saveTeacherProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button></div>`;
+      <button type="button" onclick="saveTeacherProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button>${adminPwBlock()}</div>`;
   },
 };
 
@@ -1049,15 +1196,17 @@ function editAssign(id) {
   if (!a) return;
   $("asgId").value = a.id; $("asgName").value = a.name; $("asgMax").value = a.max; $("asgDue").value = a.due || ""; $("asgDetail").value = a.detail || "";
   $("asgCat").value = a.cat; $("asgUnit").value = a.unit || ""; $("asgTarget").value = a.target || "";
+  asgFiles = (a.files || []).slice(); renderAsgFiles();
   $("asgForm").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function saveAssign(btn) {
   run(btn, "กำลังบันทึก...", async () => {
     const assignment = { id: $("asgId").value, name: $("asgName").value.trim(), max: $("asgMax").value, due: $("asgDue").value, detail: $("asgDetail").value.trim(),
-      cat: $("asgCat").value, unit: $("asgUnit").value.trim(), target: $("asgTarget").value };
+      cat: $("asgCat").value, unit: $("asgUnit").value.trim(), target: $("asgTarget").value, files: asgFiles };
     if (!assignment.name || !(Number(assignment.max) > 0)) throw new Error("กรุณากรอกชื่องานและคะแนนเต็ม");
     await adminCall({ action: "adminSaveAssignment", assignment });
+    asgFiles = [];
     await loadAdminData();
     toast("บันทึกงานแล้ว", "success");
     return true;
@@ -1121,7 +1270,7 @@ function critPreview() {
 function resetCriteriaInputs() {
   DEF_G.forEach((v, i) => { $("cg" + i).value = v; });
   DEF_A.forEach((v, i) => { $("ca" + i).value = v; });
-  $("cam").value = 0; critPreview();
+  $("cam").value = 10; critPreview();
   toast("ใส่ค่ามาตรฐานแล้ว กด \"บันทึกเกณฑ์\" เพื่อใช้งานจริง", "info");
 }
 function saveCriteria(btn) {
@@ -1140,7 +1289,7 @@ function saveCriteria(btn) {
 function exportStudents() {
   const l = studs(false);
   const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
-  const csv = "\uFEFF" + ["เลขที่,รหัสนักเรียน,ชื่อ-นามสกุล,ห้อง,อีเมล,สถานะบัญชี"].concat(l.map((s) => [s.no, s.studentId, s.name, s.class, s.email, !s.registered ? "ยังไม่สมัคร" : s.verified ? "ยืนยันแล้ว" : "รอยืนยัน OTP"].map(q).join(","))).join("\n");
+  const csv = "\uFEFF" + ["เลขที่,รหัสนักเรียน,ชื่อ-นามสกุล,กลุ่ม,อีเมล,สถานะบัญชี"].concat(l.map((s) => [s.no, s.studentId, s.name, s.class, s.email, !s.registered ? "ยังไม่สมัคร" : s.verified ? "ยืนยันแล้ว" : "รอยืนยัน OTP"].map(q).join(","))).join("\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "students.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -1165,11 +1314,15 @@ async function resetPw(sid) {
 }
 function removeFromRoom(sid) {
   const s = stuOf(sid);
-  adminDo(`ลบ ${s.name} ออกจากห้อง ${s.class || ""} ใช่ไหม? (บัญชียังอยู่ นักเรียนต้องเลือกห้องใหม่เมื่อเข้าสู่ระบบ)`, { action: "adminUpdateStudent", sid, no: "", class: "", status: s.status }, "ลบออกจากห้องแล้ว");
+  adminDo(`นำ ${s.name} ออกจากห้องนี้ใช่ไหม? (คะแนนยังเก็บไว้ ถ้านักเรียนเข้าห้องใหม่จะเห็นคะแนนเดิม)`, { action: "adminRemoveFromRoom", sid }, "นำออกจากห้องแล้ว");
 }
 function deleteStudent(sid) {
   const s = stuOf(sid);
-  adminDo(`ลบ ${s.name} (${sid}) ออกจากระบบทั้งหมด รวมบัญชี คะแนน และเช็คชื่อ? ย้อนกลับไม่ได้`, { action: "adminDeleteStudent", sid }, "ลบนักเรียนแล้ว");
+  adminDo(`ลบ ${s.name} (${sid}) ออกจากห้องนี้พร้อมคะแนนและเช็คชื่อของห้องนี้? ย้อนกลับไม่ได้ (บัญชีและห้องอื่นไม่กระทบ)`, { action: "adminDeleteStudent", sid }, "ลบนักเรียนออกจากห้องแล้ว");
+}
+function purgeStudent(sid) {
+  const s = stuOf(sid);
+  adminDo(`ลบบัญชีของ ${s.name} (${sid}) ถาวรทุกห้อง รวมคะแนนและเช็คชื่อทั้งหมด? ย้อนกลับไม่ได้`, { action: "adminPurgeStudent", sid }, "ลบบัญชีนักเรียนแล้ว");
 }
 
 function parseCsv(t) {
@@ -1197,10 +1350,8 @@ async function importCsv(inp) {
     try { txt = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (_) { txt = new TextDecoder("windows-874").decode(buf); }
     const rows = parseCsv(txt.replace(/^\uFEFF/, "")).filter((r) => r.some((c) => c.trim()));
     if (rows.length && /รหัส|เลขที่|ชื่อ|id|name/i.test(rows[0].join(" "))) rows.shift();
-    const items = rows.map((r) => ({ no: (r[0] || "").trim(), sid: (r[1] || "").trim(), name: (r[2] || "").trim(), class: (r[3] || "").trim().toUpperCase() })).filter((x) => x.sid && x.name);
+    const items = rows.map((r) => ({ no: (r[0] || "").trim(), sid: (r[1] || "").trim(), name: (r[2] || "").trim(), class: (r[3] || "").trim() })).filter((x) => x.sid && x.name);
     if (!items.length) return toast("ไม่พบข้อมูลที่นำเข้าได้ (ต้องมีรหัสและชื่อ)");
-    const bad = items.find((x) => x.class && !VALID_CLASS.test(x.class));
-    if (bad) return toast("ห้องไม่ถูกต้อง: " + bad.class + " (ต้องเป็นรูปแบบ เช่น A/L1)");
     if (!confirm("นำเข้า " + items.length + " รายชื่อ ใช่ไหม?")) return;
     await adminCall({ action: "adminImportRoster", items });
     await loadAdminData();
@@ -1209,7 +1360,7 @@ async function importCsv(inp) {
 }
 
 function downloadTemplate() {
-  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,ห้อง\n1,660001,นายตัวอย่าง ใจดี,A/L1\n2,660002,นางสาวตัวอย่าง รักเรียน,A/L1\n"], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,กลุ่ม(ไม่บังคับ)\n1,660001,นายตัวอย่าง ใจดี,L1\n2,660002,นางสาวตัวอย่าง รักเรียน,L2\n"], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = "student_template.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -1222,7 +1373,7 @@ function handleAdminLogin() {
   run(document.querySelector("#adminLoginForm button"), "กำลังตรวจสอบ...", async () => {
     const r = await postData({ action: "adminLogin", username, password });
     if (r.status !== "success") { toast(r.message); return false; }
-    adminToken = r.adminToken;
+    adminToken = r.adminToken; adminRole = r.role; adminUser = r.user; curRoom = "";
     $("adminPasswordInput").value = "";
     await loadAdminData();
     adminTab = "home";
@@ -1232,11 +1383,21 @@ function handleAdminLogin() {
 }
 
 function adminLogout() {
-  adminToken = null; adminData = null;
+  adminToken = null; adminData = null; curRoom = ""; adminRole = ""; adminUser = "";
   navStack = [{ v: "roleSelect" }, { v: "adminLoginForm" }];
   render("adminLoginForm");
 }
 
+(function () {
+  try {
+    const p = new URLSearchParams(location.search).get("join");
+    if (p) {
+      sessionStorage.setItem("joinCode", p.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
+      history.replaceState({}, "", location.pathname);
+      setTimeout(() => toast("คุณได้รับเชิญเข้าห้องเรียน เข้าสู่ระบบหรือสมัครใช้งาน แล้วระบบจะพาเข้าห้องให้อัตโนมัติ", "info"), 600);
+    }
+  } catch (_) {}
+})();
 </script>
 </body>
 </html>
