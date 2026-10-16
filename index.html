@@ -691,7 +691,7 @@ const loadStudentScores = (btn) => run(btn, "กำลังโหลด...", fe
 const setStTab = (t) => showView("studentDashboard", t);
 
 function studentLogout() {
-  clearInterval(stTimer);
+  clearSess(); clearInterval(stTimer);
   currentUser = null; stData = null; stRoom = ""; stRooms = []; stLoading = false; stJoinMode = false;
   $("roomDrawer").classList.add("hidden"); $("roomDrawerPanel").classList.add("translate-x-full");
   $("studentPasswordInput").value = "";
@@ -879,6 +879,9 @@ const pendReset = () => ((adminData && adminData.resets) || []).filter((r) => r.
 const RS_CLS = { "รอครู": "bg-amber-100 text-amber-700", "ออกโค้ดแล้ว": "bg-sky-100 text-sky-700", "เสร็จสิ้น": "bg-emerald-100 text-emerald-700", "ปฏิเสธ": "bg-slate-200 text-slate-600" };
 const FILTER_TABS = ["students", "submit", "scores", "attend", "rank", "summary"];
 let curRoom = "", adminRole = "", adminUser = "", asgFiles = [];
+let adminOnline = null;
+const onlineBadge = () => adminOnline == null ? "" : `<span id="onlineBadge" title="นักเรียนที่ออนไลน์อยู่ตอนนี้ ${adminOnline} คน" class="text-[11px] text-slate-400 select-none"><span class="inline-block w-1.5 h-1.5 rounded-full ${adminOnline > 0 ? "bg-emerald-400" : "bg-slate-300"} mr-1 align-middle"></span>${adminOnline}</span>`;
+function setOnline(n) { adminOnline = n; const el = $("onlineBadge"); if (el) el.outerHTML = onlineBadge(); }
 let adminToken = null, adminData = null, adminRoom = "", adminAssign = "", adminPeriod = "ทั้งวัน";
 let adminDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
@@ -1054,7 +1057,7 @@ async function adminCall(payload, timeoutMs) {
   if (r.status !== "success") throw new Error(r.message || "เกิดข้อผิดพลาด");
   return r;
 }
-async function loadAdminData() { adminData = await adminCall({ action: "adminLoad" }); curRoom = adminData.roomId || ""; renderAdmin(); renderNavUser(navStack[navStack.length - 1].v); }
+async function loadAdminData() { adminData = await adminCall({ action: "adminLoad" }); curRoom = adminData.roomId || ""; adminOnline = curRoom && adminData.online != null ? adminData.online : null; renderAdmin(); renderNavUser(navStack[navStack.length - 1].v); }
 function refreshAdmin(btn) { run(btn, "กำลังโหลด...", async () => { await loadAdminData(); return true; }); }
 const setAdminTab = (id) => showView("adminDashboard", id);
 
@@ -1066,7 +1069,7 @@ function renderAdmin() {
   if (!adminData.assignments.find((a) => a.id === adminAssign)) adminAssign = adminData.assignments.length ? adminData.assignments[0].id : "";
   const rm = (adminData.rooms || []).find((x) => x.id === curRoom);
   const back = `<button type="button" onclick="leaveRoom()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm shrink-0"><i class="fa-solid fa-arrow-left mr-1"></i>ห้องเรียนทั้งหมด</button>`;
-  $("adminRoomBar").innerHTML = inRoom && rm ? `<div class="w-full bg-white border border-slate-200 rounded-2xl p-3 flex flex-wrap items-center gap-3">${back}<div class="min-w-0 flex-1"><div class="font-bold text-slate-800 truncate"><i class="fa-solid fa-school text-indigo-600 mr-1"></i>${esc(rm.name)}${rm.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่)</span>' : ""}</div>${rm.desc ? `<div class="text-xs text-slate-600"><i class="fa-solid fa-chalkboard-user mr-1"></i>สอน: ${esc(rm.desc)}</div>` : `<button type="button" onclick="setAdminTab('settings')" class="text-xs text-amber-700 underline"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ยังไม่ได้ระบุว่าสอนห้องอะไร (กดเพื่อกรอก)</button>`}<div class="text-[11px] text-indigo-700">คุณกำลังจัดการเฉพาะวิชานี้ ข้อมูลไม่ปนกับห้องอื่น</div></div><div class="text-xs text-slate-500">รหัสห้อง <b class="tracking-widest text-indigo-800 text-base">${esc(rm.code)}</b></div></div>` : (adminTab !== "rooms" ? back : "");
+  $("adminRoomBar").innerHTML = inRoom && rm ? `<div class="w-full bg-white border border-slate-200 rounded-2xl p-3 flex flex-wrap items-center gap-3">${back}<div class="min-w-0 flex-1"><div class="font-bold text-slate-800 truncate"><i class="fa-solid fa-school text-indigo-600 mr-1"></i>${esc(rm.name)}${rm.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่)</span>' : ""}</div>${rm.desc ? `<div class="text-xs text-slate-600"><i class="fa-solid fa-chalkboard-user mr-1"></i>สอน: ${esc(rm.desc)}</div>` : `<button type="button" onclick="setAdminTab('settings')" class="text-xs text-amber-700 underline"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ยังไม่ได้ระบุว่าสอนห้องอะไร (กดเพื่อกรอก)</button>`}<div class="text-[11px] text-indigo-700">คุณกำลังจัดการเฉพาะวิชานี้ ข้อมูลไม่ปนกับห้องอื่น</div></div><div class="text-xs text-slate-500">รหัสห้อง <b class="tracking-widest text-indigo-800 text-base">${esc(rm.code)}</b></div>${onlineBadge()}</div>` : (adminTab !== "rooms" ? back : "");
   $("adminTabs").innerHTML = inRoom ? TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("") : "";
   $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab) || !inRoom);
   $("adminRoom").innerHTML = '<option value="">ดูทั้งหมดในวิชานี้</option>' + filterOpts(adminRoom);
@@ -1543,7 +1546,7 @@ function handleAdminLogin() {
 }
 
 function adminLogout() {
-  adminToken = null; adminData = null; curRoom = ""; adminRole = ""; adminUser = "";
+  clearSess(); adminOnline = null; adminToken = null; adminData = null; curRoom = ""; adminRole = ""; adminUser = "";
   navStack = [{ v: "roleSelect" }, { v: "adminLoginForm" }];
   render("adminLoginForm");
 }
@@ -1557,6 +1560,71 @@ function adminLogout() {
       setTimeout(() => toast("คุณได้รับเชิญเข้าห้องเรียน เข้าสู่ระบบหรือสมัครใช้งาน แล้วระบบจะพาเข้าห้องให้อัตโนมัติ", "info"), 600);
     }
   } catch (_) {}
+})();
+
+/* ---------- เซสชัน: กด F5 ไม่หลุด / หลุดเมื่อไม่ได้ใช้งาน 10 นาที / ส่งสถานะออนไลน์ ----------
+ * เก็บใน sessionStorage (ปิดแท็บ = หลุดทันที เหมาะกับคอมโรงเรียน) ไม่เก็บรหัสผ่าน */
+const IDLE_MS = 10 * 60 * 1000, PING_MS = 90 * 1000, SESS_KEY = "cls_sess";
+let lastActive = Date.now();
+function clearSess() { try { sessionStorage.removeItem(SESS_KEY); } catch (_) {} }
+function saveSess() {
+  try {
+    if (currentUser) sessionStorage.setItem(SESS_KEY, JSON.stringify({ r: "s", last: lastActive, u: currentUser, room: stRoom, tab: stTab }));
+    else if (adminToken) sessionStorage.setItem(SESS_KEY, JSON.stringify({ r: "a", last: lastActive, t: adminToken, role: adminRole, user: adminUser, room: curRoom, tab: adminTab }));
+    else sessionStorage.removeItem(SESS_KEY);
+  } catch (_) {}
+}
+["click", "keydown", "touchstart", "scroll", "mousemove"].forEach((ev) => window.addEventListener(ev, () => { lastActive = Date.now(); }, { passive: true, capture: true }));
+window.addEventListener("pagehide", saveSess);
+window.addEventListener("beforeunload", saveSess);
+setInterval(saveSess, 10000);
+
+function idleCheck() {
+  if (!(currentUser || adminToken) || Date.now() - lastActive <= IDLE_MS) return;
+  toast("ออกจากระบบอัตโนมัติ เพราะไม่ได้ใช้งานเกิน 10 นาที", "info");
+  if (adminToken) adminLogout();
+  if (currentUser) studentLogout();
+}
+setInterval(idleCheck, 15000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) idleCheck(); });
+
+async function heartbeat() {
+  if (Date.now() - lastActive > IDLE_MS) return;
+  if (currentUser) {
+    try { const r = await postData({ action: "ping", email: currentUser.email, token: currentUser.token }, 8000); if (r.code === "AUTH" && currentUser) { toast(r.message); studentLogout(); } } catch (_) {}
+  }
+  if (adminToken) {
+    try {
+      const r = await postData({ action: "adminPing", adminToken, roomId: curRoom }, 8000);
+      if (r.code === "AUTH" && adminToken) { toast(r.message); adminLogout(); }
+      else if (r.status === "success") setOnline(curRoom && r.online != null ? r.online : null);
+    } catch (_) {}
+  }
+}
+setInterval(heartbeat, PING_MS);
+
+function startStudentTimer() { // รีเฟรชข้อมูลอัตโนมัติทุก 60 วินาที (เหมือนตอนเข้าสู่ระบบ)
+  clearInterval(stTimer);
+  stTimer = setInterval(() => {
+    if (!currentUser || !stData || document.hidden || stTab === "me" || stData.noRoom || stData.needClass || $("studentDashboard").classList.contains("hidden") || !$("roomDrawer").classList.contains("hidden")) return;
+    fetchStudent().catch(() => {});
+  }, 60000);
+}
+
+(function restoreSession() {
+  let sv = null;
+  try { sv = JSON.parse(sessionStorage.getItem(SESS_KEY) || "null"); } catch (_) {}
+  if (!sv || Date.now() - (sv.last || 0) > IDLE_MS) { clearSess(); return; }
+  lastActive = Date.now();
+  if (sv.r === "s" && sv.u && sv.u.token) {
+    currentUser = sv.u; stData = null; stRoom = sv.room || ""; stTab = sv.tab || "home"; stLoading = true; stJoinMode = false;
+    resetNav("studentDashboard", stTab);
+    startStudentTimer();
+    fetchStudent().catch((e) => toast(e.message)).finally(() => { stLoading = false; if (currentUser) renderStudent(); });
+  } else if (sv.r === "a" && sv.t) {
+    adminToken = sv.t; adminRole = sv.role || ""; adminUser = sv.user || ""; curRoom = sv.room || ""; adminTab = sv.tab || (curRoom ? "home" : "rooms");
+    loadAdminData().then(() => { if (!curRoom && !GLOBAL_TABS.includes(adminTab)) adminTab = "rooms"; resetNav("adminDashboard", adminTab); }).catch(() => {});
+  }
 })();
 </script>
 </body>
