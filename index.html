@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบตรวจสอบผลการเรียน - ครูจอห์น</title>
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = { theme: { extend: { colors: { indigo: {
@@ -11,7 +15,7 @@ tailwind.config = { theme: { extend: { colors: { indigo: {
   600:"#8a2033",700:"#6b1625",800:"#560f1e",900:"#43101a" } } } } };
 </script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 body{font-family:'Sarabun',sans-serif;background:radial-gradient(circle at 8% 0%,#fbe3e7 0,transparent 42%),radial-gradient(circle at 95% 100%,#f4c4cd 0,transparent 38%),#fff7f8;background-attachment:fixed}
@@ -658,7 +662,7 @@ async function autoJoin() { // ลิงก์/QR เชิญ: เติมร�
 }
 const roomSwitch = (d) => `<button type="button" onclick="openRoomDrawer()" class="text-sm bg-white text-indigo-800 hover:bg-indigo-50 font-semibold px-3 py-2 rounded-xl max-w-[13rem] truncate"><i class="fa-solid fa-door-open mr-1"></i>${d && d.room ? esc(d.room.name) : "เลือกห้องเรียน"} <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i></button>`;
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
-let stData = null, stTimer = null;
+let stData = null, stTimer = null, lastStudentHit = 0;
 
 function enterDashboard() {
   stData = null; stTab = "home"; stRoom = ""; stLoading = false; stJoinMode = false;
@@ -668,19 +672,14 @@ function enterDashboard() {
     if (stRooms.length === 1) { stRoom = stRooms[0].id; stLoading = true; renderStudent(); return fetchStudent().finally(() => { stLoading = false; renderStudent(); }); } // มีวิชาเดียว เข้าดูเลย
     renderStudent(); openRoomDrawer(); // มีห้องแล้ว -> ให้เลือกห้องก่อนดูคะแนน
   }).catch((e) => toast(e.message));
-  clearInterval(stTimer);
-  // อัปเดตอัตโนมัติทุก 60 วินาที เมื่อเปิดดูห้องหนึ่งอยู่ (ไม่โหลดตอนกำลังเลือกห้อง/อยู่แท็บ ของฉัน)
-  stTimer = setInterval(() => {
-    if (!currentUser || !stData || document.hidden || stTab === "me" || stData.noRoom || stData.needClass || $("studentDashboard").classList.contains("hidden") || !$("roomDrawer").classList.contains("hidden")) return;
-    fetchStudent().catch(() => {});
-  }, 60000);
+  startStudentTimer(); // อัปเดตอัตโนมัติทุก 60 วินาที เมื่อเปิดดูห้องหนึ่งอยู่ (ไม่โหลดตอนกำลังเลือกห้อง/อยู่แท็บ ของฉัน)
 }
 
 async function fetchStudent() {
   const r = await postData({ action: "getScores", email: currentUser.email, token: currentUser.token, roomId: stRoom });
   if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
   if (r.status !== "success") throw new Error(r.message);
-  stData = r; stJoinMode = false;
+  stData = r; stJoinMode = false; lastStudentHit = Date.now();
   stRooms = r.rooms || [];
   if (r.room) stRoom = r.room.id;
   Object.assign(currentUser, r.me);
@@ -916,9 +915,19 @@ const matchT = (t, c) => { if (!t) return true; c = c || ""; if (t === c || c.in
 
 const inRoom = (s) => !adminRoom || s.class === adminRoom || (s.class || "").startsWith(adminRoom + "/");
 const studs = (active) => adminData.students.filter((s) => (!active || s.active) && inRoom(s));
-const sumOf = (sid) => adminData.summary.find((x) => x.sid === sid) || {};
-const recOf = (sid, aid) => adminData.records.find((r) => r.sid === sid && r.aid === aid);
-const nameOf = (sid) => (adminData.students.find((s) => s.studentId === sid) || {}).name || sid;
+// ดัชนีค้นหาเร็ว สร้างใหม่เมื่อ adminData ถูกโหลดใหม่ (ผลลัพธ์เหมือน .find เดิม: เจอตัวแรกก่อน)
+let ixFor = null, ixSum = {}, ixRec = {}, ixName = {};
+function ix() {
+  if (ixFor !== adminData) {
+    ixFor = adminData; ixSum = {}; ixRec = {}; ixName = {};
+    adminData.summary.forEach((x) => { if (!(x.sid in ixSum)) ixSum[x.sid] = x; });
+    adminData.records.forEach((r) => { const k = r.sid + "\u0001" + r.aid; if (!(k in ixRec)) ixRec[k] = r; });
+    adminData.students.forEach((s) => { if (!(s.studentId in ixName)) ixName[s.studentId] = s; });
+  }
+}
+const sumOf = (sid) => { ix(); return ixSum[sid] || {}; };
+const recOf = (sid, aid) => { ix(); return ixRec[sid + "\u0001" + aid]; };
+const nameOf = (sid) => { ix(); return (ixName[sid] || {}).name || sid; };
 const asgOf = () => adminData.assignments.find((a) => a.id === adminAssign);
 const assignSelect = () => `<select onchange="adminAssign=this.value;renderAdmin()" class="${selC}">${adminData.assignments.map((a) => `<option value="${esc(a.id)}" ${a.id === adminAssign ? "selected" : ""}>${esc(a.name)} (เต็ม ${a.max}${a.target ? " · ห้อง " + esc(a.target) : ""})</option>`).join("")}</select>`;
 const noAssign = () => empty('ยังไม่มีงาน ไปเพิ่มที่แท็บ "รายละเอียดงาน" ก่อน');
@@ -1570,15 +1579,18 @@ function adminLogout() {
  * เก็บใน sessionStorage (ปิดแท็บ = หลุดทันที เหมาะกับคอมโรงเรียน) ไม่เก็บรหัสผ่าน */
 const IDLE_MS = 10 * 60 * 1000, PING_MS = 90 * 1000, SESS_KEY = "cls_sess";
 let lastActive = Date.now();
-function clearSess() { try { sessionStorage.removeItem(SESS_KEY); } catch (_) {} }
+let lastSessStr = "";
+function clearSess() { lastSessStr = ""; try { sessionStorage.removeItem(SESS_KEY); } catch (_) {} }
 function saveSess() {
   try {
-    if (currentUser) sessionStorage.setItem(SESS_KEY, JSON.stringify({ r: "s", last: lastActive, u: currentUser, room: stRoom, tab: stTab }));
-    else if (adminToken) sessionStorage.setItem(SESS_KEY, JSON.stringify({ r: "a", last: lastActive, t: adminToken, role: adminRole, user: adminUser, room: curRoom, tab: adminTab }));
-    else sessionStorage.removeItem(SESS_KEY);
+    let str = "";
+    if (currentUser) str = JSON.stringify({ r: "s", last: lastActive, u: currentUser, room: stRoom, tab: stTab });
+    else if (adminToken) str = JSON.stringify({ r: "a", last: lastActive, t: adminToken, role: adminRole, user: adminUser, room: curRoom, tab: adminTab });
+    if (!str) { lastSessStr = ""; sessionStorage.removeItem(SESS_KEY); }
+    else if (str !== lastSessStr) { lastSessStr = str; sessionStorage.setItem(SESS_KEY, str); } // ไม่เขียนซ้ำถ้าไม่มีอะไรเปลี่ยน (รูปโปรไฟล์ใหญ่)
   } catch (_) {}
 }
-["click", "keydown", "touchstart", "scroll", "mousemove"].forEach((ev) => window.addEventListener(ev, () => { lastActive = Date.now(); }, { passive: true, capture: true }));
+["click", "keydown", "touchstart", "scroll", "mousemove"].forEach((ev) => window.addEventListener(ev, () => { const n = Date.now(); if (n - lastActive > 1000) lastActive = n; }, { passive: true, capture: true }));
 window.addEventListener("pagehide", saveSess);
 window.addEventListener("beforeunload", saveSess);
 setInterval(saveSess, 10000);
@@ -1594,7 +1606,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) idle
 
 async function heartbeat() {
   if (Date.now() - lastActive > IDLE_MS) return;
-  if (currentUser) {
+  if (currentUser && Date.now() - lastStudentHit >= PING_MS) {
     try { const r = await postData({ action: "ping", email: currentUser.email, token: currentUser.token }, 8000); if (r.code === "AUTH" && currentUser) { toast(r.message); studentLogout(); } } catch (_) {}
   }
   if (adminToken) {
