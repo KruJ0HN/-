@@ -78,7 +78,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
     <g transform="rotate(-18 160 178)"><rect x="124" y="172" width="76" height="12" rx="2" fill="#f59e0b"/><path d="M200 172 l16 6 -16 6z" fill="#fde7c0"/><path d="M212 175.5 l4 2.5 -4 2.5z" fill="#374151"/><rect x="116" y="172" width="10" height="12" rx="2" fill="#e898a6"/></g>
    </svg>
    <button type="button" onclick="chooseRole('student')" class="pulse-ring w-full max-w-md mx-auto block rounded-2xl bg-white text-indigo-800 text-2xl md:text-3xl font-bold py-5 shadow-xl hover:-translate-y-1 transition duration-300">เข้าสู่ระบบนักเรียน <i class="fa-solid fa-arrow-right ml-2"></i></button>
-   <button type="button" onclick="showStudentRegister()" class="mt-4 text-white/90 hover:text-white underline text-sm md:text-base">ยังไม่มีบัญชี? สมัครใช้งานครั้งแรก</button>
+   <button type="button" onclick="showStudentRegister()" class="mt-3 w-full max-w-md mx-auto block rounded-2xl bg-white/15 hover:bg-white/25 border-2 border-white/60 text-white text-xl md:text-2xl font-bold py-4 transition"><i class="fa-solid fa-user-plus mr-2"></i>สมัครใช้งานครั้งแรก</button>
   </div>
  </div>
  <div class="grid grid-cols-3 gap-3 mt-5">
@@ -97,9 +97,9 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
   <p class="text-slate-500 text-sm mb-6 text-center">กรอกอีเมลจริงและรหัสผ่านเพื่อเข้าดูคะแนน</p>
   <div class="space-y-4">
    <div><label class="text-xs font-semibold text-slate-600">อีเมล <span class="text-red-500">*</span></label>
-    <input type="email" id="studentEmailInput" placeholder="student@example.com" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1"></div>
+    <input type="email" id="studentEmailInput" placeholder="student@example.com" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
    <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน <span class="text-red-500">*</span></label>
-    <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm mt-1">
+    <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1">
     <label class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input type="checkbox" onchange="$('studentPasswordInput').type=this.checked?'text':'password'"> แสดงรหัสผ่าน</label></div>
    <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-500 hover:from-indigo-800 hover:to-indigo-600 disabled:opacity-60 text-white text-lg font-bold py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>เข้าสู่ระบบ</span></button>
    <button type="button" onclick="showView('forgotForm')" class="w-full text-sm text-indigo-600 hover:underline"><i class="fa-solid fa-key mr-1"></i>ลืมรหัสผ่าน?</button>
@@ -107,26 +107,39 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
   <div class="mt-6 pt-4 border-t text-sm text-slate-600 text-center">ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button></div>
  </div>
 
- <div id="studentRegisterForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="text-center mb-6">
+ <div id="studentRegisterForm" class="hidden bg-white p-6 md:p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
+  <div class="text-center mb-5">
    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl"><i class="fa-solid fa-id-card"></i></div>
-   <h2 class="text-2xl font-bold text-slate-800">ลงทะเบียนนักเรียน</h2>
-   <p class="text-slate-500 text-sm">กรอกอีเมลจริงเพื่อรับรหัสยืนยัน OTP</p>
+   <h2 class="text-2xl font-bold text-slate-800">สมัครใช้งานครั้งแรก</h2>
+   <p class="text-slate-500 text-sm">กรอก 3 ส่วนสั้น ๆ แล้วรับรหัส OTP ทางอีเมล</p>
   </div>
-  <div class="space-y-3">
-   <div><label class="text-xs font-semibold text-slate-600">อีเมลจริง <span class="text-red-500">*</span> (ระบบจะส่ง OTP ไปที่นี่)</label>
-    <input type="email" id="regEmail" placeholder="student@example.com" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-    <div><label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
-     <input type="password" id="regPassword" placeholder="เช่น Abcd1234" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-    <div><label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
-     <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-   </div>
-   <div><label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
-    <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-   <div><label class="text-xs font-semibold text-slate-600">รหัสนักเรียน <span class="text-red-500">*</span> (กรอกให้ตรงกับที่ครูมี)</label>
-    <input type="text" id="regStudentId" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="เช่น 660123" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></div>
-   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
+  <div class="space-y-5">
+   <section class="space-y-3">
+    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">1</span>ข้อมูลของคุณ</div>
+    <div><label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
+     <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+    <div><label class="text-xs font-semibold text-slate-600">รหัสนักเรียน <span class="text-red-500">*</span> (ให้ตรงกับที่ครูมี)</label>
+     <input type="text" id="regStudentId" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="เช่น 660123" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+   </section>
+   <section class="space-y-3">
+    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">2</span>ระดับชั้น ห้อง และกลุ่มของคุณ</div>
+    <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2"><i class="fa-solid fa-circle-info mr-1"></i>เลือกครั้งเดียวตอนสมัคร จะเปลี่ยนเองไม่ได้ ถ้าเลือกผิดให้แจ้งครูเป็นคนแก้ให้</p>
+    <div id="regClassBox" class="space-y-3"></div>
+   </section>
+   <section class="space-y-3">
+    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">3</span>อีเมลและรหัสผ่าน</div>
+    <div><label class="text-xs font-semibold text-slate-600">อีเมลจริง <span class="text-red-500">*</span> (ระบบจะส่ง OTP ไปที่นี่)</label>
+     <input type="email" id="regEmail" placeholder="student@gmail.com" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+    <div><label class="text-xs font-semibold text-slate-600">พิมพ์อีเมลอีกครั้ง <span class="text-red-500">*</span></label>
+     <input type="email" id="regEmail2" placeholder="พิมพ์อีเมลเดิมซ้ำ" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+     <div><label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
+      <input type="password" id="regPassword" placeholder="เช่น Abcd1234" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+     <div><label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
+      <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+    </div>
+   </section>
+   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-lg font-bold py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
   </div>
   <div class="mt-4 text-center text-sm">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button></div>
  </div>
@@ -203,7 +216,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  </div>
  <div id="adminRoomBar" class="flex flex-wrap items-center gap-2"></div>
  <div id="adminTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
- <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">กรองเฉพาะห้อง/กลุ่ม (ในวิชานี้):</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
+ <div id="adminFilterBar" class="flex items-center gap-2"><label class="text-sm text-slate-600">ดูเฉพาะระดับชั้น/ห้อง/กลุ่ม:</label><select id="adminRoom" onchange="adminRoom=this.value;renderAdmin()" class="px-3 py-2 border rounded-lg text-sm bg-white"></select></div>
  <div id="adminPanel" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4"></div>
 </div>
 </main>
@@ -217,6 +230,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
 const API_TIMEOUT_MS = 20000;
 const RESEND_SECONDS = 60;
 let currentUser = null;      // {email, name, studentId, class, no, nick, avatar, bio, token}
+const LEVELS = ["ปวช", "ปวส"], ROOMS = ["A", "B", "C", "D"], SUBS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"];
 let tempRegisterEmail = "";
 let cooldownTimer = null;
 
@@ -372,8 +386,16 @@ function cleanEmail(v, inputId) {
   return cleaned;
 }
 
+const TYPO_MAIL = { "gmial.com": "gmail.com", "gamil.com": "gmail.com", "gmai.com": "gmail.com", "gmail.con": "gmail.com", "gmail.co": "gmail.com", "gmail.comm": "gmail.com", "hotmial.com": "hotmail.com", "hotmail.con": "hotmail.com", "yaho.com": "yahoo.com", "yahoo.con": "yahoo.com", "outlook.con": "outlook.com", "icloud.con": "icloud.com" };
+function emailHint(e) {
+  const at = e.lastIndexOf("@"), local = e.slice(0, at), dom = e.slice(at + 1);
+  if (at < 1 || !/^[a-z0-9](?:[a-z0-9._%+\-]*[a-z0-9])?$/.test(local) || /\.\./.test(local) || !/^(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(dom)) return "รูปแบบอีเมลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+  if (TYPO_MAIL[dom]) return "อีเมลน่าจะพิมพ์ผิด คุณหมายถึง @" + TYPO_MAIL[dom] + " ใช่ไหม?";
+  if (dom === "gmail.com" || dom === "googlemail.com") { const core = local.split("+")[0].replace(/\./g, ""); if (core.length < 6 || core.length > 30) return "อีเมล Gmail นี้ไม่มีอยู่จริง (ชื่อก่อน @ ต้องยาว 6-30 ตัว) กรุณาตรวจสอบ"; }
+  return null;
+}
 function initEmailInputs() {
-  ["regEmail", "studentEmailInput", "fgEmail"].forEach((id) => {
+  ["regEmail", "regEmail2", "studentEmailInput", "fgEmail"].forEach((id) => {
     const el = $(id);
     el.setAttribute("autocapitalize", "off");
     el.setAttribute("autocorrect", "off");
@@ -394,17 +416,22 @@ function handleStudentRegister() {
   const email = cleanEmail($("regEmail").value, "regEmail");
   const password = $("regPassword").value;
   const confirm = $("regPasswordConfirm").value;
+  const email2 = cleanEmail($("regEmail2").value, "regEmail2");
   const name = $("regName").value.trim();
   const studentId = $("regStudentId").value.normalize("NFKC").replace(/\s+/g, "");
 
-  if (!email || !password || !confirm || !name || !studentId) return toast("กรุณากรอกข้อมูลให้ครบทุกช่องที่มี *");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("รูปแบบอีเมลไม่ถูกต้อง");
+  if (!email || !email2 || !password || !confirm || !name || !studentId) return toast("กรุณากรอกข้อมูลให้ครบทุกช่องที่มี *");
+  let cls;
+  try { cls = pickedClass("rg"); } catch (e) { return toast(e.message); }
+  const hint = emailHint(email);
+  if (hint) return toast(hint);
+  if (email !== email2) return toast("อีเมลสองช่องไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง");
   const pwErr = passwordError(password);
   if (pwErr) return toast(pwErr);
   if (password !== confirm) return toast("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
 
   run($("btnRegister"), "กำลังส่ง OTP...", async () => {
-    const r = await postData({ action: "register", email, password, name, studentId });
+    const r = await postData({ action: "register", email, password, name, studentId, class: cls });
     if (r.status !== "success") {
       if (r.code === "COOLDOWN") { tempRegisterEmail = email; showView("otpForm"); startCooldown(r.wait); }
       toast(r.message);
@@ -550,19 +577,29 @@ const attScoreCard = (s, c) => {
   const n = s.attN || 0;
   return `<div class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 flex items-center gap-4"><div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-hand-holding-heart"></i></div><div class="min-w-0 flex-1"><div class="font-bold text-slate-700">คะแนนจิตพิสัย (จากเช็คชื่อ)</div><div class="text-3xl font-bold text-emerald-700">${n ? fmt(s.attGot) : "-"} <span class="text-base text-slate-400 font-normal">/ ${fmt(s.attFull)}</span></div><div class="text-xs text-slate-500">${n ? "ตอนนี้ได้ " + fmt(s.attGot) + " คะแนน จากเช็คชื่อ " + n + " ครั้ง · มา " + c["มา"] + " สาย " + c["สาย"] + " ลา " + c["ลา"] + " ขาด " + c["ขาด"] : "ยังไม่มีการเช็คชื่อ (เต็ม " + fmt(s.attFull) + " คะแนน)"}</div></div></div>`;
 };
-const classPick = (p) => `<div class="grid grid-cols-2 gap-2 text-left"><div><label class="text-xs font-semibold text-slate-600">ห้องของคุณ <span class="text-red-500">*</span></label><select id="${p}Room" class="${inC} bg-white"><option value="">เลือกห้อง</option>${["A", "B", "C", "D", "E"].map((x) => `<option value="${x}">ห้อง ${x}</option>`).join("")}</select></div><div><label class="text-xs font-semibold text-slate-600">กลุ่ม <span class="text-red-500">*</span></label><select id="${p}Sub" class="${inC} bg-white"><option value="">เลือกกลุ่ม</option>${["L1", "L2", "L3", "L4"].map((x) => `<option value="${x}">${x}</option>`).join("")}</select></div></div>`;
-const pickedClass = (p) => { const a = $(p + "Room").value, b = $(p + "Sub").value; if (!a || !b) throw new Error("กรุณาเลือกห้องและกลุ่มของคุณ"); return a + "/" + b; };
+const chipCls = (on) => "px-4 py-2 rounded-xl border-2 text-base font-semibold transition " + (on ? "bg-indigo-700 border-indigo-700 text-white shadow" : "bg-white border-slate-200 text-slate-700 hover:border-indigo-300");
+const chipGroup = (p, key, label, list) => `<div><div class="text-xs font-semibold text-slate-600 mb-1">${label} <span class="text-red-500">*</span></div><div id="${p}-${key}" class="flex flex-wrap gap-2">${list.map((x) => `<button type="button" data-v="${x}" onclick="pickChip('${p}','${key}',this)" class="${chipCls(false)}">${x}</button>`).join("")}</div></div>`;
+const classPick = (p) => chipGroup(p, "lv", "ระดับชั้น", LEVELS) + chipGroup(p, "rm", "ห้อง", ROOMS) + chipGroup(p, "sb", "กลุ่ม", SUBS) + `<div id="${p}-preview" class="text-sm text-slate-500">ยังไม่ได้เลือก</div>`;
+function pickChip(p, key, btn) {
+  const box = $(p + "-" + key);
+  box.dataset.value = btn.dataset.v;
+  box.querySelectorAll("button").forEach((b) => { b.className = chipCls(b === btn); });
+  const g = (k) => $(p + "-" + k).dataset.value || "…";
+  $(p + "-preview").innerHTML = `คุณเลือก: <b class="text-indigo-700">${g("lv")} · ห้อง ${g("rm")} · กลุ่ม ${g("sb")}</b>`;
+}
+const pickedClass = (p) => { const g = (k) => $(p + "-" + k).dataset.value; if (!g("lv") || !g("rm") || !g("sb")) throw new Error("กรุณาเลือกระดับชั้น ห้อง และกลุ่มของคุณให้ครบ"); return g("lv") + "/" + g("rm") + "/" + g("sb"); };
+document.addEventListener("DOMContentLoaded", () => { $("regClassBox").innerHTML = classPick("rg"); });
 let pendingCode = "";
-const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือกดลิงก์/สแกน QR จากครู) แล้วเลือกห้องและกลุ่มของคุณ ครูจะใช้แยกนักเรียนแต่ละห้องในวิชาเดียวกัน</p><input id="joinCode" maxlength="8" value="${esc(pendingCode)}" placeholder="รหัสห้อง เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center">${classPick("jn")}<button type="button" onclick="handleJoin(this)" class="${btnP} w-full"><span>เข้าห้อง</span></button></div>`;
-const classPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏷️</div><h3 class="text-xl font-bold text-slate-800">เลือกห้องและกลุ่มของคุณ</h3><p class="text-xs text-slate-500">เพื่อให้ครูแยกคะแนนและงานของแต่ละห้อง เลือกได้ครั้งเดียว หากผิดให้แจ้งครู</p>${classPick("sc")}<button type="button" onclick="handleSetClass(this)" class="${btnP} w-full"><span>บันทึก</span></button></div>`;
-const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3><p class="text-xs text-slate-500">สมัครบัญชีแล้ว ขั้นต่อไปคือกรอกรหัสห้องที่ครูให้ และเลือกห้อง/กลุ่มของคุณ</p>${joinBox()}</div>`;
+const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือกดลิงก์/สแกน QR จากครู) แล้วกดเข้าห้อง (ระบบใช้ระดับชั้น/ห้อง/กลุ่มที่คุณเลือกตอนสมัครให้อัตโนมัติ)</p><input id="joinCode" maxlength="8" value="${esc(pendingCode)}" placeholder="รหัสห้อง เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center text-lg py-3"><button type="button" onclick="handleJoin(this)" class="${btnP} w-full"><span>เข้าห้อง</span></button></div>`;
+const classPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏷️</div><h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น ห้อง และกลุ่มของคุณ</h3><p class="text-xs text-slate-500">เลือกครั้งเดียว หลังจากนี้ถ้าจะเปลี่ยนให้แจ้งครูเป็นคนแก้ให้</p>${classPick("sc")}<button type="button" onclick="handleSetClass(this)" class="${btnP} w-full"><span>บันทึก</span></button></div>`;
+const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3><p class="text-xs text-slate-500">สมัครบัญชีแล้ว ขั้นต่อไปคือกรอกรหัสห้องที่ครูให้</p>${joinBox()}</div>`;
 function handleJoin(btn) {
   run(btn, "กำลังเข้าห้อง...", async () => {
     const code = $("joinCode").value.trim();
     if (!code) throw new Error("กรุณากรอกรหัสห้อง");
-    const cls = pickedClass("jn");
-    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code, class: cls });
+    const r = await postData({ action: "joinRoom", email: currentUser.email, token: currentUser.token, code });
     if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
+    if (r.code === "NEED_CLASS") { toast(r.message, "info"); await fetchStudent(); return false; }
     if (r.status !== "success") { toast(r.message); return false; }
     pendingCode = ""; stRoom = r.roomId || stRoom; stTab = "home"; stJoinMode = false; toast(r.message, "success");
     await fetchStudent();
@@ -572,10 +609,10 @@ function handleJoin(btn) {
 function handleSetClass(btn) {
   run(btn, "กำลังบันทึก...", async () => {
     const cls = pickedClass("sc");
-    const r = await postData({ action: "setMyClass", email: currentUser.email, token: currentUser.token, roomId: stRoom, class: cls });
+    const r = await postData({ action: "setMyClass", email: currentUser.email, token: currentUser.token, class: cls });
     if (r.code === "AUTH") { toast(r.message); studentLogout(); return false; }
     if (r.status !== "success") { toast(r.message); return false; }
-    toast("บันทึกห้อง " + cls + " แล้ว", "success");
+    toast("บันทึก " + cls + " แล้ว", "success");
     await fetchStudent();
     return true;
   });
@@ -617,7 +654,7 @@ function goJoin() {
 }
 async function autoJoin() { // ลิงก์/QR เชิญ: เติมรหัสห้องให้ แล้วให้นักเรียนเลือกห้อง-กลุ่มของตัวเองก่อนเข้า
   try { pendingCode = sessionStorage.getItem("joinCode") || ""; sessionStorage.removeItem("joinCode"); } catch (_) {}
-  if (pendingCode) { stTab = "me"; toast("เลือกห้องและกลุ่มของคุณ แล้วกด เข้าห้อง", "info"); }
+  if (pendingCode) { stTab = "me"; toast("ตรวจรหัสห้องแล้วกด เข้าห้อง", "info"); }
 }
 const roomSwitch = (d) => `<button type="button" onclick="openRoomDrawer()" class="text-sm bg-white text-indigo-800 hover:bg-indigo-50 font-semibold px-3 py-2 rounded-xl max-w-[13rem] truncate"><i class="fa-solid fa-door-open mr-1"></i>${d && d.room ? esc(d.room.name) : "เลือกห้องเรียน"} <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i></button>`;
 const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
@@ -627,7 +664,8 @@ function enterDashboard() {
   stData = null; stTab = "home"; stRoom = ""; stLoading = false; stJoinMode = false;
   resetNav("studentDashboard", "home");
   autoJoin().then(() => {
-    if (pendingCode || !stRooms.length) return fetchStudent(); // มาจากลิงก์เชิญ หรือยังไม่มีห้อง -> ไปหน้าเข้าห้องเลย
+    if (pendingCode || !stRooms.length || !currentUser.class) return fetchStudent(); // ลิงก์เชิญ / ยังไม่มีห้อง / ยังไม่เคยเลือกห้อง-กลุ่ม -> ไปหน้านั้นเลย
+    if (stRooms.length === 1) { stRoom = stRooms[0].id; stLoading = true; renderStudent(); return fetchStudent().finally(() => { stLoading = false; renderStudent(); }); } // มีวิชาเดียว เข้าดูเลย
     renderStudent(); openRoomDrawer(); // มีห้องแล้ว -> ให้เลือกห้องก่อนดูคะแนน
   }).catch((e) => toast(e.message));
   clearInterval(stTimer);
@@ -673,7 +711,7 @@ function renderStudent() {
     <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
   const unread = d && d.notes ? d.notes.length : 0;
   $("stTabs").innerHTML = (!d || d.noRoom || d.needClass) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
-  $("stBody").innerHTML = d ? (d.noRoom ? joinPanel() : d.needClass ? classPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d))
+  $("stBody").innerHTML = d ? (d.needClass ? classPanel() : d.noRoom ? joinPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d))
     : stLoading ? empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูลห้องนี้...')
     : stJoinMode ? joinPanel()
     : `<div class="bg-white rounded-2xl shadow-md border p-8 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🚪</div><h3 class="text-xl font-bold text-slate-800">เลือกห้องเรียนก่อน</h3><p class="text-sm text-slate-500">เลือกวิชา/ห้องที่ต้องการดูคะแนน</p><button type="button" onclick="openRoomDrawer()" class="${btnP}"><i class="fa-solid fa-door-open mr-1"></i>เลือกห้องเรียน</button></div>`;
@@ -756,7 +794,7 @@ const ST_VIEWS = {
      <div><label class="text-xs font-semibold text-slate-600">หรือเลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === m.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="pfAvatar" value="${esc(m.avatar)}"></div>
      <div><label class="text-xs font-semibold text-slate-600">ชื่อเล่น / ชื่อที่ต้องการแสดง</label><input id="pfNick" maxlength="30" value="${esc(m.nick)}" class="${inC}"></div>
      <div><label class="text-xs font-semibold text-slate-600">แนะนำตัวสั้น ๆ</label><textarea id="pfBio" maxlength="200" rows="3" class="${inC}">${esc(m.bio)}</textarea></div>
-     <div class="grid grid-cols-2 gap-2 text-sm text-slate-500 bg-slate-50 rounded-xl p-3"><div>ชื่อ: ${esc(m.name)}</div><div>รหัส: <b>${esc(m.studentId)}</b></div><div>ห้อง: ${esc(m.class)}</div><div class="break-all">อีเมล: ${esc(m.email)}</div><div class="col-span-2 text-xs">หากข้อมูลห้อง/ชื่อ/รหัสไม่ถูกต้อง กรุณาแจ้งครูผู้สอน</div></div>
+     <div class="grid grid-cols-2 gap-2 text-sm text-slate-500 bg-slate-50 rounded-xl p-3"><div>ชื่อ: ${esc(m.name)}</div><div>รหัส: <b>${esc(m.studentId)}</b></div><div>ห้อง: <b>${esc(m.class || "-")}</b></div><div class="break-all">อีเมล: ${esc(m.email)}</div><div class="col-span-2 text-xs">ห้อง/กลุ่มเปลี่ยนเองไม่ได้ หากข้อมูลห้อง/ชื่อ/รหัสไม่ถูกต้อง กรุณาแจ้งครูผู้สอน</div></div>
      <button type="button" onclick="saveStudentProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button>
      <hr>${joinBox()}<hr><h3 class="font-bold text-slate-700"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>เปลี่ยนรหัสผ่าน</h3>
      <input id="pwOld" type="password" placeholder="รหัสผ่านเดิม" class="${inC}"><input id="pwNew" type="password" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="${inC}">
@@ -819,9 +857,8 @@ function saveStudentProfile(btn) {
 }
 
 /* ---------- ฝั่งครู/แอดมิน ---------- */
-const ROOMS = ["A", "B", "C", "D", "E"], SUBS = ["L1", "L2", "L3", "L4"];
-const CLASS_OPTIONS = ROOMS.flatMap((r) => SUBS.map((s) => `${r}/${s}`));
-const VALID_CLASS = /^[A-E]\/L[1-4]$/;
+const CLASS_OPTIONS = LEVELS.flatMap((lv) => ROOMS.flatMap((r) => SUBS.map((s) => `${lv}/${r}/${s}`)));
+const VALID_CLASS = /^((ปวช|ปวส)\/[A-D]\/L[1-8]|[A-E]\/L[1-4])$/; // รูปแบบใหม่ + รูปแบบเก่า (ข้อมูลเดิม)
 const ATT = ["มา", "สาย", "ลา", "ขาด"];
 const STATUSES = ["ยังไม่ส่ง", "ส่งแล้ว", "ส่งช้า", "ตรวจแล้ว", "ต้องแก้ไข"];
 const CATS = ["ใบงาน", "แบบทดสอบ", "แบบฝึกหัด", "ปฏิบัติ/ชิ้นงาน", "สอบกลางภาค", "สอบปลายภาค", "จิตพิสัย"];
@@ -854,8 +891,21 @@ const table = (head, body, cols) => `<div class="overflow-x-auto"><table class="
 const searchBox = () => `<input oninput="filterRows(this.value)" placeholder="ค้นหาชื่อ/รหัส..." class="${selC} w-full md:w-64">`;
 const rowQ = (s) => esc((s.studentId + " " + s.name).toLowerCase());
 const opts = (list, cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + list.map((x) => `<option value="${esc(x)}" ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
-const targetOpts = (cur) => `<option value="">ทุกกลุ่มในวิชานี้</option>` + ROOMS.map((r) => `<option value="${r}" ${cur === r ? "selected" : ""}>ห้อง ${r} (ทุกกลุ่ม)</option>` + SUBS.map((s) => `<option value="${r}/${s}" ${cur === r + "/" + s ? "selected" : ""}>ห้อง ${r}/${s}</option>`).join("")).join("");
-const matchT = (t, c) => !t || t === c || (c || "").indexOf(t + "/") === 0;
+const tLabel = (t) => { const p = t.split("/"); if (!LEVELS.includes(p[0])) return t; return p.length === 1 ? p[0] + " (ทุกห้อง ทุกกลุ่ม)" : p.length === 2 ? p[0] + " ห้อง " + p[1] + " (ทุกกลุ่ม)" : p[0] + " ห้อง " + p[1] + " กลุ่ม " + p[2]; };
+const legacyOpt = (cur, list) => (cur && !list.includes(cur) ? `<option value="${esc(cur)}" selected>${esc(cur)} (รูปแบบเก่า)</option>` : "");
+const targetOpts = (cur) => {
+  const all = [];
+  LEVELS.forEach((lv) => { all.push(lv); ROOMS.forEach((r) => { all.push(lv + "/" + r); SUBS.forEach((s) => all.push(lv + "/" + r + "/" + s)); }); });
+  return `<option value="">ทุกกลุ่มในวิชานี้</option>` + legacyOpt(cur, all) + LEVELS.map((lv) => `<optgroup label="${lv}">` + all.filter((t) => t === lv || t.startsWith(lv + "/")).map((t) => `<option value="${t}" ${t === cur ? "selected" : ""}>${tLabel(t)}</option>`).join("") + `</optgroup>`).join("");
+};
+const clsOpts = (cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + legacyOpt(cur, CLASS_OPTIONS) + LEVELS.map((lv) => `<optgroup label="${lv}">` + CLASS_OPTIONS.filter((c) => c.startsWith(lv + "/")).map((c) => `<option value="${c}" ${c === cur ? "selected" : ""}>${c}</option>`).join("") + `</optgroup>`).join("");
+const filterOpts = (cur) => { // ตัวกรองแสดงเฉพาะระดับชั้น/ห้อง/กลุ่มที่มีนักเรียนจริงในวิชานี้
+  const set = new Set();
+  ((adminData && adminData.students) || []).forEach((st) => { const c = st.class; if (!c) return; const p = c.split("/"); if (LEVELS.includes(p[0]) && p.length === 3) { set.add(p[0]); set.add(p[0] + "/" + p[1]); } set.add(c); });
+  const list = [...set].sort(); if (cur && !list.includes(cur)) list.push(cur);
+  return list.map((t) => `<option value="${esc(t)}" ${t === cur ? "selected" : ""}>${esc(tLabel(t))}</option>`).join("");
+};
+const matchT = (t, c) => { if (!t) return true; c = c || ""; if (t === c || c.indexOf(t + "/") === 0) return true; const sh = c.replace(/^(ปวช|ปวส)\//, ""); return sh !== c && (t === sh || sh.indexOf(t + "/") === 0); };
 
 const inRoom = (s) => !adminRoom || s.class === adminRoom || (s.class || "").startsWith(adminRoom + "/");
 const studs = (active) => adminData.students.filter((s) => (!active || s.active) && inRoom(s));
@@ -1019,7 +1069,7 @@ function renderAdmin() {
   $("adminRoomBar").innerHTML = inRoom && rm ? `<div class="w-full bg-white border border-slate-200 rounded-2xl p-3 flex flex-wrap items-center gap-3">${back}<div class="min-w-0 flex-1"><div class="font-bold text-slate-800 truncate"><i class="fa-solid fa-school text-indigo-600 mr-1"></i>${esc(rm.name)}${rm.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่)</span>' : ""}</div>${rm.desc ? `<div class="text-xs text-slate-600"><i class="fa-solid fa-chalkboard-user mr-1"></i>สอน: ${esc(rm.desc)}</div>` : `<button type="button" onclick="setAdminTab('settings')" class="text-xs text-amber-700 underline"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ยังไม่ได้ระบุว่าสอนห้องอะไร (กดเพื่อกรอก)</button>`}<div class="text-[11px] text-indigo-700">คุณกำลังจัดการเฉพาะวิชานี้ ข้อมูลไม่ปนกับห้องอื่น</div></div><div class="text-xs text-slate-500">รหัสห้อง <b class="tracking-widest text-indigo-800 text-base">${esc(rm.code)}</b></div></div>` : (adminTab !== "rooms" ? back : "");
   $("adminTabs").innerHTML = inRoom ? TABS.map(([id, label, icon]) => `<button type="button" onclick="setAdminTab('${id}')" class="whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium border transition ${id === adminTab ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} mr-1"></i>${label}${id === "resets" && pendReset() ? `<span class="ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${pendReset()}</span>` : ""}</button>`).join("") : "";
   $("adminFilterBar").classList.toggle("hidden", !FILTER_TABS.includes(adminTab) || !inRoom);
-  $("adminRoom").innerHTML = '<option value="">ทุกกลุ่มในวิชานี้</option>' + ROOMS.map((x) => `<option value="${x}" ${adminRoom === x ? "selected" : ""}>ห้อง ${x} (ทุกกลุ่ม)</option>` + SUBS.map((y) => `<option value="${x}/${y}" ${adminRoom === x + "/" + y ? "selected" : ""}>ห้อง ${x}/${y}</option>`).join("")).join("");
+  $("adminRoom").innerHTML = '<option value="">ดูทั้งหมดในวิชานี้</option>' + filterOpts(adminRoom);
   $("adminPanel").innerHTML = AVIEWS[adminTab]();
   if (adminTab === "criteria") critPreview();
   if (adminTab === "assign") renderAsgFiles();
@@ -1072,8 +1122,9 @@ const AVIEWS = {
     const act = adminData.students.filter((s) => s.active), reg = adminData.students.filter((s) => s.registered && s.verified);
     const withPct = adminData.summary.filter((x) => x.pct !== null), withAtt = adminData.summary.filter((x) => x.attPct !== null);
     const avg = (l, k) => (l.length ? fmt(l.reduce((a, x) => a + x[k], 0) / l.length) + "%" : "-");
-    const noClass = 0;
-    const rooms = CLASS_OPTIONS.map((c) => [c, act.filter((s) => s.class === c).length]).filter((x) => x[1]);
+    const noClass = act.filter((s) => !s.class).length;
+    const cnt = {}; act.forEach((s) => { if (s.class) cnt[s.class] = (cnt[s.class] || 0) + 1; });
+    const rooms = Object.keys(cnt).sort().map((c) => [c, cnt[c]]);
     const top = withPct.slice().sort((a, b) => a.rank - b.rank).slice(0, 3);
     return `<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">${[card("นักเรียนที่ใช้งาน", act.length, "fa-users"), card("สมัครและยืนยันแล้ว", reg.length, "fa-user-check"), card("จำนวนงาน", adminData.assignments.length, "fa-book"), card("ร้อยละเฉลี่ย", avg(withPct, "pct"), "fa-percent"), card("เช็คชื่อเฉลี่ย", avg(withAtt, "attPct"), "fa-calendar-check")].join("")}</div>
       ${pendReset() ? `<div class="mb-4 text-sm bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2"><span><i class="fa-solid fa-key mr-1"></i>มีนักเรียนขอรีเซ็ตรหัสผ่าน ${pendReset()} คน</span><button type="button" onclick="setAdminTab('resets')" class="${btnP}">ดูคำขอ</button></div>` : ""}
@@ -1090,7 +1141,7 @@ const AVIEWS = {
     const l = studs(false);
     const rows = l.map((s) => `<tr data-q="${rowQ(s)}" data-sid="${esc(s.studentId)}">
       <td class="px-2 py-1"><input class="st-no w-14 px-2 py-1 border rounded text-center" value="${esc(s.no)}" maxlength="6"></td>${td("<b class=\"text-indigo-800 bg-amber-50 px-2 py-0.5 rounded\">" + esc(s.studentId) + "</b>", "whitespace-nowrap")}${td(esc(s.name))}${td(esc(s.email || "-"), "text-xs text-slate-500")}
-      <td class="px-2 py-1"><select class="st-cls ${selC}">${opts(CLASS_OPTIONS, s.class, "- ยังไม่เลือก -")}</select></td>
+      <td class="px-2 py-1"><select class="st-cls ${selC}">${clsOpts(s.class, "- ยังไม่เลือก -")}</select></td>
       <td class="px-2 py-1"><select class="st-sts ${selC}">${opts(STU_STATUS, s.status)}</select></td>
       ${td(!s.registered ? '<span class="text-slate-400">ยังไม่สมัคร</span>' : s.verified ? '<span class="text-emerald-600">ยืนยันแล้ว</span>' : '<span class="text-amber-600">รอยืนยัน OTP</span>')}
       <td class="px-3 py-2 whitespace-nowrap"><button type="button" title="บันทึก" onclick="saveStudent('${esc(s.studentId)}',this)" class="text-indigo-700 mr-3"><i class="fa-solid fa-floppy-disk"></i></button>
@@ -1102,7 +1153,7 @@ const AVIEWS = {
       <button type="button" onclick="$('csvFile').click()" class="${btnP}"><i class="fa-solid fa-file-import mr-1"></i> นำเข้า CSV</button>
       <button type="button" onclick="downloadTemplate()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ดาวน์โหลดแม่แบบ</button>
       <button type="button" onclick="exportStudents()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-file-export mr-1"></i> ส่งออกรายชื่อ (CSV)</button></div>
-      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, ห้อง (เช่น A/L1) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = นำออกจากห้อง (เก็บคะแนน) · ถังขยะ = ลบออกจากห้องพร้อมคะแนนของห้องนี้</p>
+      <p class="text-xs text-slate-500 mb-3">คอลัมน์ไฟล์: เลขที่, รหัสประจำตัว, ชื่อ-นามสกุล, ห้อง (เช่น ปวช/A/L1) · นักเรียนเลือกห้อง/กลุ่มเองครั้งเดียวตอนสมัคร ครูเป็นคนเปลี่ยนที่ช่องนี้ (เปลี่ยนแล้วมีผลทุกวิชา) · 🔑 รีเซ็ตรหัสผ่านให้นักเรียน (ครูดูรหัสผ่านเดิมไม่ได้เพราะเก็บแบบเข้ารหัส) · ไอคอนประตู = นำออกจากห้อง (เก็บคะแนน) · ถังขยะ = ลบออกจากห้องพร้อมคะแนนของห้องนี้</p>
       ${table(th("เลขที่", "รหัสนักเรียน", "ชื่อ-นามสกุล", "อีเมล", "ห้อง/กลุ่ม", "สถานะ", "บัญชี", "จัดการ"), rows, 8)}`;
   },
 
@@ -1460,7 +1511,7 @@ async function importCsv(inp) {
     const items = rows.map((r) => ({ no: (r[0] || "").trim(), sid: (r[1] || "").trim(), name: (r[2] || "").trim(), class: (r[3] || "").trim().toUpperCase() })).filter((x) => x.sid && x.name);
     if (!items.length) return toast("ไม่พบข้อมูลที่นำเข้าได้ (ต้องมีรหัสและชื่อ)");
     const bad = items.find((x) => x.class && !VALID_CLASS.test(x.class));
-    if (bad) return toast("ห้องไม่ถูกต้อง: " + bad.class + " (ต้องเป็นรูปแบบ เช่น A/L1)");
+    if (bad) return toast("ห้องไม่ถูกต้อง: " + bad.class + " (ต้องเป็นรูปแบบ เช่น ปวช/A/L1 โดยห้อง A-D กลุ่ม L1-L8)");
     if (!confirm("นำเข้า " + items.length + " รายชื่อ ใช่ไหม?")) return;
     await adminCall({ action: "adminImportRoster", items });
     await loadAdminData();
@@ -1469,7 +1520,7 @@ async function importCsv(inp) {
 }
 
 function downloadTemplate() {
-  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,ห้อง\n1,660001,นายตัวอย่าง ใจดี,A/L1\n2,660002,นางสาวตัวอย่าง รักเรียน,A/L2\n"], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["\uFEFFเลขที่,รหัสประจำตัว,ชื่อ-นามสกุล,ห้อง\n1,660001,นายตัวอย่าง ใจดี,ปวช/A/L1\n2,660002,นางสาวตัวอย่าง รักเรียน,ปวส/B/L5\n"], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = "student_template.csv"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
