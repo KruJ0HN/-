@@ -896,16 +896,20 @@ const rowQ = (s) => esc((s.studentId + " " + s.name).toLowerCase());
 const opts = (list, cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + list.map((x) => `<option value="${esc(x)}" ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
 const tLabel = (t) => { const p = t.split("/"); if (!LEVELS.includes(p[0])) return t; return p.length === 1 ? p[0] + " (ทุกห้อง ทุกกลุ่ม)" : p.length === 2 ? p[0] + " ห้อง " + p[1] + " (ทุกกลุ่ม)" : p[0] + " ห้อง " + p[1] + " กลุ่ม " + p[2]; };
 const legacyOpt = (cur, list) => (cur && !list.includes(cur) ? `<option value="${esc(cur)}" selected>${esc(cur)} (รูปแบบเก่า)</option>` : "");
-const targetOpts = (cur) => {
-  const all = [];
-  LEVELS.forEach((lv) => { all.push(lv); ROOMS.forEach((r) => { all.push(lv + "/" + r); SUBS.forEach((s) => all.push(lv + "/" + r + "/" + s)); }); });
-  return `<option value="">ทุกกลุ่มในวิชานี้</option>` + legacyOpt(cur, all) + LEVELS.map((lv) => `<optgroup label="${lv}">` + all.filter((t) => t === lv || t.startsWith(lv + "/")).map((t) => `<option value="${t}" ${t === cur ? "selected" : ""}>${tLabel(t)}</option>`).join("") + `</optgroup>`).join("");
-};
-const clsOpts = (cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + legacyOpt(cur, CLASS_OPTIONS) + LEVELS.map((lv) => `<optgroup label="${lv}">` + CLASS_OPTIONS.filter((c) => c.startsWith(lv + "/")).map((c) => `<option value="${c}" ${c === cur ? "selected" : ""}>${c}</option>`).join("") + `</optgroup>`).join("");
-const filterOpts = (cur) => { // ตัวกรองแสดงเฉพาะระดับชั้น/ห้อง/กลุ่มที่มีนักเรียนจริงในวิชานี้
+// ห้อง/กลุ่มที่มีนักเรียนอยู่จริงในวิชานี้ (เรียงแล้ว) ใช้ทั้งตัวเลือก "มอบให้ห้อง" และตัวกรอง
+const existingTargets = () => {
   const set = new Set();
   ((adminData && adminData.students) || []).forEach((st) => { const c = st.class; if (!c) return; const p = c.split("/"); if (LEVELS.includes(p[0]) && p.length === 3) { set.add(p[0]); set.add(p[0] + "/" + p[1]); } set.add(c); });
-  const list = [...set].sort(); if (cur && !list.includes(cur)) list.push(cur);
+  return [...set].sort();
+};
+const targetOpts = (cur) => {
+  const list = existingTargets();
+  const extra = cur && !list.includes(cur) ? `<option value="${esc(cur)}" selected>${esc(tLabel(cur))}${LEVELS.includes(cur.split("/")[0]) ? "" : " (รูปแบบเก่า)"}</option>` : "";
+  return `<option value="">ทุกกลุ่มในวิชานี้</option>` + extra + list.map((t) => `<option value="${esc(t)}" ${t === cur ? "selected" : ""}>${esc(tLabel(t))}</option>`).join("");
+};
+const clsOpts = (cur, blank) => (blank !== undefined ? `<option value="">${blank}</option>` : "") + legacyOpt(cur, CLASS_OPTIONS) + LEVELS.map((lv) => `<optgroup label="${lv}">` + CLASS_OPTIONS.filter((c) => c.startsWith(lv + "/")).map((c) => `<option value="${c}" ${c === cur ? "selected" : ""}>${c}</option>`).join("") + `</optgroup>`).join("");
+const filterOpts = (cur) => {
+  const list = existingTargets(); if (cur && !list.includes(cur)) list.push(cur);
   return list.map((t) => `<option value="${esc(t)}" ${t === cur ? "selected" : ""}>${esc(tLabel(t))}</option>`).join("");
 };
 const matchT = (t, c) => { if (!t) return true; c = c || ""; if (t === c || c.indexOf(t + "/") === 0) return true; const sh = c.replace(/^(ปวช|ปวส)\//, ""); return sh !== c && (t === sh || sh.indexOf(t + "/") === 0); };
