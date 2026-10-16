@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบตรวจสอบผลการเรียน - ครูจอห์น</title>
+<title>ระบบตรวจสอบผลการเรียน</title>
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,7 +44,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
    <button id="btnBack" type="button" onclick="history.back()" class="hidden bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full shrink-0" title="ย้อนกลับ"><i class="fa-solid fa-arrow-left"></i></button>
    <button type="button" onclick="goHome()" class="flex items-center gap-3 text-left min-w-0">
     <i class="fa-solid fa-graduation-cap text-3xl"></i>
-    <div class="min-w-0"><h1 class="text-lg md:text-xl font-bold truncate">ระบบตรวจสอบผลการเรียน</h1><p class="text-xs text-indigo-200 truncate">ห้องเรียนออนไลน์ ครูจอห์น</p></div>
+    <div class="min-w-0"><h1 class="text-lg md:text-xl font-bold truncate">ระบบตรวจสอบผลการเรียน</h1><p class="text-xs text-indigo-200 truncate">ห้องเรียนออนไลน์</p></div>
    </button>
   </div>
   <button id="navUser" type="button" onclick="openProfile()" class="hidden bg-white/15 hover:bg-white/25 pl-1 pr-3 py-1 rounded-full text-sm items-center gap-2 max-w-[45%]"></button>
@@ -62,7 +62,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
   <span class="absolute bottom-40 left-5 text-3xl floaty hidden sm:block">📚</span>
   <span class="absolute bottom-44 right-5 text-3xl floaty hidden sm:block" style="animation-delay:1s">✏️</span>
   <div class="relative z-10 px-5 pt-8 pb-9 md:px-10 md:pt-10 text-center">
-   <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1 text-sm"><i class="fa-solid fa-graduation-cap"></i> ห้องเรียนออนไลน์ ครูจอห์น</div>
+   <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1 text-sm"><i class="fa-solid fa-graduation-cap"></i> ห้องเรียนออนไลน์</div>
    <h2 class="text-3xl md:text-5xl font-bold mt-4 leading-tight">เช็คคะแนนของคุณ<br class="sm:hidden"> ได้ง่าย ๆ ที่นี่</h2>
    <p class="mt-2 text-white/85 md:text-lg">ดูคะแนน เกรด งานที่ต้องส่ง และการเข้าเรียน</p>
    <svg viewBox="0 0 320 200" class="floaty w-60 md:w-80 mx-auto my-4 drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
@@ -228,7 +228,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  <div class="absolute inset-0 bg-black/40" onclick="closeRoomDrawer()"></div>
  <aside id="roomDrawerPanel" class="absolute right-0 top-0 h-full w-[88%] max-w-sm bg-white shadow-2xl p-4 overflow-y-auto translate-x-full transition-transform duration-200"><div id="roomDrawerBody"></div></aside>
 </div>
-<footer class="text-center text-xs text-slate-400 pb-6">© ห้องเรียนออนไลน์ ครูจอห์น</footer>
+<footer class="text-center text-xs text-slate-400 pb-6">© ห้องเรียนออนไลน์</footer>
 
 <script>
 const API_TIMEOUT_MS = 20000;
@@ -752,7 +752,7 @@ const ST_VIEWS = {
      ${attScoreCard(s, c)}
      ${box("สิ่งที่ต้องทำ", "fa-list-check", todo.length ? todo.join("") : '<p class="text-slate-400 py-2">ไม่มีอะไรค้าง เยี่ยมมาก 🎉</p>')}
      ${news.length ? box("ประกาศจากครู", "fa-bullhorn", `<div class="space-y-2">${news.slice(0, 3).map(newsItem).join("")}</div>${news.length > 3 ? `<details class="mt-2"><summary class="text-sm text-indigo-700 cursor-pointer">ดูประกาศเก่า (${news.length - 3})</summary><div class="space-y-2 mt-2">${news.slice(3).map(newsItem).join("")}</div></details>` : ""}`) : ""}
-     <div class="flex items-center gap-3 text-sm text-slate-500 px-1">${avatarEl(t.avatar, "w-10 h-10 text-xl")}<div>ครูผู้สอน: <b class="text-slate-700">${esc(t.name || "ครูจอห์น")}</b>${t.subject ? " · " + esc(t.subject) : ""}<br><span class="text-xs">ข้อมูลอัปเดตอัตโนมัติ</span></div></div></div>`;
+     <div class="flex items-center gap-3 text-sm text-slate-500 px-1">${avatarEl(t.avatar, "w-10 h-10 text-xl")}<div>ครูผู้สอน: <b class="text-slate-700">${esc(t.name || t.nick || "ครู")}</b>${t.subject ? " · " + esc(t.subject) : ""}<br><span class="text-xs">ข้อมูลอัปเดตอัตโนมัติ</span></div></div></div>`;
   },
   work(d) {
     const s = d.summary || {}, cats = Object.keys(s.byCat || {});
@@ -761,9 +761,9 @@ const ST_VIEWS = {
     const keys = Object.keys(groups), one = keys.length === 1 && keys[0] === "งานทั่วไป";
     const item = (a) => `<div class="border rounded-2xl p-3 bg-white"><div class="flex justify-between gap-3 items-start"><div class="min-w-0"><div class="font-semibold text-slate-800">${esc(a.name)}</div><div class="text-xs text-slate-500 mt-0.5">${esc(a.cat)}${a.due ? " · ส่ง " + esc(a.due) : ""}</div></div>
       <div class="text-right shrink-0">${badge(a.status)}<div class="text-lg font-bold mt-1">${a.score == null ? '<span class="text-slate-400 font-normal text-sm">รอคะแนน</span>' : fmt(a.score) + '<span class="text-slate-400 text-sm font-normal"> / ' + fmt(a.max) + "</span>"}</div></div></div>
-      ${a.detail || a.feedback || a.history.length || (a.files || []).length ? `<details class="mt-2 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs">ดูรายละเอียด</summary>
-       ${a.detail ? `<div class="text-slate-600 mt-2">${esc(a.detail)}</div>` : ""}
-       ${filesHtml(a.files)}
+      ${a.detail ? `<div class="mt-3 rounded-xl bg-amber-50 border-l-4 border-amber-400 p-3"><div class="text-xs font-bold text-amber-800 mb-1"><i class="fa-solid fa-file-lines mr-1"></i>รายละเอียดงาน</div><div class="text-base text-slate-900 leading-relaxed whitespace-pre-line break-words">${esc(a.detail)}</div></div>` : ""}
+      ${filesHtml(a.files)}
+      ${a.feedback || a.history.length ? `<details class="mt-2 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs">ดูข้อเสนอแนะและประวัติ</summary>
        ${a.feedback ? `<div class="mt-2 bg-indigo-50 border border-indigo-100 rounded-lg p-2"><i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i>ครู: ${esc(a.feedback)}</div>` : ""}
        ${a.history.length ? `<div class="mt-2 text-xs text-slate-500">${a.history.map((h) => `<div class="py-0.5">${dt(h.t)} — ${esc(h.st)}${h.score !== "" ? " · คะแนน " + esc(h.score) : ""}${h.fb ? " · " + esc(h.fb) : ""}</div>`).join("")}</div>` : ""}</details>` : ""}</div>`;
     const catRows = cats.map((c) => { const x = s.byCat[c]; return `<tr>${td(esc(c))}${td(x.max ? fmt(x.got) + " / " + fmt(x.max) : "-")}${td(fmt(x.all))}</tr>`; }).join("");
@@ -1189,7 +1189,7 @@ const AVIEWS = {
   },
 
   assign() {
-    const rows = adminData.assignments.map((a) => `<tr>${td(esc(a.name))}${td(esc(a.cat))}${td(esc(a.unit || "-"))}${td(esc(a.target || "ทุกห้อง"))}${td(a.max)}${td(esc(a.due || "-"), "whitespace-nowrap")}${td(esc(a.detail || "-") + ((a.files || []).length ? ' <span class="text-xs text-indigo-600"><i class="fa-solid fa-paperclip"></i> ' + a.files.length + "</span>" : ""), "max-w-xs")}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="editAssign('${esc(a.id)}')" class="text-indigo-700 mr-3"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="deleteAssign('${esc(a.id)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
+    const rows = adminData.assignments.map((a) => `<tr>${td(esc(a.name))}${td(esc(a.cat))}${td(esc(a.unit || "-"))}${td(esc(a.target || "ทุกห้อง"))}${td(a.max)}${td(esc(a.due || "-"), "whitespace-nowrap")}${td(esc(a.detail || "-") + ((a.files || []).length ? ' <span class="text-xs text-indigo-600"><i class="fa-solid fa-paperclip"></i> ' + a.files.length + "</span>" : ""), "min-w-[14rem] max-w-md whitespace-pre-line break-words text-slate-800")}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="editAssign('${esc(a.id)}')" class="text-indigo-700 mr-3"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="deleteAssign('${esc(a.id)}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`).join("");
     return `<p class="text-xs text-slate-500 mb-2">บันทึกรายการงานที่สั่งนอกระบบไว้ที่นี่ เพื่อให้นักเรียนเห็นกำหนดส่ง สถานะ และคะแนน (นักเรียนไม่ได้ส่งงานผ่านเว็บ)</p>
       <div id="asgForm" class="grid md:grid-cols-4 gap-3 mb-4 p-3 bg-slate-50 rounded-xl border"><input type="hidden" id="asgId">
       <div><label class="text-xs font-semibold text-slate-600">ชื่องาน <span class="text-red-500">*</span></label><input id="asgName" class="${inC}" placeholder="เช่น ใบงานที่ 1"></div>
@@ -1199,7 +1199,7 @@ const AVIEWS = {
       <div><label class="text-xs font-semibold text-slate-600">หน่วยการเรียน / สัปดาห์ / บทเรียน</label><input id="asgUnit" class="${inC}" placeholder="เช่น สัปดาห์ที่ 1"></div>
       <div><label class="text-xs font-semibold text-slate-600">มอบให้ห้อง</label><select id="asgTarget" class="${inC}">${targetOpts("")}</select></div>
       <div class="md:col-span-2 flex items-end"><button type="button" onclick="saveAssign(this)" class="${btnP} w-full"><span>บันทึกงาน</span></button></div>
-      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">รายละเอียดงาน</label><textarea id="asgDetail" rows="2" class="${inC}" placeholder="คำอธิบาย / วิธีส่งงานนอกระบบ"></textarea></div>
+      <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">รายละเอียดงาน</label><textarea id="asgDetail" rows="4" class="${inC}" placeholder="คำอธิบาย / วิธีส่งงานนอกระบบ"></textarea></div>
       <div class="md:col-span-4"><label class="text-xs font-semibold text-slate-600">ไฟล์ / รูปภาพ / ลิงก์แนบ (ให้นักเรียนศึกษาเพิ่มเติม)</label>
        <div id="asgFiles" class="space-y-1 my-1"></div>
        <div class="flex flex-wrap gap-2 items-center"><label class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm"><i class="fa-solid fa-paperclip mr-1"></i>แนบไฟล์/รูป<input type="file" multiple class="hidden" onchange="attachFiles(this)"></label>
@@ -1299,7 +1299,7 @@ const AVIEWS = {
       </div>
       <div><label class="text-xs font-semibold text-slate-600">หรือเลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === c.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="tfAvatar" value="${esc(c.avatar)}"></div>
       <div class="grid md:grid-cols-2 gap-3"><div><label class="text-xs font-semibold text-slate-600">ชื่อ-นามสกุลครู</label><input id="tfName" value="${esc(c.name)}" class="${inC}"></div>
-      <div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง (เช่น ครูจอห์น)</label><input id="tfNick" value="${esc(c.nick)}" class="${inC}"></div></div>
+      <div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง (เช่น ครูสมชาย)</label><input id="tfNick" value="${esc(c.nick)}" class="${inC}"></div></div>
       <div><label class="text-xs font-semibold text-slate-600">รายวิชา</label><input id="tfSubject" value="${esc(c.subject)}" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4"></div>
       <div><label class="text-xs font-semibold text-slate-600">แนะนำตัว</label><textarea id="tfBio" rows="3" class="${inC}">${esc(c.bio)}</textarea></div>
       <button type="button" onclick="saveTeacherProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button>${adminPwBlock()}</div>`;
