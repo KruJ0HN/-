@@ -18,7 +18,7 @@ tailwind.config = { theme: { extend: { colors: { indigo: {
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:'Sarabun',sans-serif;background:radial-gradient(circle at 8% 0%,#fbe3e7 0,transparent 42%),radial-gradient(circle at 95% 100%,#f4c4cd 0,transparent 38%),#fff7f8;background-attachment:fixed}
+body{font-family:'Sarabun',sans-serif;background:linear-gradient(180deg,#f6f3f0 0%,#efeae6 100%);background-attachment:fixed;color:#292524}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes twinkle{0%,100%{opacity:.35}50%{opacity:1}}
 .floaty{animation:floaty 4s ease-in-out infinite}.twinkle{animation:twinkle 2.4s ease-in-out infinite}
@@ -31,7 +31,23 @@ html{scroll-behavior:smooth}
 .lift{transition:transform .25s,box-shadow .25s}.lift:hover{transform:translateY(-3px);box-shadow:0 14px 24px -14px rgba(107,22,37,.45)}
 @keyframes ring{0%{box-shadow:0 0 0 0 rgba(251,191,36,.6)}70%{box-shadow:0 0 0 18px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
 .pulse-ring{animation:ring 2.2s infinite}
-#studentLoginForm,#studentRegisterForm,#otpForm,#forgotForm,#adminLoginForm{border-top:5px solid #8a2033;border-radius:1.5rem;box-shadow:0 22px 40px -22px rgba(107,22,37,.4)}
+/* ===== ธีมทางการ: แดงเลือดหมู + ทอง + เทาอบอุ่น ===== */
+.auth-card{background:#fff;border:1px solid #e6dfdb;border-radius:1rem;box-shadow:0 24px 44px -28px rgba(67,16,26,.45);overflow:hidden}
+.auth-head{background:linear-gradient(135deg,#43101a 0%,#6b1625 60%,#8a2033 100%);color:#fff;text-align:center;padding:1.75rem 1.5rem 1.4rem;border-bottom:3px solid #c9a227;position:relative}
+.auth-head h2{font-size:1.4rem;font-weight:700;letter-spacing:.2px}
+.auth-head p{font-size:.85rem;color:rgba(255,255,255,.78);margin-top:.25rem}
+.auth-icon{width:3.5rem;height:3.5rem;border-radius:9999px;border:2px solid #e3c25d;color:#f3dc8f;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto .8rem;background:rgba(255,255,255,.06)}
+.auth-body{padding:1.5rem 1.75rem 1.75rem}
+.auth-card input:not([type=checkbox]){background:#fcfbfa;border-color:#d9d0cb}
+.auth-card input:not([type=checkbox]):focus{background:#fff;border-color:#8a2033}
+.auth-sec{display:flex;align-items:center;gap:.5rem;font-weight:700;color:#43101a;padding-bottom:.4rem;border-bottom:1px solid #eadfdb}
+.step-no{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:9999px;background:#6b1625;color:#fff;font-size:.75rem;font-weight:700}
+.brand-panel{background:linear-gradient(160deg,#43101a 0%,#6b1625 55%,#8a2033 100%);position:relative;overflow:hidden}
+.brand-panel::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 2px,transparent 2px 16px)}
+.brand-panel::after{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(#c9a227,#e3c25d,#c9a227)}
+.brand-panel>*{position:relative;z-index:1}
+.gold-rule{width:64px;height:3px;background:#c9a227;margin-top:1rem;border-radius:2px}
+.crest{width:3.75rem;height:3.75rem;border-radius:9999px;border:2px solid #e3c25d;color:#f3dc8f;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:rgba(255,255,255,.06)}
 </style>
 </head>
 <body class="min-h-screen">
@@ -53,143 +69,129 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
 
 <main class="max-w-6xl mx-auto p-4 md:p-6">
 
-<div id="roleSelect" class="max-w-3xl mx-auto py-2 md:py-6">
- <div class="hero relative overflow-hidden rounded-[2rem] text-white shadow-2xl">
-  <div class="blob w-56 h-56 bg-white/10 -top-16 -left-16"></div>
-  <div class="blob w-44 h-44 bg-amber-300/20 -bottom-10 -right-6"></div>
-  <span class="absolute top-5 left-6 text-3xl twinkle">✨</span>
-  <span class="absolute top-10 right-8 text-2xl twinkle" style="animation-delay:.8s">⭐</span>
-  <span class="absolute bottom-40 left-5 text-3xl floaty hidden sm:block">📚</span>
-  <span class="absolute bottom-44 right-5 text-3xl floaty hidden sm:block" style="animation-delay:1s">✏️</span>
-  <div class="relative z-10 px-5 pt-8 pb-9 md:px-10 md:pt-10 text-center">
-   <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1 text-sm"><i class="fa-solid fa-graduation-cap"></i> ห้องเรียนออนไลน์</div>
-   <h2 class="text-3xl md:text-5xl font-bold mt-4 leading-tight">เช็คคะแนนของคุณ<br class="sm:hidden"> ได้ง่าย ๆ ที่นี่</h2>
-   <p class="mt-2 text-white/85 md:text-lg">ดูคะแนน เกรด งานที่ต้องส่ง และการเข้าเรียน</p>
-   <svg viewBox="0 0 320 200" class="floaty w-60 md:w-80 mx-auto my-4 drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="160" cy="194" rx="140" ry="6" fill="#000" opacity=".18"/>
-    <rect x="50" y="10" width="220" height="110" rx="10" fill="#d4a15e"/>
-    <rect x="58" y="18" width="204" height="94" rx="6" fill="#234236"/>
-    <text x="150" y="82" text-anchor="middle" font-size="46" font-weight="700" fill="#fff" font-family="Sarabun,sans-serif">A+</text>
-    <path d="M78 98 h70 M78 108 h44" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
-    <path d="M222 34 l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z" fill="#fbbf24"/>
-    <rect x="44" y="120" width="232" height="8" rx="4" fill="#a16207"/>
-    <rect x="16" y="166" width="100" height="24" rx="4" fill="#fbbf24"/><rect x="16" y="166" width="100" height="6" rx="3" fill="#f59e0b"/>
-    <rect x="24" y="144" width="86" height="22" rx="4" fill="#fff"/><rect x="24" y="144" width="86" height="6" rx="3" fill="#e5e7eb"/>
-    <rect x="30" y="126" width="72" height="18" rx="4" fill="#e898a6"/>
-    <path d="M250 134 L296 150 L250 166 L204 150 Z" fill="#43101a"/>
-    <path d="M226 158 v14 c12 10 36 10 48 0 v-14 l-24 10 z" fill="#6b1625"/>
-    <path d="M292 151 v26" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/><circle cx="292" cy="180" r="4" fill="#fbbf24"/>
-    <g transform="rotate(-18 160 178)"><rect x="124" y="172" width="76" height="12" rx="2" fill="#f59e0b"/><path d="M200 172 l16 6 -16 6z" fill="#fde7c0"/><path d="M212 175.5 l4 2.5 -4 2.5z" fill="#374151"/><rect x="116" y="172" width="10" height="12" rx="2" fill="#e898a6"/></g>
-   </svg>
-   <button type="button" onclick="chooseRole('student')" class="pulse-ring w-full max-w-md mx-auto block rounded-2xl bg-white text-indigo-800 text-2xl md:text-3xl font-bold py-5 shadow-xl hover:-translate-y-1 transition duration-300">เข้าสู่ระบบนักเรียน <i class="fa-solid fa-arrow-right ml-2"></i></button>
-   <button type="button" onclick="showStudentRegister()" class="mt-3 w-full max-w-md mx-auto block rounded-2xl bg-white/15 hover:bg-white/25 border-2 border-white/60 text-white text-xl md:text-2xl font-bold py-4 transition"><i class="fa-solid fa-user-plus mr-2"></i>สมัครใช้งานครั้งแรก</button>
+<div id="roleSelect" class="max-w-4xl mx-auto py-2 md:py-8 fade">
+ <div class="bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden grid md:grid-cols-5">
+  <div class="brand-panel md:col-span-3 text-white p-8 md:p-12 flex flex-col justify-between gap-8">
+   <div>
+    <div class="crest"><i class="fa-solid fa-graduation-cap"></i></div>
+    <p class="mt-6 text-amber-200 text-sm tracking-widest">ห้องเรียนออนไลน์</p>
+    <h2 class="text-3xl md:text-4xl font-bold mt-1 leading-tight">ระบบตรวจสอบ<br>ผลการเรียน</h2>
+    <div class="gold-rule"></div>
+    <p class="mt-4 text-white/80 leading-relaxed">ตรวจสอบคะแนน เกรด งานที่ได้รับมอบหมาย และการเข้าเรียน ได้อย่างสะดวก ถูกต้อง และเป็นระเบียบ</p>
+   </div>
+   <ul class="space-y-3 text-sm md:text-base text-white/90">
+    <li class="flex items-center gap-3"><span class="w-8 h-8 rounded-full border border-amber-300/60 text-amber-200 flex items-center justify-center shrink-0"><i class="fa-solid fa-chart-line text-sm"></i></span>คะแนนและเกรดรายวิชา</li>
+    <li class="flex items-center gap-3"><span class="w-8 h-8 rounded-full border border-amber-300/60 text-amber-200 flex items-center justify-center shrink-0"><i class="fa-solid fa-clipboard-list text-sm"></i></span>งานและกำหนดส่ง</li>
+    <li class="flex items-center gap-3"><span class="w-8 h-8 rounded-full border border-amber-300/60 text-amber-200 flex items-center justify-center shrink-0"><i class="fa-solid fa-calendar-check text-sm"></i></span>ประวัติการเข้าเรียน</li>
+   </ul>
   </div>
- </div>
- <div class="grid grid-cols-3 gap-3 mt-5">
-  <div class="lift bg-white rounded-2xl p-4 text-center shadow border border-rose-100"><div class="text-3xl mb-1">⭐</div><div class="font-semibold text-slate-700 text-sm md:text-base">คะแนนและเกรด</div></div>
-  <div class="lift bg-white rounded-2xl p-4 text-center shadow border border-rose-100"><div class="text-3xl mb-1">📝</div><div class="font-semibold text-slate-700 text-sm md:text-base">งานและกำหนดส่ง</div></div>
-  <div class="lift bg-white rounded-2xl p-4 text-center shadow border border-rose-100"><div class="text-3xl mb-1">📅</div><div class="font-semibold text-slate-700 text-sm md:text-base">เช็คชื่อ</div></div>
- </div>
- <div class="text-center mt-8">
-  <button type="button" onclick="chooseRole('teacher')" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-700 border border-slate-300 hover:border-indigo-300 bg-white/70 rounded-full px-3 py-1.5 transition"><i class="fa-solid fa-chalkboard-user"></i>สำหรับครู</button>
+  <div class="md:col-span-2 p-8 md:p-10 flex flex-col justify-center">
+   <h3 class="text-xl font-bold text-stone-800">เข้าสู่ระบบ</h3>
+   <p class="text-sm text-stone-500 mt-1 mb-6">เลือกประเภทผู้ใช้งานเพื่อดำเนินการต่อ</p>
+   <button type="button" onclick="chooseRole('student')" class="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-lg font-semibold py-3.5 shadow-md transition"><i class="fa-solid fa-user-graduate"></i>เข้าสู่ระบบนักเรียน</button>
+   <button type="button" onclick="showStudentRegister()" class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-indigo-700 text-indigo-700 hover:bg-indigo-50 font-semibold py-3 transition"><i class="fa-solid fa-user-plus"></i>สมัครใช้งานครั้งแรก</button>
+   <div class="flex items-center gap-3 my-6 text-xs text-stone-400"><span class="flex-1 h-px bg-stone-200"></span>สำหรับบุคลากร<span class="flex-1 h-px bg-stone-200"></span></div>
+   <button type="button" onclick="chooseRole('teacher')" class="w-full flex items-center justify-center gap-2 rounded-lg border border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 font-medium py-3 transition"><i class="fa-solid fa-chalkboard-user"></i>เข้าสู่ระบบครูผู้สอน</button>
+  </div>
  </div>
 </div>
 
-<div id="studentLoginForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-graduate"></i></div>
-  <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับนักเรียน</h2>
-  <p class="text-slate-500 text-sm mb-6 text-center">กรอกอีเมลจริงและรหัสผ่านเพื่อเข้าดูคะแนน</p>
-  <div class="space-y-4">
-   <div><label class="text-xs font-semibold text-slate-600">อีเมล <span class="text-red-500">*</span></label>
-    <input type="email" id="studentEmailInput" placeholder="student@example.com" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
-   <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน <span class="text-red-500">*</span></label>
-    <input type="password" id="studentPasswordInput" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1">
-    <label class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input type="checkbox" onchange="$('studentPasswordInput').type=this.checked?'text':'password'"> แสดงรหัสผ่าน</label></div>
-   <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-500 hover:from-indigo-800 hover:to-indigo-600 disabled:opacity-60 text-white text-lg font-bold py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>เข้าสู่ระบบ</span></button>
-   <button type="button" onclick="showView('forgotForm')" class="w-full text-sm text-indigo-600 hover:underline"><i class="fa-solid fa-key mr-1"></i>ลืมรหัสผ่าน?</button>
+<div id="studentLoginForm" class="hidden auth-card max-w-md mx-auto">
+  <div class="auth-head"><div class="auth-icon"><i class="fa-solid fa-user-graduate"></i></div>
+   <h2>เข้าสู่ระบบสำหรับนักเรียน</h2><p>กรอกอีเมลและรหัสผ่านเพื่อเข้าดูคะแนน</p></div>
+  <div class="auth-body">
+   <div class="space-y-4">
+    <div><label class="text-sm font-semibold text-stone-700">อีเมล <span class="text-red-500">*</span></label>
+     <input type="email" id="studentEmailInput" autocomplete="email" placeholder="student@example.com" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+    <div><label class="text-sm font-semibold text-stone-700">รหัสผ่าน <span class="text-red-500">*</span></label>
+     <input type="password" id="studentPasswordInput" autocomplete="current-password" placeholder="รหัสผ่านเข้าสู่ระบบ" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1">
+     <label class="flex items-center gap-2 text-xs text-stone-500 mt-2"><input type="checkbox" onchange="$('studentPasswordInput').type=this.checked?'text':'password'"> แสดงรหัสผ่าน</label></div>
+    <button type="button" id="btnLogin" onclick="handleStudentLogin()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white text-base font-semibold py-3.5 rounded-lg transition shadow-md flex justify-center items-center gap-2"><span>เข้าสู่ระบบ</span></button>
+    <button type="button" onclick="showView('forgotForm')" class="w-full text-sm text-indigo-700 hover:underline"><i class="fa-solid fa-key mr-1"></i>ลืมรหัสผ่าน?</button>
+   </div>
+   <div class="mt-6 pt-4 border-t border-stone-200 text-sm text-stone-600 text-center">ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-700 font-bold hover:underline">สมัครสมาชิกที่นี่</button></div>
   </div>
-  <div class="mt-6 pt-4 border-t text-sm text-slate-600 text-center">ยังไม่มีบัญชีใช่ไหม? <button type="button" onclick="showStudentRegister()" class="text-indigo-600 font-bold hover:underline">สมัครสมาชิกที่นี่</button></div>
  </div>
 
- <div id="studentRegisterForm" class="hidden bg-white p-6 md:p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="text-center mb-5">
-   <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl"><i class="fa-solid fa-id-card"></i></div>
-   <h2 class="text-2xl font-bold text-slate-800">สมัครใช้งานครั้งแรก</h2>
-   <p class="text-slate-500 text-sm">กรอก 3 ส่วนสั้น ๆ แล้วรับรหัส OTP ทางอีเมล</p>
+ <div id="studentRegisterForm" class="hidden auth-card max-w-md mx-auto">
+  <div class="auth-head"><div class="auth-icon"><i class="fa-solid fa-id-card"></i></div>
+   <h2>สมัครใช้งานครั้งแรก</h2><p>กรอก 3 ส่วนสั้น ๆ แล้วรับรหัส OTP ทางอีเมล</p></div>
+  <div class="auth-body">
+   <div class="space-y-5">
+    <section class="space-y-3">
+     <div class="auth-sec"><span class="step-no">1</span>ข้อมูลของคุณ</div>
+     <div><label class="text-sm font-semibold text-stone-700">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
+      <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+     <div><label class="text-sm font-semibold text-stone-700">รหัสนักเรียน <span class="text-red-500">*</span> <span class="font-normal text-stone-500">(ให้ตรงกับที่ครูมี)</span></label>
+      <input type="text" id="regStudentId" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="เช่น 660123" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+    </section>
+    <section class="space-y-3">
+     <div class="auth-sec"><span class="step-no">2</span>ระดับชั้น ห้อง และกลุ่มของคุณ</div>
+     <p class="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-2"><i class="fa-solid fa-circle-info mr-1"></i>เลือกครั้งเดียวตอนสมัคร จะเปลี่ยนเองไม่ได้ ถ้าเลือกผิดให้แจ้งครูเป็นคนแก้ให้</p>
+     <div id="regClassBox" class="space-y-3"></div>
+    </section>
+    <section class="space-y-3">
+     <div class="auth-sec"><span class="step-no">3</span>อีเมลและรหัสผ่าน</div>
+     <div><label class="text-sm font-semibold text-stone-700">อีเมลจริง <span class="text-red-500">*</span> <span class="font-normal text-stone-500">(ระบบจะส่ง OTP ไปที่นี่)</span></label>
+      <input type="email" id="regEmail" autocomplete="email" placeholder="student@gmail.com" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+     <div><label class="text-sm font-semibold text-stone-700">พิมพ์อีเมลอีกครั้ง <span class="text-red-500">*</span></label>
+      <input type="email" id="regEmail2" autocomplete="off" placeholder="พิมพ์อีเมลเดิมซ้ำ" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div><label class="text-sm font-semibold text-stone-700">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
+       <input type="password" id="regPassword" autocomplete="new-password" placeholder="เช่น Abcd1234" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+      <div><label class="text-sm font-semibold text-stone-700">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
+       <input type="password" id="regPasswordConfirm" autocomplete="new-password" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+     </div>
+    </section>
+    <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white text-base font-semibold py-3.5 rounded-lg transition shadow-md flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
+   </div>
+   <div class="mt-5 pt-4 border-t border-stone-200 text-center text-sm text-stone-600">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-700 font-bold hover:underline">เข้าสู่ระบบ</button></div>
   </div>
-  <div class="space-y-5">
-   <section class="space-y-3">
-    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">1</span>ข้อมูลของคุณ</div>
-    <div><label class="text-xs font-semibold text-slate-600">ชื่อ - นามสกุลจริง <span class="text-red-500">*</span></label>
-     <input type="text" id="regName" placeholder="นายสมชาย รักดี" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
-    <div><label class="text-xs font-semibold text-slate-600">รหัสนักเรียน <span class="text-red-500">*</span> (ให้ตรงกับที่ครูมี)</label>
-     <input type="text" id="regStudentId" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="เช่น 660123" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
-   </section>
-   <section class="space-y-3">
-    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">2</span>ระดับชั้น ห้อง และกลุ่มของคุณ</div>
-    <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2"><i class="fa-solid fa-circle-info mr-1"></i>เลือกครั้งเดียวตอนสมัคร จะเปลี่ยนเองไม่ได้ ถ้าเลือกผิดให้แจ้งครูเป็นคนแก้ให้</p>
-    <div id="regClassBox" class="space-y-3"></div>
-   </section>
-   <section class="space-y-3">
-    <div class="font-bold text-slate-700"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">3</span>อีเมลและรหัสผ่าน</div>
-    <div><label class="text-xs font-semibold text-slate-600">อีเมลจริง <span class="text-red-500">*</span> (ระบบจะส่ง OTP ไปที่นี่)</label>
-     <input type="email" id="regEmail" placeholder="student@gmail.com" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
-    <div><label class="text-xs font-semibold text-slate-600">พิมพ์อีเมลอีกครั้ง <span class="text-red-500">*</span></label>
-     <input type="email" id="regEmail2" placeholder="พิมพ์อีเมลเดิมซ้ำ" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-     <div><label class="text-xs font-semibold text-slate-600">ตั้งรหัสผ่าน <span class="text-red-500">*</span></label>
-      <input type="password" id="regPassword" placeholder="เช่น Abcd1234" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
-     <div><label class="text-xs font-semibold text-slate-600">ยืนยันรหัสผ่าน <span class="text-red-500">*</span></label>
-      <input type="password" id="regPasswordConfirm" placeholder="พิมพ์รหัสผ่านเดิมซ้ำ" class="w-full px-3 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base"></div>
+ </div>
+
+<div id="forgotForm" class="hidden auth-card max-w-md mx-auto">
+  <div class="auth-head"><div class="auth-icon"><i class="fa-solid fa-key"></i></div>
+   <h2>ลืมรหัสผ่าน</h2><p>ขอโค้ดจากครู แล้วตั้งรหัสผ่านใหม่ได้เอง</p></div>
+  <div class="auth-body">
+   <div class="space-y-3">
+    <div class="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+     <div class="font-semibold text-stone-800 text-sm"><span class="step-no mr-1">1</span>ส่งคำขอถึงครู</div>
+     <input type="email" id="fgEmail" autocomplete="email" placeholder="อีเมลที่สมัครไว้" class="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+     <input type="text" id="fgSid" inputmode="numeric" placeholder="รหัสนักเรียน" class="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+     <button type="button" id="btnReqReset" onclick="handleRequestReset()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition"><span>ส่งคำขอให้ครู</span></button>
+     <p id="fgSent" class="hidden text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2">ส่งคำขอแล้ว ✓ ให้แจ้งครูเพื่อขอ <b>โค้ด 6 หลัก</b> แล้วกรอกในขั้นตอนที่ 2</p>
+     <p id="fgNoAcc" class="hidden text-xs text-red-700 bg-red-50 rounded-lg p-2">ไม่พบบัญชีนี้ในระบบ <button type="button" onclick="showStudentRegister()" class="text-indigo-700 font-bold underline">กรุณาสมัครบัญชี</button></p>
+     <button type="button" onclick="$('fgStep2').classList.remove('hidden')" class="w-full text-xs text-indigo-700 underline">ได้รับโค้ดจากครูแล้ว? กรอกโค้ดที่นี่</button>
     </div>
-   </section>
-   <button type="button" id="btnRegister" onclick="handleStudentRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-lg font-bold py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ส่งรหัส OTP ไปยังอีเมล</span></button>
+    <div id="fgStep2" class="hidden p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+     <div class="font-semibold text-stone-800 text-sm"><span class="step-no mr-1">2</span>ได้โค้ดจากครูแล้ว</div>
+     <input type="text" id="fgCode" maxlength="6" inputmode="numeric" placeholder="โค้ด 6 หลักจากครู" class="w-full px-3 py-2.5 border rounded-lg text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-indigo-500">
+     <input type="password" id="fgPw" autocomplete="new-password" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+     <input type="password" id="fgPw2" autocomplete="new-password" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full px-3 py-2.5 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+     <button type="button" id="btnConfirmReset" onclick="handleConfirmReset()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition"><span>ตั้งรหัสผ่านใหม่</span></button>
+    </div>
+   </div>
+   <div class="mt-5 pt-4 border-t border-stone-200 text-center text-sm"><button type="button" onclick="showStudentLogin()" class="text-indigo-700 font-bold hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i>กลับไปเข้าสู่ระบบ</button></div>
   </div>
-  <div class="mt-4 text-center text-sm">มีบัญชีอยู่แล้ว? <button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">เข้าสู่ระบบ</button></div>
  </div>
 
-<div id="forgotForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-key"></i></div>
-  <h2 class="text-2xl font-bold text-slate-800 text-center">ลืมรหัสผ่าน</h2>
-  <p class="text-slate-500 text-sm mb-4 text-center">ขอโค้ดจากครู แล้วตั้งรหัสผ่านใหม่ได้เอง</p>
-  <div class="space-y-3">
-   <div class="p-3 rounded-xl bg-slate-50 border space-y-2">
-    <div class="font-semibold text-slate-700 text-sm"><span class="inline-block w-6 h-6 rounded-full bg-indigo-600 text-white text-center text-xs leading-6 mr-1">1</span>ส่งคำขอถึงครู</div>
-    <input type="email" id="fgEmail" placeholder="อีเมลที่สมัครไว้" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-    <input type="text" id="fgSid" inputmode="numeric" placeholder="รหัสนักเรียน" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-    <button type="button" id="btnReqReset" onclick="handleRequestReset()" class="w-full bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl"><span>ส่งคำขอให้ครู</span></button>
-    <p id="fgSent" class="hidden text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2">ส่งคำขอแล้ว ✓ ให้แจ้งครูเพื่อขอ <b>โค้ด 6 หลัก</b> แล้วกรอกในขั้นตอนที่ 2</p>
-    <p id="fgNoAcc" class="hidden text-xs text-red-700 bg-red-50 rounded-lg p-2">ไม่พบบัญชีนี้ในระบบ <button type="button" onclick="showStudentRegister()" class="text-indigo-700 font-bold underline">กรุณาสมัครบัญชี</button></p>
-    <button type="button" onclick="$('fgStep2').classList.remove('hidden')" class="w-full text-xs text-indigo-600 underline">ได้รับโค้ดจากครูแล้ว? กรอกโค้ดที่นี่</button>
-   </div>
-   <div id="fgStep2" class="hidden p-3 rounded-xl bg-slate-50 border space-y-2">
-    <div class="font-semibold text-slate-700 text-sm"><span class="inline-block w-6 h-6 rounded-full bg-emerald-600 text-white text-center text-xs leading-6 mr-1">2</span>ได้โค้ดจากครูแล้ว</div>
-    <input type="text" id="fgCode" maxlength="6" inputmode="numeric" placeholder="โค้ด 6 หลักจากครู" class="w-full px-3 py-2 border rounded-lg text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-emerald-500">
-    <input type="password" id="fgPw" placeholder="รหัสผ่านใหม่ (8 ตัวขึ้นไป ขึ้นต้น A-Z มี a-z และตัวเลข)" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-    <input type="password" id="fgPw2" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-    <button type="button" id="btnConfirmReset" onclick="handleConfirmReset()" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl"><span>ตั้งรหัสผ่านใหม่</span></button>
-   </div>
-  </div>
-  <div class="mt-4 text-center text-sm"><button type="button" onclick="showStudentLogin()" class="text-indigo-600 font-bold hover:underline">กลับไปเข้าสู่ระบบ</button></div>
- </div>
-
- <div id="otpForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto text-center border border-slate-200">
-  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-key"></i></div>
-  <h2 class="text-2xl font-bold text-slate-800 mb-2">กรอกรหัสยืนยัน OTP</h2>
-  <p class="text-slate-500 text-sm mb-6">ระบบได้ส่งรหัส 6 หลักไปที่ <b id="otpTo" class="text-slate-700"></b> แล้ว (ตรวจกล่องสแปมด้วย)<br><button type="button" onclick="showStudentRegister()" class="text-indigo-600 underline text-xs mt-1">พิมพ์อีเมลผิด? กลับไปแก้ไข</button></p>
-  <div class="space-y-4">
-   <div><label class="text-xs font-semibold text-slate-600 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
-    <input type="text" id="otpInput" maxlength="6" inputmode="numeric" placeholder="------" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold text-xl tracking-widest"></div>
-   <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2"><span>ยืนยันรหัส OTP</span></button>
-   <div class="pt-2">
-    <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="text-sm font-semibold text-indigo-600 hover:underline disabled:text-slate-400 disabled:no-underline"><span>ขอส่งรหัส OTP อีกครั้ง</span></button>
-    <p id="resendTimerText" class="text-xs text-slate-400 mt-1 hidden">สามารถขอรหัสใหม่ได้ในอีก <span id="timerSec" class="font-bold text-slate-600">60</span> วินาที</p>
+ <div id="otpForm" class="hidden auth-card max-w-md mx-auto">
+  <div class="auth-head"><div class="auth-icon"><i class="fa-solid fa-shield-halved"></i></div>
+   <h2>กรอกรหัสยืนยัน OTP</h2><p>ยืนยันตัวตนเพื่อเปิดใช้งานบัญชี</p></div>
+  <div class="auth-body text-center">
+   <p class="text-stone-600 text-sm mb-5">ระบบได้ส่งรหัส 6 หลักไปที่ <b id="otpTo" class="text-stone-800"></b> แล้ว (ตรวจกล่องสแปมด้วย)<br><button type="button" onclick="showStudentRegister()" class="text-indigo-700 underline text-xs mt-1">พิมพ์อีเมลผิด? กลับไปแก้ไข</button></p>
+   <div class="space-y-4">
+    <div><label class="text-sm font-semibold text-stone-700 block text-left mb-1">รหัส OTP 6 หลัก <span class="text-red-500">*</span></label>
+     <input type="text" id="otpInput" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="------" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-center font-bold text-2xl tracking-widest"></div>
+    <button type="button" id="btnVerifyOtp" onclick="handleVerifyOtp()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2"><span>ยืนยันรหัส OTP</span></button>
+    <div class="pt-2">
+     <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="text-sm font-semibold text-indigo-700 hover:underline disabled:text-stone-400 disabled:no-underline"><span>ขอส่งรหัส OTP อีกครั้ง</span></button>
+     <p id="resendTimerText" class="text-xs text-stone-400 mt-1 hidden">สามารถขอรหัสใหม่ได้ในอีก <span id="timerSec" class="font-bold text-stone-600">60</span> วินาที</p>
+    </div>
    </div>
   </div>
  </div>
 
-
- 
 
 <div id="studentDashboard" class="hidden space-y-4">
  <div id="stHeader"></div>
@@ -197,16 +199,17 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
  <div id="stBody"></div>
 </div>
 
-<div id="adminLoginForm" class="hidden bg-white p-8 rounded-2xl shadow-md max-w-md mx-auto border border-slate-200">
-  <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
-  <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">เข้าสู่ระบบสำหรับครูผู้สอน</h2>
-  <p class="text-slate-500 text-sm mb-6 text-center">กรอก Username และ รหัสผ่านแอดมิน</p>
-  <div class="space-y-4">
-   <div><label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (Username) <span class="text-red-500">*</span></label>
-    <input type="text" id="adminUsernameInput" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
-   <div><label class="text-xs font-semibold text-slate-600">รหัสผ่าน (Password) <span class="text-red-500">*</span></label>
-    <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm mt-1"></div>
-   <button type="button" onclick="handleAdminLogin()" class="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition shadow-md"><span>เข้าสู่ระบบแอดมิน</span></button>
+<div id="adminLoginForm" class="hidden auth-card max-w-md mx-auto">
+  <div class="auth-head"><div class="auth-icon"><i class="fa-solid fa-user-shield"></i></div>
+   <h2>เข้าสู่ระบบสำหรับครูผู้สอน</h2><p>กรอกชื่อผู้ใช้และรหัสผ่านที่ได้รับ</p></div>
+  <div class="auth-body">
+   <div class="space-y-4">
+    <div><label class="text-sm font-semibold text-stone-700">ชื่อผู้ใช้ (Username) <span class="text-red-500">*</span></label>
+     <input type="text" id="adminUsernameInput" autocomplete="username" placeholder="ชื่อผู้ใช้ (Username)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+    <div><label class="text-sm font-semibold text-stone-700">รหัสผ่าน (Password) <span class="text-red-500">*</span></label>
+     <input type="password" id="adminPasswordInput" autocomplete="current-password" placeholder="รหัสผ่าน (Password)" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base mt-1"></div>
+    <button type="button" onclick="handleAdminLogin()" class="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white font-semibold py-3.5 rounded-lg transition shadow-md"><span>เข้าสู่ระบบครู</span></button>
+   </div>
   </div>
  </div>
 
@@ -938,6 +941,13 @@ async function enterRoom(id, tab) {
   try { await loadAdminData(); showView("adminDashboard", tab || "home"); } catch (e) { toast(e.message); }
 }
 function toggleAdminRooms(u) { adminOpen[u] = !adminOpen[u]; renderAdmin(); }
+const allResets = () => (adminData.resets || []).concat(...(adminData.admins || []).map((a) => a.resets || []));
+const pendN = (a) => (a.resets || []).filter((r) => r.status === "รอครู").length;
+function adminResetsHtml(a) { // คำขอรีเซ็ตรหัสของนักเรียนในห้องของครูคนนั้น (ผู้ดูแลหลักเห็นที่นี่)
+  const l = (a.resets || []).filter((r) => r.status === "รอครู" || r.status === "ออกโค้ดแล้ว").sort((x, y) => y.time - x.time);
+  if (!l.length) return "";
+  return `<div class="mb-3 border border-amber-200 bg-amber-50 rounded-xl p-3"><div class="text-sm font-semibold text-amber-800 mb-1"><i class="fa-solid fa-key mr-1"></i>คำขอรีเซ็ตรหัสของนักเรียนครู ${esc(a.name || a.user)}</div>${l.map((r) => `<div class="flex flex-wrap items-center justify-between gap-2 py-1 border-t border-amber-100"><span class="text-sm"><b>${esc(r.sid)}</b> ${esc(r.name)} ${badge(r.status, RS_CLS)} <span class="text-xs text-slate-500">${dt(r.time)}</span></span><span class="whitespace-nowrap"><button type="button" onclick="issueReset('${esc(r.email)}')" class="${btnP}">${r.status === "รอครู" ? "ออกโค้ด" : "ออกโค้ดใหม่"}</button> <button type="button" onclick="rejectReset('${esc(r.email)}')" class="text-red-600 text-sm ml-2">ปฏิเสธ</button></span></div>`).join("")}</div>`;
+}
 function leaveRoom() {
   const back = adminData && adminData.viewingOwner ? "admins" : "rooms"; // ดูห้องของครูคนอื่นอยู่ -> กลับหน้าจัดการแอดมิน
   curRoom = ""; adminRoom = ""; adminAssign = ""; asgFiles = [];
@@ -1130,7 +1140,7 @@ const AVIEWS = {
   },
 
   admins() {
-    const rows = (adminData.admins || []).map((a) => `<tr>${td("<b>" + esc(a.user) + "</b>")}${td(esc(a.name))}${td(a.active ? '<span class="text-emerald-600">ใช้งานได้</span>' : '<span class="text-red-600">ปิดอยู่</span>')}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="toggleAdmin('${esc(a.user)}')" class="text-amber-700 text-sm mr-3 underline">${a.active ? "ปิดใช้งาน" : "เปิดใช้งาน"}</button><button type="button" onclick="resetAdminPw('${esc(a.user)}')" class="text-sky-600 text-sm mr-3 underline">รีเซ็ตรหัส</button><button type="button" onclick="toggleAdminRooms('${esc(a.user)}')" class="text-indigo-700 text-sm underline"><i class="fa-solid ${adminOpen[a.user] ? "fa-chevron-up" : "fa-chevron-down"} mr-1"></i>ห้องเรียน (${(a.rooms || []).length})</button></td></tr>${adminOpen[a.user] ? `<tr><td colspan="4" class="px-3 py-2 bg-slate-50">${(a.rooms || []).length ? `<div class="grid md:grid-cols-2 gap-2">${a.rooms.map((r) => `<div class="border rounded-xl p-3 bg-white flex flex-col gap-1"><div class="font-semibold text-slate-800">${esc(r.name)}${r.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่)</span>' : ""}</div>${r.desc ? `<div class="text-xs text-slate-600">สอน: ${esc(r.desc)}</div>` : ""}<div class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i>${r.count || 0} คน · รหัส <b class="tracking-widest">${esc(r.code)}</b></div><button type="button" onclick="enterRoom('${esc(r.id)}')" class="${btnP} mt-1">เข้าไปดูห้องนี้ <i class="fa-solid fa-arrow-right ml-1"></i></button></div>`).join("")}</div>` : '<span class="text-sm text-slate-400">แอดมินคนนี้ยังไม่ได้สร้างห้องเรียน</span>'}</td></tr>` : ""}`).join("");
+    const rows = (adminData.admins || []).map((a) => `<tr>${td("<b>" + esc(a.user) + "</b>")}${td(esc(a.name))}${td(a.active ? '<span class="text-emerald-600">ใช้งานได้</span>' : '<span class="text-red-600">ปิดอยู่</span>')}<td class="px-3 py-2 whitespace-nowrap"><button type="button" onclick="toggleAdmin('${esc(a.user)}')" class="text-amber-700 text-sm mr-3 underline">${a.active ? "ปิดใช้งาน" : "เปิดใช้งาน"}</button><button type="button" onclick="resetAdminPw('${esc(a.user)}')" class="text-sky-600 text-sm mr-3 underline">รีเซ็ตรหัส</button><button type="button" onclick="toggleAdminRooms('${esc(a.user)}')" class="text-indigo-700 text-sm underline"><i class="fa-solid ${adminOpen[a.user] ? "fa-chevron-up" : "fa-chevron-down"} mr-1"></i>ห้องเรียน (${(a.rooms || []).length})${pendN(a) ? `<span class="ml-1 bg-red-600 text-white text-[10px] rounded-full px-1.5 py-0.5 no-underline inline-block">ขอรีเซ็ต ${pendN(a)}</span>` : ""}</button></td></tr>${adminOpen[a.user] ? `<tr><td colspan="4" class="px-3 py-2 bg-slate-50">${adminResetsHtml(a)}${(a.rooms || []).length ? `<div class="grid md:grid-cols-2 gap-2">${a.rooms.map((r) => `<div class="border rounded-xl p-3 bg-white flex flex-col gap-1"><div class="font-semibold text-slate-800">${esc(r.name)}${r.archived ? ' <span class="text-xs text-slate-500">(ซ่อนอยู่)</span>' : ""}</div>${r.desc ? `<div class="text-xs text-slate-600">สอน: ${esc(r.desc)}</div>` : ""}<div class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i>${r.count || 0} คน · รหัส <b class="tracking-widest">${esc(r.code)}</b></div><button type="button" onclick="enterRoom('${esc(r.id)}')" class="${btnP} mt-1">เข้าไปดูห้องนี้ <i class="fa-solid fa-arrow-right ml-1"></i></button></div>`).join("")}</div>` : '<span class="text-sm text-slate-400">แอดมินคนนี้ยังไม่ได้สร้างห้องเรียน</span>'}</td></tr>` : ""}`).join("");
     return `<div class="space-y-4 max-w-3xl"><div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-user-shield text-indigo-600 mr-2"></i>จัดการแอดมิน (เฉพาะผู้ดูแลหลัก)</h3><p class="text-xs text-slate-500">นักเรียนสมัครเป็นแอดมินเองไม่ได้ ต้องให้ผู้ดูแลหลักสร้างบัญชีให้ที่นี่ · แอดมินที่เพิ่มสร้างห้องและทำได้ทุกอย่างเหมือนผู้ดูแลหลัก ยกเว้นหน้านี้ · ครูแต่ละคนเห็นเฉพาะห้องที่ตัวเองสร้าง มีแต่ผู้ดูแลหลักที่กดปุ่ม "ห้องเรียน" ของแอดมินแต่ละคนเพื่อเข้าไปดูห้องของเขาได้</p></div>
       <div class="grid md:grid-cols-4 gap-3 p-3 bg-slate-50 border rounded-xl"><div><label class="text-xs font-semibold text-slate-600">ชื่อผู้ใช้ (อังกฤษ/ตัวเลข)</label><input id="adUser" maxlength="20" class="${inC}"></div><div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง</label><input id="adName" maxlength="60" class="${inC}"></div><div><label class="text-xs font-semibold text-slate-600">รหัสผ่านเริ่มต้น</label><input id="adPw" type="text" class="${inC}" placeholder="เช่น Teacher123"></div><div class="flex items-end"><button type="button" onclick="createAdminAcc(this)" class="${btnP} w-full"><span>สร้างแอดมิน</span></button></div></div>
       ${table(th("ชื่อผู้ใช้", "ชื่อ", "สถานะ", "จัดการ"), rows, 4)}</div>`;
@@ -1476,7 +1486,7 @@ async function issueReset(email) {
   try {
     const r = await adminCall({ action: "adminIssueResetCode", email });
     await loadAdminData();
-    const q = (adminData.resets || []).find((x) => x.email === email);
+    const q = allResets().find((x) => x.email === email);
     alert(`โค้ดรีเซ็ตรหัสผ่านของ ${q ? q.name + " (" + q.sid + ")" : email}\n\n${r.code}\n\nแจ้งนักเรียนคนนี้เท่านั้น (ใช้ได้ ${r.minutes} นาที) แล้วให้นักเรียนกดลืมรหัสผ่าน > ขั้นตอนที่ 2`);
   } catch (e) { toast(e.message); } finally { adminBusy = false; }
 }
