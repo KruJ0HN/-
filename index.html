@@ -200,7 +200,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEUcm3PNWFGI_3tldA1
 
 <div id="studentDashboard" class="hidden space-y-4">
  <div id="stHeader"></div>
- <div id="stTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
+ <div id="stTabs"></div>
  <div id="stBody"></div>
 </div>
 
@@ -640,8 +640,8 @@ const pickedClass = (p) => { const g = (k) => $(p + "-" + k).dataset.value; if (
 document.addEventListener("DOMContentLoaded", () => { $("regClassBox").innerHTML = classPick("rg"); });
 let pendingCode = "";
 const joinBox = () => `<div class="space-y-2"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>เข้าร่วมห้องเรียน</h3><p class="text-xs text-slate-500">กรอกรหัสห้อง 6 ตัวที่ครูให้ (หรือกดลิงก์/สแกน QR จากครู) แล้วกดเข้าห้อง (ระบบใช้ระดับชั้น/ห้อง/กลุ่มที่คุณเลือกตอนสมัครให้อัตโนมัติ)</p><input id="joinCode" maxlength="8" value="${esc(pendingCode)}" placeholder="รหัสห้อง เช่น K7M2QX" class="${inC} uppercase tracking-widest font-bold text-center text-lg py-3"><button type="button" onclick="handleJoin(this)" class="${btnP} w-full"><span>เข้าห้อง</span></button></div>`;
-const classPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏷️</div><h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น ห้อง และกลุ่มของคุณ</h3><p class="text-xs text-slate-500">เลือกครั้งเดียว หลังจากนี้ถ้าจะเปลี่ยนให้แจ้งครูเป็นคนแก้ให้</p>${classPick("sc")}<button type="button" onclick="handleSetClass(this)" class="${btnP} w-full"><span>บันทึก</span></button></div>`;
-const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🏫</div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3><p class="text-xs text-slate-500">สมัครบัญชีแล้ว ขั้นต่อไปคือกรอกรหัสห้องที่ครูให้</p>${joinBox()}</div>`;
+const classPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-4xl text-indigo-700"><i class="fa-solid fa-tags"></i></div><h3 class="text-xl font-bold text-slate-800">เลือกระดับชั้น ห้อง และกลุ่มของคุณ</h3><p class="text-xs text-slate-500">เลือกครั้งเดียว หลังจากนี้ถ้าจะเปลี่ยนให้แจ้งครูเป็นคนแก้ให้</p>${classPick("sc")}<button type="button" onclick="handleSetClass(this)" class="${btnP} w-full"><span>บันทึก</span></button></div>`;
+const joinPanel = () => `<div class="bg-white rounded-2xl shadow-md border p-6 max-w-md mx-auto text-center space-y-3"><div class="text-4xl text-indigo-700"><i class="fa-solid fa-school"></i></div><h3 class="text-xl font-bold text-slate-800">ยังไม่ได้เข้าห้องเรียน</h3><p class="text-xs text-slate-500">สมัครบัญชีแล้ว ขั้นต่อไปคือกรอกรหัสห้องที่ครูให้</p>${joinBox()}</div>`;
 function handleJoin(btn) {
   run(btn, "กำลังเข้าห้อง...", async () => {
     const code = $("joinCode").value.trim();
@@ -710,7 +710,7 @@ async function autoJoin() { // ลิงก์/QR เชิญ: เติมร�
   if (pendingCode) { stTab = "me"; toast("ตรวจรหัสห้องแล้วกด เข้าห้อง", "info"); }
 }
 const roomSwitch = (d) => `<button type="button" onclick="openRoomDrawer()" class="text-sm bg-white text-indigo-800 hover:bg-indigo-50 font-semibold px-3 py-2 rounded-xl max-w-[13rem] truncate"><i class="fa-solid fa-door-open mr-1"></i>${d && d.room ? esc(d.room.name) : "เลือกห้องเรียน"} <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i></button>`;
-const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["me", "ของฉัน", "fa-user"]];
+const ST_TABS = [["home", "หน้าหลัก", "fa-house"], ["work", "งานและคะแนน", "fa-book-open"], ["att", "เช็คชื่อ", "fa-calendar-check"], ["rule", "เกณฑ์รายวิชา", "fa-scale-balanced"], ["teacher", "ประวัติครูผู้สอน", "fa-chalkboard-user"], ["me", "ข้อมูลของฉัน", "fa-user"]];
 let stData = null, stTimer = null, lastStudentHit = 0;
 
 // จำวิชาที่นักเรียนเลือกล่าสุด (ต่อบัญชี) เพื่อเข้าให้อัตโนมัติรอบหน้า
@@ -754,93 +754,164 @@ function studentLogout() {
 function renderStudent() {
   if (!currentUser) return;
   const d = stData, me = d ? d.me : currentUser;
-  $("stHeader").innerHTML = `<div class="relative overflow-hidden bg-gradient-to-r from-indigo-800 to-indigo-600 text-white p-5 rounded-3xl shadow-lg">
-    <div class="blob w-40 h-40 bg-white/10 -top-12 -right-10"></div>
-    <div class="relative flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-4"><div class="w-16 h-16 text-4xl rounded-full bg-white/90 flex items-center justify-center shrink-0 overflow-hidden">${avSpan(me.avatar)}</div><div><div class="text-sm text-indigo-100">สวัสดี 👋</div><h2 class="text-2xl font-bold leading-tight">${esc(me.nick || me.name)}</h2>
-    <p class="text-sm text-indigo-100">รหัส ${esc(me.studentId)}${d && d.room ? " · " + esc(d.room.name) : ""}${me.no ? " · เลขที่ " + esc(me.no) : ""}${me.class ? " · ห้อง " + esc(me.class) : ""}</p>${d && d.room && (d.room.desc || d.room.teacher) ? `<p class="text-xs text-indigo-200">${d.room.teacher ? "ครู " + esc(d.room.teacher) : ""}${d.room.desc ? (d.room.teacher ? " · " : "") + "สอน: " + esc(d.room.desc) : ""}</p>` : ""}</div></div>
-    <div class="flex flex-wrap gap-2">${roomSwitch(d)}${d && d.room ? `<button type="button" onclick="loadStudentScores(this)" class="text-sm bg-white/15 hover:bg-white/25 disabled:opacity-60 px-3 py-2 rounded-xl"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>` : ""}
-    <button type="button" onclick="studentLogout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออก</button></div></div></div>`;
   const unread = d && d.notes ? d.notes.length : 0;
-  $("stTabs").innerHTML = (!d || d.noRoom || d.needClass) ? "" : `<div class="grid grid-cols-4 gap-2">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex flex-col items-center gap-1 py-3 rounded-2xl text-xs sm:text-base font-semibold border transition ${id === stTab ? "bg-indigo-700 text-white border-indigo-700 shadow-lg" : "bg-white text-slate-600 hover:bg-indigo-50"}"><i class="fa-solid ${icon} text-lg sm:text-xl"></i>${label}${id === "home" && unread ? `<span class="absolute top-1.5 right-3 bg-red-500 text-white rounded-full px-1.5 text-[10px]">${unread}</span>` : ""}</button>`).join("")}</div>`;
+  $("stHeader").innerHTML = `<div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+    <div class="h-1.5 bg-gradient-to-r from-indigo-900 via-indigo-700 to-[#c9a227]"></div>
+    <div class="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
+     <div class="flex items-center gap-4 min-w-0">
+      <div class="w-16 h-16 text-4xl rounded-full bg-indigo-50 ring-2 ring-[#c9a227] flex items-center justify-center shrink-0 overflow-hidden">${avSpan(me.avatar)}</div>
+      <div class="min-w-0"><div class="text-xs tracking-wide text-slate-500">ระบบตรวจสอบผลการเรียน</div>
+       <h2 class="text-xl font-bold text-slate-900 leading-tight break-words">${esc(me.name || me.nick)}</h2>
+       <p class="text-sm text-slate-600">รหัสนักเรียน ${esc(me.studentId)}${me.no ? " · เลขที่ " + esc(me.no) : ""}${me.class ? " · ห้อง " + esc(me.class) : ""}</p>
+       ${d && d.room ? `<p class="text-sm text-slate-600">รายวิชา: <b class="text-slate-800">${esc(d.room.name)}</b>${d.room.teacher ? " · ครูผู้สอน " + esc(d.room.teacher) : ""}</p>` : ""}</div></div>
+     <div class="flex flex-wrap gap-2">
+      <button type="button" onclick="openRoomDrawer()" class="px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 max-w-[14rem] truncate"><i class="fa-solid fa-repeat mr-1"></i>${d && d.room ? "เปลี่ยนวิชา" : "เลือกวิชา"}</button>
+      ${d && d.room ? `<button type="button" onclick="loadStudentScores(this)" class="px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60"><span><i class="fa-solid fa-rotate mr-1"></i>รีเฟรช</span></button>` : ""}
+      <button type="button" onclick="studentLogout()" class="px-3 py-2 text-sm font-medium rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออกจากระบบ</button></div></div></div>`;
+  $("stTabs").innerHTML = (!d || d.noRoom || d.needClass) ? "" : `<nav class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-x-auto"><div class="flex min-w-max sm:min-w-0">${ST_TABS.map(([id, label, icon]) => `<button type="button" onclick="setStTab('${id}')" class="relative flex-1 whitespace-nowrap px-4 py-3 text-sm font-semibold border-b-[3px] transition ${id === stTab ? "border-[#c9a227] text-indigo-800 bg-indigo-50" : "border-transparent text-slate-600 hover:bg-slate-50"}"><i class="fa-solid ${icon} mr-1.5"></i>${label}${id === "home" && unread ? `<span class="ml-1.5 inline-block align-middle bg-red-600 text-white rounded-full px-1.5 text-[10px] leading-4">${unread}</span>` : ""}</button>`).join("")}</div></nav>`;
   $("stBody").innerHTML = d ? (d.needClass ? classPanel() : d.noRoom ? joinPanel() : (ST_VIEWS[stTab] || ST_VIEWS.home)(d))
     : stLoading ? empty('<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูลห้องนี้...')
     : stJoinMode ? joinPanel()
     : stRooms.length ? `<div class="max-w-3xl mx-auto space-y-4"><div><h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-door-open text-indigo-600 mr-2"></i>ห้องเรียนของฉัน</h3><p class="text-sm text-slate-500">แตะที่ห้องที่ต้องการดูคะแนน คะแนนของแต่ละวิชาแยกกัน</p></div>
         <div class="grid sm:grid-cols-2 gap-3">${stRoomCards("")}</div>
         <button type="button" onclick="goJoin()" class="w-full border-2 border-dashed border-indigo-300 text-indigo-700 rounded-2xl py-3 text-sm font-semibold hover:bg-indigo-50"><i class="fa-solid fa-plus mr-1"></i>เข้าห้องใหม่ด้วยรหัสห้อง</button></div>`
-    : `<div class="bg-white rounded-2xl shadow-md border p-8 max-w-md mx-auto text-center space-y-3"><div class="text-5xl">🚪</div><h3 class="text-xl font-bold text-slate-800">เลือกห้องเรียนก่อน</h3><p class="text-sm text-slate-500">เลือกวิชา/ห้องที่ต้องการดูคะแนน</p><button type="button" onclick="openRoomDrawer()" class="${btnP}"><i class="fa-solid fa-door-open mr-1"></i>เลือกห้องเรียน</button></div>`;
+    : `<div class="bg-white rounded-2xl shadow-md border p-8 max-w-md mx-auto text-center space-y-3"><div class="text-4xl text-indigo-700"><i class="fa-solid fa-door-open"></i></div><h3 class="text-xl font-bold text-slate-800">เลือกห้องเรียนก่อน</h3><p class="text-sm text-slate-500">เลือกวิชา/ห้องที่ต้องการดูคะแนน</p><button type="button" onclick="openRoomDrawer()" class="${btnP}"><i class="fa-solid fa-door-open mr-1"></i>เลือกห้องเรียน</button></div>`;
 }
 
-const attCards = (d) => { const c = d.attCounts, tot = c["มา"] + c["สาย"] + c["ลา"] + c["ขาด"];
-  return [card("มาเรียน", c["มา"], "fa-check"), card("มาสาย", c["สาย"], "fa-clock"), card("ลา", c["ลา"], "fa-envelope"), card("ขาดเรียน", c["ขาด"], "fa-xmark"),
-    card("เข้าเรียน", d.summary && d.summary.attPct != null ? fmt(d.summary.attPct) + "%" : "-", "fa-percent", tot + " ครั้งที่บันทึก")].join(""); };
-const newsItem = (a) => `<div class="border rounded-xl p-3 ${a.pinned ? "bg-amber-50 border-amber-200" : "bg-slate-50"}"><div class="flex justify-between gap-2 text-xs text-slate-400"><span>${a.pinned ? '<i class="fa-solid fa-thumbtack text-amber-600 mr-1"></i>ปักหมุด' : ""}${a.target ? " · เฉพาะห้อง " + esc(a.target) : ""}</span><span>${esc(a.date)}</span></div><div class="font-semibold text-slate-800">${esc(a.title)}</div>${a.body ? `<div class="text-sm text-slate-600 whitespace-pre-line mt-1">${esc(a.body)}</div>` : ""}</div>`;
+/* ===== UI นักเรียน: แบบเรียบ เป็นทางการ ===== */
+const FULL_SCORE_UI = 100;
+let stFilter = "all";
+const setStFilter = (f) => { stFilter = f; renderStudent(); };
+const courseOf = (c) => { try { const v = JSON.parse((c && c.course) || "{}"); return v && typeof v === "object" ? v : {}; } catch (_) { return {}; } };
+const GRADE_TEXT = { "4": "ดีเยี่ยม", "3.5": "ดีมาก", "3": "ดี", "2.5": "ค่อนข้างดี", "2": "ปานกลาง", "1.5": "พอใช้", "1": "ผ่านเกณฑ์ขั้นต่ำ", "0": "ต่ำกว่าเกณฑ์" };
+const STF = [
+  ["all", "ทั้งหมด", () => true],
+  ["pend", "ยังไม่ส่ง", (a) => a.status === "ยังไม่ส่ง"],
+  ["wait", "รอตรวจ", (a) => (a.status === "ส่งแล้ว" || a.status === "ส่งช้า") && a.score == null],
+  ["fix", "ต้องแก้ไข", (a) => a.status === "ต้องแก้ไข"],
+  ["done", "ตรวจแล้ว", (a) => a.score != null],
+];
+
+const sCard = (label, value, sub) => `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm"><div class="text-xs text-slate-500">${label}</div><div class="text-2xl font-bold text-slate-900 mt-1">${value}</div>${sub ? `<div class="text-xs text-slate-500 mt-0.5">${sub}</div>` : ""}</div>`;
+const sBox = (title, icon, inner, extra) => `<section class="bg-white border border-slate-200 rounded-lg shadow-sm"><header class="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50 rounded-t-lg"><h3 class="font-bold text-slate-800 text-[15px]"><i class="fa-solid ${icon} text-indigo-700 mr-2"></i>${title}</h3>${extra || ""}</header><div class="p-4">${inner}</div></section>`;
+const sBar = (pct, cls) => `<div class="h-2 rounded-full bg-slate-200 overflow-hidden"><div class="h-full rounded-full ${cls || "bg-indigo-700"}" style="width:${Math.max(0, Math.min(100, Number(pct) || 0))}%"></div></div>`;
+const kv = (k, v) => v ? `<div class="py-3 grid sm:grid-cols-[11rem_1fr] gap-1 sm:gap-4 border-b border-slate-100 last:border-0"><dt class="text-sm font-semibold text-slate-500">${k}</dt><dd class="text-slate-800 whitespace-pre-line break-words leading-relaxed">${esc(v)}</dd></div>` : "";
+const gradeBox = (s) => s.final
+  ? `<div class="text-center shrink-0"><div class="text-xs text-slate-500 mb-1">ผลการเรียน</div><div class="w-24 h-24 rounded-lg border-2 ${s.grade === "0" ? "border-red-500 text-red-700 bg-red-50" : "border-[#c9a227] text-indigo-800 bg-amber-50"} flex items-center justify-center text-5xl font-bold">${esc(s.grade)}</div>${s.grade === "0" ? '<div class="text-xs text-red-600 mt-1">ไม่ผ่านเกณฑ์</div>' : `<div class="text-xs text-slate-500 mt-1">${esc(GRADE_TEXT[s.grade] || "")}</div>`}</div>`
+  : `<div class="text-center shrink-0"><div class="text-xs text-slate-500 mb-1">ผลการเรียน</div><div class="w-24 h-24 rounded-lg border-2 border-dashed border-slate-300 text-slate-500 bg-slate-50 flex items-center justify-center text-xs leading-snug p-2"><span><i class="fa-solid fa-hourglass-half block text-lg mb-1"></i>รอประมวลผล</span></div></div>`;
+const newsItem = (a) => `<article class="border border-slate-200 rounded-lg p-3 ${a.pinned ? "bg-amber-50/60 border-l-4 border-l-[#c9a227]" : "bg-white"}"><div class="flex justify-between gap-2 text-xs text-slate-500"><span>${a.pinned ? '<i class="fa-solid fa-thumbtack text-[#a8841a] mr-1"></i>ปักหมุด' : ""}${a.target ? (a.pinned ? " · " : "") + "เฉพาะห้อง " + esc(a.target) : ""}</span><span>${esc(a.date)}</span></div><div class="font-semibold text-slate-900 mt-0.5">${esc(a.title)}</div>${a.body ? `<div class="text-sm text-slate-600 whitespace-pre-line mt-1">${esc(a.body)}</div>` : ""}</article>`;
 
 const ST_VIEWS = {
+  /* ---------- หน้าหลัก ---------- */
   home(d) {
     const s = d.summary || {}, A = d.assignments, c = d.attCounts, t = d.teacher || {}, news = d.announcements;
     const pend = A.filter((a) => a.status === "ยังไม่ส่ง"), sent = A.length - pend.length;
     const wait = A.filter((a) => (a.status === "ส่งแล้ว" || a.status === "ส่งช้า") && a.score == null).length;
+    const li = (left, right) => `<li class="py-2.5 flex justify-between gap-3 border-b border-slate-100 last:border-0 text-sm"><span class="min-w-0 break-words">${left}</span><span class="shrink-0">${right || ""}</span></li>`;
     const todo = pend.map((a) => ({ a, n: a.due ? daysTo(a.due, d.today) : 999 })).sort((x, y) => x.n - y.n).slice(0, 5).map(({ a, n }) => {
-      const tag = n < 0 ? `<span class="text-red-600 font-semibold">เลยกำหนด ${-n} วัน</span>` : n === 0 ? '<span class="text-amber-600 font-semibold">ส่งวันนี้!</span>' : n <= 3 ? `<span class="text-amber-600 font-semibold">อีก ${n} วัน</span>` : n === 999 ? '<span class="text-slate-400">ไม่มีกำหนด</span>' : `<span class="text-slate-500">กำหนด ${esc(a.due)}</span>`;
-      return `<div class="py-2.5 border-b last:border-0 flex justify-between gap-2"><span><i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i>${esc(a.name)}</span>${tag}</div>`;
+      const tag = n < 0 ? `<span class="text-red-600 font-semibold">เลยกำหนด ${-n} วัน</span>` : n === 0 ? '<span class="text-amber-700 font-semibold">ส่งวันนี้</span>' : n <= 3 ? `<span class="text-amber-700 font-semibold">อีก ${n} วัน</span>` : n === 999 ? '<span class="text-slate-400">ไม่กำหนดวันส่ง</span>' : `<span class="text-slate-500">กำหนดส่ง ${esc(a.due)}</span>`;
+      return li(`<i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i>${esc(a.name)}`, tag);
     });
-    A.filter((a) => a.status === "ต้องแก้ไข").forEach((a) => todo.push(`<div class="py-2.5 border-b last:border-0"><i class="fa-solid fa-pen text-orange-500 mr-2"></i>${esc(a.name)} <span class="text-orange-600 font-semibold">ต้องแก้ไข</span></div>`));
-    d.notes.filter((n) => n.type === "score").slice(0, 2).forEach((n) => todo.push(`<div class="py-2.5 border-b last:border-0 text-sm"><i class="fa-solid fa-pen-to-square text-emerald-600 mr-2"></i>${esc(n.text)}</div>`));
-    const pct = s.pct == null ? 0 : Math.max(0, Math.min(100, s.pct));
+    A.filter((a) => a.status === "ต้องแก้ไข").forEach((a) => todo.push(li(`<i class="fa-solid fa-pen text-orange-500 mr-2"></i>${esc(a.name)}`, '<span class="text-orange-600 font-semibold">ต้องแก้ไข</span>')));
+    d.notes.filter((n) => n.type === "score").slice(0, 2).forEach((n) => todo.push(li(`<i class="fa-solid fa-pen-to-square text-emerald-600 mr-2"></i>${esc(n.text)}`)));
+    const pct = s.pct == null ? 0 : s.pct;
     return `<div class="space-y-4">
-     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 to-indigo-900 text-white p-6 shadow-xl">
-      <div class="blob w-48 h-48 bg-white/10 -bottom-20 -right-10"></div>
-      <div class="relative flex items-center justify-between gap-4">
-       <div class="min-w-0 flex-1"><div class="text-sm text-indigo-100">คะแนนของฉัน (งานที่ตรวจแล้ว)</div>
-        <div class="text-5xl font-bold">${s.max ? fmt(s.total) : "-"} <span class="text-xl text-indigo-200">/ ${s.max ? fmt(s.max) : "-"}</span></div>
-        <div class="mt-3 h-3 rounded-full bg-white/20 overflow-hidden"><div class="h-full rounded-full bg-amber-300" style="width:${pct}%"></div></div>
-        <div class="text-sm text-indigo-100 mt-2">${s.pct == null ? "ยังไม่มีคะแนน" : "ร้อยละ " + fmt(s.pct) + "% ของงานที่ตรวจแล้ว"}${s.classRank ? " · อันดับ " + s.classRank + "/" + s.classSize + " ในห้อง" : ""}</div>
-        ${!s.final && s.courseMax ? `<div class="text-xs text-indigo-200 mt-1">ตรวจแล้ว ${fmt(s.max)} จากคะแนนเต็มรวม ${fmt(s.courseMax)}</div>` : ""}</div>
-       <div class="text-center shrink-0"><div class="text-xs text-indigo-100 mb-1">เกรด</div>${gradeBubble(s)}</div>
-      </div></div>
-     <div class="grid grid-cols-3 gap-3">
-      ${card("เข้าเรียน", s.attPct == null ? "-" : fmt(s.attPct) + "%", "fa-calendar-check", `มา ${c["มา"]} · ขาด ${c["ขาด"]}`)}
-      ${card("ส่งงานแล้ว", `${sent}/${A.length}`, "fa-circle-check", wait ? "รอตรวจ " + wait : "")}
-      ${card("ค้างส่ง", pend.length, "fa-circle-exclamation")}
+     ${sBox("สรุปผลการเรียน", "fa-chart-simple", `<div class="flex flex-wrap items-center justify-between gap-5">
+       <div class="min-w-0 flex-1 basis-64"><div class="text-sm text-slate-500">คะแนนรวม (เฉพาะงานที่ตรวจแล้ว)</div>
+        <div class="text-4xl font-bold text-slate-900 mt-1">${s.max ? fmt(s.total) : "-"} <span class="text-lg font-medium text-slate-500">/ ${s.max ? fmt(s.max) : "-"}</span></div>
+        <div class="mt-3">${sBar(pct)}</div>
+        <div class="text-sm text-slate-600 mt-2">${s.pct == null ? "ยังไม่มีคะแนน" : "คิดเป็นร้อยละ " + fmt(s.pct)}${s.classRank ? " · อันดับที่ " + s.classRank + " จาก " + s.classSize + " คนในห้อง" : ""}</div>
+        ${!s.final && s.courseMax ? `<div class="text-xs text-slate-500 mt-1">ตรวจแล้ว ${fmt(s.max)} จากคะแนนเต็มรวม ${fmt(s.courseMax)} คะแนน</div>` : ""}</div>
+       ${gradeBox(s)}</div>`)}
+     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      ${sCard("อัตราการเข้าเรียน", s.attPct == null ? "-" : fmt(s.attPct) + "%", `มา ${c["มา"]} · สาย ${c["สาย"]} · ลา ${c["ลา"]} · ขาด ${c["ขาด"]}`)}
+      ${sCard("ส่งงานแล้ว", `${sent} / ${A.length}`, wait ? "รอตรวจ " + wait + " รายการ" : "")}
+      ${sCard("งานค้างส่ง", pend.length, pend.length ? "รายการ" : "ไม่มีรายการค้าง")}
+      ${s.attFull ? sCard("คะแนนจิตพิสัย", s.attN ? fmt(s.attGot) + " / " + fmt(s.attFull) : "- / " + fmt(s.attFull), s.attN ? "จากการเช็คชื่อ " + s.attN + " ครั้ง" : "ยังไม่มีการเช็คชื่อ") : ""}
      </div>
-     ${attScoreCard(s, c)}
-     ${box("สิ่งที่ต้องทำ", "fa-list-check", todo.length ? todo.join("") : '<p class="text-slate-400 py-2">ไม่มีอะไรค้าง เยี่ยมมาก 🎉</p>')}
-     ${news.length ? box("ประกาศจากครู", "fa-bullhorn", `<div class="space-y-2">${news.slice(0, 3).map(newsItem).join("")}</div>${news.length > 3 ? `<details class="mt-2"><summary class="text-sm text-indigo-700 cursor-pointer">ดูประกาศเก่า (${news.length - 3})</summary><div class="space-y-2 mt-2">${news.slice(3).map(newsItem).join("")}</div></details>` : ""}`) : ""}
-     <div class="flex items-center gap-3 text-sm text-slate-500 px-1">${avatarEl(t.avatar, "w-10 h-10 text-xl")}<div>ครูผู้สอน: <b class="text-slate-700">${esc(t.name || t.nick || "ครู")}</b>${t.subject ? " · " + esc(t.subject) : ""}<br><span class="text-xs">ข้อมูลอัปเดตอัตโนมัติ</span></div></div></div>`;
+     ${sBox("รายการที่ต้องดำเนินการ", "fa-list-check", todo.length ? `<ul>${todo.join("")}</ul>` : '<p class="text-slate-500 text-sm py-1">ไม่มีรายการค้างดำเนินการ</p>')}
+     ${news.length ? sBox("ประกาศจากครูผู้สอน", "fa-bullhorn", `<div class="space-y-2">${news.slice(0, 3).map(newsItem).join("")}</div>${news.length > 3 ? `<details class="mt-3"><summary class="text-sm text-indigo-700 cursor-pointer">ดูประกาศก่อนหน้า (${news.length - 3})</summary><div class="space-y-2 mt-2">${news.slice(3).map(newsItem).join("")}</div></details>` : ""}`) : ""}
+     <button type="button" onclick="setStTab('teacher')" class="w-full text-left bg-white border border-slate-200 rounded-lg shadow-sm p-3 flex items-center gap-3 hover:bg-slate-50">${avatarEl(t.avatar, "w-11 h-11 text-2xl")}<div class="min-w-0 flex-1 text-sm"><div class="text-xs text-slate-500">ครูผู้สอน</div><div class="font-semibold text-slate-800 truncate">${esc(t.name || t.nick || "ครู")}${t.subject ? " · " + esc(t.subject) : ""}</div></div><span class="text-xs text-indigo-700 whitespace-nowrap">ดูประวัติ <i class="fa-solid fa-chevron-right ml-0.5"></i></span></button>
+     <p class="text-xs text-slate-400 text-center">ข้อมูลอัปเดตอัตโนมัติ</p></div>`;
   },
+
+  /* ---------- งานและคะแนน ---------- */
   work(d) {
     const s = d.summary || {}, cats = Object.keys(s.byCat || {});
-    if (!d.assignments.length) return box("งานและคะแนน", "fa-book-open", empty("ครูยังไม่ได้บันทึกงาน"));
-    const groups = {}; d.assignments.forEach((a) => { (groups[a.unit || "งานทั่วไป"] = groups[a.unit || "งานทั่วไป"] || []).push(a); });
+    if (!d.assignments.length) return sBox("งานและคะแนน", "fa-book-open", '<p class="text-center text-slate-500 py-8">ครูผู้สอนยังไม่ได้บันทึกงานในรายวิชานี้</p>');
+    const cur = STF.find((f) => f[0] === stFilter) || STF[0];
+    const list = d.assignments.filter(cur[2]);
+    const chips = STF.map(([id, label, fn]) => { const n = d.assignments.filter(fn).length; return `<button type="button" onclick="setStFilter('${id}')" class="px-3 py-1.5 rounded-full text-sm border transition ${id === cur[0] ? "bg-indigo-700 text-white border-indigo-700" : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"}">${label} <span class="${id === cur[0] ? "text-indigo-100" : "text-slate-400"}">${n}</span></button>`; }).join("");
+    const groups = {}; list.forEach((a) => { (groups[a.unit || "งานทั่วไป"] = groups[a.unit || "งานทั่วไป"] || []).push(a); });
     const keys = Object.keys(groups), one = keys.length === 1 && keys[0] === "งานทั่วไป";
-    const item = (a) => `<div class="border rounded-2xl p-3 bg-white"><div class="flex justify-between gap-3 items-start"><div class="min-w-0"><div class="font-semibold text-slate-800">${esc(a.name)}</div><div class="text-xs text-slate-500 mt-0.5">${esc(a.cat)}${a.due ? " · ส่ง " + esc(a.due) : ""}</div></div>
-      <div class="text-right shrink-0">${badge(a.status)}<div class="text-lg font-bold mt-1">${a.score == null ? '<span class="text-slate-400 font-normal text-sm">รอคะแนน</span>' : fmt(a.score) + '<span class="text-slate-400 text-sm font-normal"> / ' + fmt(a.max) + "</span>"}</div></div></div>
-      ${a.detail ? `<div class="mt-3 rounded-xl bg-amber-50 border-l-4 border-amber-400 p-3"><div class="text-xs font-bold text-amber-800 mb-1"><i class="fa-solid fa-file-lines mr-1"></i>รายละเอียดงาน</div><div class="text-base text-slate-900 leading-relaxed whitespace-pre-line break-words">${esc(a.detail)}</div></div>` : ""}
+    const item = (a) => `<div class="border border-slate-200 rounded-lg p-4 bg-white"><div class="flex justify-between gap-3 items-start"><div class="min-w-0"><div class="font-semibold text-slate-900">${esc(a.name)}</div><div class="text-xs text-slate-500 mt-0.5">${esc(a.cat)}${a.due ? " · กำหนดส่ง " + esc(a.due) : ""}</div></div>
+      <div class="text-right shrink-0">${badge(a.status)}<div class="text-lg font-bold mt-1 text-slate-900">${a.score == null ? '<span class="text-slate-400 font-normal text-sm">รอคะแนน</span>' : fmt(a.score) + '<span class="text-slate-500 text-sm font-normal"> / ' + fmt(a.max) + "</span>"}</div></div></div>
+      ${a.detail ? `<div class="mt-3 rounded-md bg-slate-50 border-l-4 border-indigo-700 p-3"><div class="text-xs font-bold text-indigo-800 mb-1">รายละเอียดงาน</div><div class="text-sm text-slate-800 leading-relaxed whitespace-pre-line break-words">${esc(a.detail)}</div></div>` : ""}
       ${filesHtml(a.files)}
-      ${a.feedback || a.history.length ? `<details class="mt-2 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs">ดูข้อเสนอแนะและประวัติ</summary>
-       ${a.feedback ? `<div class="mt-2 bg-indigo-50 border border-indigo-100 rounded-lg p-2"><i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i>ครู: ${esc(a.feedback)}</div>` : ""}
+      ${a.feedback || a.history.length ? `<details class="mt-3 text-sm"><summary class="cursor-pointer text-indigo-700 text-xs font-medium">ข้อเสนอแนะและประวัติการบันทึก</summary>
+       ${a.feedback ? `<div class="mt-2 bg-indigo-50 border border-indigo-100 rounded-md p-2"><i class="fa-solid fa-comment-dots text-indigo-700 mr-1"></i>ครูผู้สอน: ${esc(a.feedback)}</div>` : ""}
        ${a.history.length ? `<div class="mt-2 text-xs text-slate-500">${a.history.map((h) => `<div class="py-0.5">${dt(h.t)} — ${esc(h.st)}${h.score !== "" ? " · คะแนน " + esc(h.score) : ""}${h.fb ? " · " + esc(h.fb) : ""}</div>`).join("")}</div>` : ""}</details>` : ""}</div>`;
-    const catRows = cats.map((c) => { const x = s.byCat[c]; return `<tr>${td(esc(c))}${td(x.max ? fmt(x.got) + " / " + fmt(x.max) : "-")}${td(fmt(x.all))}</tr>`; }).join("");
+    const catRows = cats.map((k) => { const x = s.byCat[k], p = x.max ? x.got / x.max * 100 : 0; return `<tr>${td(esc(k))}${td(x.max ? fmt(x.got) + " / " + fmt(x.max) : "-")}${td(`<div class="w-24 sm:w-40">${sBar(p)}</div>`)}${td(fmt(x.all), "text-right")}</tr>`; }).join("");
     return `<div class="space-y-4">
-      <div class="grid grid-cols-3 gap-3">${card("ได้แล้ว", fmt(s.total), "fa-star")}${card("เต็ม (ที่ตรวจแล้ว)", fmt(s.max), "fa-list-check")}${card("เกรด", s.final ? s.grade : "รอประมวลผล", "fa-award", s.pct == null ? "" : fmt(s.pct) + "%")}</div>
-      <p class="text-xs text-slate-500 px-1">งานสั่งและส่งนอกระบบ หน้านี้แสดงสถานะ คะแนน และข้อเสนอแนะที่ครูบันทึกให้</p>
-      ${keys.map((u) => `<div class="space-y-2">${one ? "" : `<h3 class="font-bold text-slate-700 px-1 mt-2"><i class="fa-solid fa-folder-open text-indigo-600 mr-2"></i>${esc(u)}</h3>`}${groups[u].map(item).join("")}</div>`).join("")}
-      <details class="bg-white rounded-2xl shadow-sm border p-4"><summary class="cursor-pointer font-semibold text-slate-700"><i class="fa-solid fa-layer-group text-indigo-600 mr-2"></i>ดูคะแนนแยกตามหมวด และเกณฑ์เกรด</summary>
-       <div class="mt-3">${table(th("หมวด", "ได้ / เต็ม (ที่ตรวจแล้ว)", "เต็มทั้งหมด"), catRows, 3)}</div><p class="text-xs text-slate-500 mt-3">${esc(gradeNote(d.teacher))}</p></details></div>`;
+      <div class="grid grid-cols-3 gap-3">${sCard("คะแนนที่ได้", fmt(s.total))}${sCard("คะแนนเต็ม (ที่ตรวจแล้ว)", fmt(s.max))}${sCard("ผลการเรียน", s.final ? esc(s.grade) : "รอประมวลผล", s.pct == null ? "" : "ร้อยละ " + fmt(s.pct))}</div>
+      ${sBox("คะแนนแยกตามหมวด", "fa-layer-group", table(th("หมวด", "ได้ / เต็ม (ที่ตรวจแล้ว)", "สัดส่วน", '<span class="block text-right">เต็มทั้งหมด</span>'), catRows, 4) + `<p class="text-xs text-slate-500 mt-3">ดูเกณฑ์การตัดสินผลการเรียนได้ที่เมนู <button type="button" onclick="setStTab('rule')" class="text-indigo-700 underline">เกณฑ์รายวิชา</button></p>`)}
+      ${sBox("รายการงาน", "fa-book-open", `<div class="flex flex-wrap gap-2 mb-3">${chips}</div><p class="text-xs text-slate-500 mb-3">งานสั่งและส่งนอกระบบ หน้านี้แสดงสถานะ คะแนน และข้อเสนอแนะที่ครูผู้สอนบันทึกให้</p>
+        ${list.length ? keys.map((u) => `<div class="space-y-2 mb-3">${one ? "" : `<h4 class="font-semibold text-slate-700 text-sm mt-2"><i class="fa-solid fa-folder-open text-indigo-700 mr-2"></i>${esc(u)}</h4>`}${groups[u].map(item).join("")}</div>`).join("") : '<p class="text-center text-slate-500 py-6">ไม่มีรายการในหมวดนี้</p>'}`)}
+    </div>`;
   },
+
+  /* ---------- เช็คชื่อ ---------- */
   att(d) {
-    const s = d.summary || {};
+    const s = d.summary || {}, c = d.attCounts;
     const rows = d.attList.map((a) => `<tr><td class="px-3 py-2 whitespace-nowrap">${esc(a.date)}</td><td class="px-3 py-2">${esc(a.period)}</td><td class="px-3 py-2">${badge(a.st, ATT_CLS)}</td><td class="px-3 py-2 text-slate-500">${esc(a.note || "-")}</td></tr>`).join("");
     return `<div class="space-y-4">
-      ${attScoreCard(s, d.attCounts)}<div class="rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-6 text-center shadow-lg"><div class="text-sm text-emerald-100">เข้าเรียนรวม</div><div class="text-5xl font-bold my-1">${s.attPct == null ? "-" : fmt(s.attPct) + "%"}</div></div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${card("มาเรียน", d.attCounts["มา"], "fa-check")}${card("มาสาย", d.attCounts["สาย"], "fa-clock")}${card("ลา", d.attCounts["ลา"], "fa-envelope")}${card("ขาดเรียน", d.attCounts["ขาด"], "fa-xmark")}</div>
-      ${box("ประวัติการเข้าเรียนของฉัน", "fa-clock-rotate-left", table(th("วันที่", "คาบ", "สถานะ", "หมายเหตุ"), rows, 4))}</div>`;
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${sCard("อัตราการเข้าเรียน", s.attPct == null ? "-" : fmt(s.attPct) + "%", s.attN ? "เช็คชื่อทั้งหมด " + s.attN + " ครั้ง" : "ยังไม่มีการเช็คชื่อ")}${sCard("มาเรียน", c["มา"], "ครั้ง")}${sCard("มาสาย / ลา", c["สาย"] + " / " + c["ลา"], "ครั้ง")}${sCard("ขาดเรียน", c["ขาด"], "ครั้ง")}</div>
+      ${s.attFull ? sBox("คะแนนจิตพิสัย (จากการเช็คชื่อ)", "fa-hand-holding-heart", `<div class="flex items-baseline gap-2"><span class="text-3xl font-bold text-slate-900">${s.attN ? fmt(s.attGot) : "-"}</span><span class="text-slate-500">/ ${fmt(s.attFull)} คะแนน</span></div><div class="mt-2">${sBar(s.attN ? s.attGot / s.attFull * 100 : 0, "bg-emerald-600")}</div><p class="text-xs text-slate-500 mt-2">${s.attN ? "คำนวณจากการเช็คชื่อ " + s.attN + " ครั้ง" : "ยังไม่มีการเช็คชื่อ"} · ดูเกณฑ์คะแนนเช็คชื่อได้ที่เมนู <button type="button" onclick="setStTab('rule')" class="text-indigo-700 underline">เกณฑ์รายวิชา</button></p>`) : ""}
+      ${sBox("ประวัติการเข้าเรียน", "fa-clock-rotate-left", table(th("วันที่", "คาบ", "สถานะ", "หมายเหตุ"), rows, 4))}</div>`;
+  },
+
+  /* ---------- เกณฑ์รายวิชา ---------- */
+  rule(d) {
+    const t = d.teacher || {}, cv = courseOf(t), k = critOf(t), s = d.summary || {};
+    const courseName = cv.name || (d.room && d.room.desc) || (d.room && d.room.name) || "";
+    const info = kv("ชื่อรายวิชา", courseName) + kv("รหัสวิชา", cv.code) + kv("หน่วยกิต", cv.credits) + kv("จำนวนชั่วโมงเรียน", cv.hours) + kv("ครูผู้สอน", t.name || t.nick) + kv("คำอธิบายรายวิชา", cv.desc) + kv("จุดประสงค์ / ผลการเรียนรู้", cv.objectives);
+    // สัดส่วนคะแนน: รวมงานตามหมวด + คะแนนจิตพิสัย (เช็คชื่อ)
+    const byCat = {}; d.assignments.forEach((a) => { const x = (byCat[a.cat] = byCat[a.cat] || { n: 0, max: 0 }); x.n++; x.max += a.max; });
+    const parts = Object.keys(byCat).map((n) => ({ name: n, n: byCat[n].n, max: byCat[n].max }));
+    if (k.m > 0) parts.push({ name: "จิตพิสัย (เช็คชื่อ)", n: null, max: k.m });
+    const total = parts.reduce((x, p) => x + p.max, 0);
+    const shareRows = parts.map((p) => `<tr>${td(esc(p.name))}${td(p.n == null ? "-" : p.n + " รายการ")}${td(fmt(p.max) + " คะแนน")}${td(`<div class="flex items-center gap-2"><div class="w-20 sm:w-32">${sBar(total ? p.max / total * 100 : 0)}</div><span class="text-xs text-slate-500">${total ? fmt(p.max / total * 100) : 0}%</span></div>`)}</tr>`).join("");
+    const gRows = GR.map((g, i) => {
+      const range = i === 0 ? "ร้อยละ " + fmt(k.g[0]) + " ขึ้นไป" : "ร้อยละ " + fmt(k.g[i]) + " – ต่ำกว่า " + fmt(k.g[i - 1]);
+      return `<tr class="${s.final && s.grade === g ? "bg-amber-50 font-semibold" : ""}">${td(g, "font-bold")}${td(GRADE_TEXT[g])}${td(range)}</tr>`;
+    }).join("") + `<tr class="${s.final && s.grade === "0" ? "bg-red-50 font-semibold" : ""}">${td("0", "font-bold")}${td(GRADE_TEXT["0"])}${td("ต่ำกว่าร้อยละ " + fmt(k.g[6]))}</tr>`;
+    const attRows = ATT.map((x, i) => `<tr>${td(badge(x, ATT_CLS))}${td(fmt(k.a[i]) + " คะแนน / ครั้ง")}</tr>`).join("");
+    return `<div class="space-y-4">
+      ${sBox("ข้อมูลรายวิชา", "fa-book-bookmark", info ? `<dl>${info}</dl>` : '<p class="text-sm text-slate-500 py-2">ครูผู้สอนยังไม่ได้กรอกข้อมูลรายวิชา</p>')}
+      ${sBox("สัดส่วนคะแนนของรายวิชา", "fa-chart-pie", parts.length ? table(th("หมวดคะแนน", "จำนวนงาน", "คะแนนเต็ม", "สัดส่วน"), shareRows + `<tr class="bg-slate-50 font-semibold">${td("รวม")}${td("")}${td(fmt(total) + " คะแนน")}${td("")}</tr>`, 4) + (Math.abs(total - FULL_SCORE_UI) > 0.001 ? `<p class="text-xs text-slate-500 mt-3">หมายเหตุ: ขณะนี้คะแนนเต็มรวมที่ครูกำหนดไว้เท่ากับ ${fmt(total)} คะแนน ครูผู้สอนอาจเพิ่มงานในภายหลัง ผลการเรียนจะประกาศเมื่อคะแนนเต็มรวมครบ ${FULL_SCORE_UI} คะแนนและตรวจครบทุกงาน</p>` : "") : '<p class="text-sm text-slate-500">ยังไม่มีข้อมูลงานในรายวิชานี้</p>')}
+      ${sBox("เกณฑ์การตัดสินผลการเรียน", "fa-scale-balanced", table(th("ระดับผลการเรียน", "ความหมาย", "ช่วงคะแนน"), gRows, 3) + `<p class="text-xs text-slate-500 mt-3">คิดจากร้อยละของคะแนนรวมที่ได้ เทียบกับคะแนนเต็มรวม เมื่อครบ ${FULL_SCORE_UI} คะแนนและตรวจครบทุกงานแล้ว${s.final ? "" : " (ขณะนี้ผลการเรียนของคุณอยู่ระหว่างประมวลผล)"}</p>`)}
+      ${sBox("เกณฑ์คะแนนจิตพิสัย (เช็คชื่อ)", "fa-calendar-check", k.m > 0
+        ? table(th("สถานะ", "คะแนนที่ได้"), attRows, 2) + `<p class="text-xs text-slate-500 mt-3">คะแนนจิตพิสัย = (ผลรวมคะแนนเช็คชื่อ ÷ จำนวนครั้งที่เช็คชื่อ) × ${fmt(k.m)} คะแนน</p>`
+        : '<p class="text-sm text-slate-500">รายวิชานี้ไม่นับคะแนนเช็คชื่อรวมในคะแนน</p>')}
+      ${cv.rules ? sBox("กติกาและเงื่อนไขของรายวิชา", "fa-gavel", `<div class="text-slate-800 whitespace-pre-line break-words leading-relaxed">${esc(cv.rules)}</div>`) : ""}
+    </div>`;
+  },
+
+  /* ---------- ประวัติครูผู้สอน ---------- */
+  teacher(d) {
+    const t = d.teacher || {};
+    const name = t.name || t.nick || "ครูผู้สอน";
+    const body = kv("ตำแหน่ง / วิทยฐานะ", t.title) + kv("รายวิชาที่สอน", t.subject) + kv("แนะนำตัว", t.bio) + kv("ประวัติการศึกษา", t.edu) + kv("ประสบการณ์ / ผลงาน", t.exp) + kv("ช่องทางติดต่อ", t.contact) + kv("เวลา / สถานที่ให้คำปรึกษา", t.office);
+    return `<div class="space-y-4">
+      <section class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden"><div class="h-1.5 bg-gradient-to-r from-indigo-900 via-indigo-700 to-[#c9a227]"></div>
+       <div class="p-5 flex flex-wrap items-center gap-4"><div class="w-24 h-24 text-5xl rounded-full bg-indigo-50 ring-2 ring-[#c9a227] flex items-center justify-center overflow-hidden shrink-0">${avSpan(t.avatar, "👤")}</div>
+        <div class="min-w-0"><div class="text-xs text-slate-500">ครูผู้สอน</div><h2 class="text-2xl font-bold text-slate-900 break-words">${esc(name)}</h2>${t.nick && t.name && t.nick !== t.name ? `<div class="text-sm text-slate-600">ชื่อที่ใช้เรียก: ${esc(t.nick)}</div>` : ""}${t.title ? `<div class="text-sm text-slate-600">${esc(t.title)}</div>` : ""}</div></div></section>
+      ${sBox("ประวัติครูผู้สอน", "fa-id-card", body ? `<dl>${body}</dl>` : '<p class="text-sm text-slate-500 py-2">ครูผู้สอนยังไม่ได้กรอกประวัติ</p>')}
+    </div>`;
   },
   me(d) {
     const m = d.me;
-    return `<div class="bg-white rounded-2xl shadow-md border p-5 space-y-4 max-w-xl mx-auto"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-user-pen text-indigo-600 mr-2"></i>ตกแต่งโปรไฟล์</h3>
+    return `<div class="bg-white rounded-2xl shadow-md border p-5 space-y-4 max-w-xl mx-auto"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-user-pen text-indigo-600 mr-2"></i>ข้อมูลส่วนตัวและการตั้งค่าบัญชี</h3>
      <div class="flex items-center gap-3">
       <div id="pfAvatarPrev" class="w-16 h-16 text-3xl rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">${avSpan(m.avatar)}</div>
       <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-camera mr-1"></i>อัปโหลดรูปจากเครื่อง<input type="file" accept="image/*" class="hidden" onchange="pickPhoto(this,'pfAvatar')"></label>
@@ -921,7 +992,7 @@ const STU_STATUS = ["ปกติ", "พักการเรียน", "ย้
 const PERIODS = ["ทั้งวัน"].concat([1, 2, 3, 4, 5, 6, 7, 8].map((n) => "คาบ " + n));
 const GLOBAL_TABS = ["rooms", "profile", "resets", "admins"]; // หน้านอกห้อง: รายการห้อง / โปรไฟล์ครู / จัดการแอดมิน
 const TABS = [["home", "หน้าหลัก", "fa-house"], ["students", "รายชื่อนักเรียน", "fa-users"], ["submit", "เช็คส่งงาน", "fa-clipboard-check"],
-  ["assign", "รายละเอียดงาน", "fa-book"], ["criteria", "เกณฑ์คะแนน", "fa-scale-balanced"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
+  ["assign", "รายละเอียดงาน", "fa-book"], ["criteria", "เกณฑ์คะแนน / ข้อมูลวิชา", "fa-scale-balanced"], ["scores", "คะแนนรายบุคคล", "fa-pen-to-square"], ["attend", "คะแนนเช็คชื่อ", "fa-calendar-check"],
   ["rank", "จัดอันดับ", "fa-ranking-star"], ["summary", "สรุปผลการเรียน", "fa-file-lines"], ["news", "ประกาศ", "fa-bullhorn"], ["settings", "ตั้งค่าห้อง / รหัสเชิญ", "fa-gear"]];
 const DEF_G = [80, 75, 70, 65, 60, 55, 50], DEF_A = [1, 0.5, 0.5, 0], GR = ["4", "3.5", "3", "2.5", "2", "1.5", "1"];
 function critOf(c) {
@@ -1323,7 +1394,7 @@ const AVIEWS = {
   },
 
   criteria() {
-    const k = critOf(adminData.config);
+    const k = critOf(adminData.config), cv = courseOf(adminData.config);
     const asgSum = (cls) => adminData.assignments.filter((a) => matchT(a.target, cls)).reduce((x, a) => x + a.max, 0);
     const clsList = [...new Set(adminData.students.filter((s) => s.active).map((s) => s.class || ""))].sort();
     const totals = clsList.map((c) => { const t = asgSum(c) + k.m; return `<span class="px-3 py-1 rounded-full text-sm ${t === 100 ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">${esc(c || "ทั้งห้อง")}: ${fmt(t)} คะแนน</span>`; }).join("") || '<span class="text-slate-400 text-sm">ยังไม่มีนักเรียนในห้อง</span>';
@@ -1339,7 +1410,17 @@ const AVIEWS = {
        <div class="w-40"><label class="text-xs font-semibold text-slate-600">คะแนนเต็มจิตพิสัย</label><input id="cam" type="number" min="0" max="100" step="0.5" value="${k.m}" class="${inC}"></div></div>
       <div class="p-4 bg-white border rounded-xl"><h4 class="font-semibold text-slate-700 mb-1">คะแนนเต็มรวมที่วางไว้ (งานทั้งหมด + เช็คชื่อ)</h4><p class="text-xs text-slate-500 mb-2">เขียวคือครบ 100 พอดี · เหลืองคือยังไม่ถึง/เกิน 100 (เกรดจริงจะแสดงให้นักเรียนเมื่อคะแนนเต็มครบ 100 และตรวจครบทุกงาน)</p><div class="flex flex-wrap gap-2">${totals}</div></div>
       <div class="flex flex-wrap gap-2"><button type="button" onclick="saveCriteria(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกเกณฑ์</span></button>
-       <button type="button" onclick="resetCriteriaInputs()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ใช้ค่ามาตรฐาน (80/75/70/65/60/55/50)</button></div></div>`;
+       <button type="button" onclick="resetCriteriaInputs()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm">ใช้ค่ามาตรฐาน (80/75/70/65/60/55/50)</button></div>
+      <hr class="my-2">
+      <div><h3 class="font-bold text-slate-700 text-lg"><i class="fa-solid fa-book-bookmark text-indigo-600 mr-2"></i>ข้อมูลรายวิชา (แสดงให้นักเรียน)</h3><p class="text-xs text-slate-500">นักเรียนจะเห็นในเมนู "เกณฑ์รายวิชา" พร้อมเกณฑ์เกรดและสัดส่วนคะแนนที่ตั้งไว้ด้านบน · ปุ่มนี้บันทึกเฉพาะข้อมูลรายวิชา (ถ้าแก้เกณฑ์ด้านบนค้างไว้ ให้กด "บันทึกเกณฑ์" ก่อน)</p></div>
+      <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+       <div class="grid md:grid-cols-4 gap-3"><div class="md:col-span-2"><label class="text-xs font-semibold text-slate-600">ชื่อรายวิชา</label><input id="cvName" maxlength="150" value="${esc(cv.name)}" class="${inC}"></div>
+        <div><label class="text-xs font-semibold text-slate-600">รหัสวิชา</label><input id="cvCode" maxlength="30" value="${esc(cv.code)}" class="${inC}" placeholder="เช่น 20001-1001"></div>
+        <div class="grid grid-cols-2 gap-2"><div><label class="text-xs font-semibold text-slate-600">หน่วยกิต</label><input id="cvCredits" maxlength="12" value="${esc(cv.credits)}" class="${inC}" placeholder="2"></div><div><label class="text-xs font-semibold text-slate-600">ชม./สัปดาห์</label><input id="cvHours" maxlength="12" value="${esc(cv.hours)}" class="${inC}" placeholder="4"></div></div></div>
+       <div><label class="text-xs font-semibold text-slate-600">คำอธิบายรายวิชา</label><textarea id="cvDesc" maxlength="800" rows="3" class="${inC}">${esc(cv.desc)}</textarea></div>
+       <div><label class="text-xs font-semibold text-slate-600">จุดประสงค์ / ผลการเรียนรู้</label><textarea id="cvObj" maxlength="1200" rows="3" class="${inC}">${esc(cv.objectives)}</textarea></div>
+       <div><label class="text-xs font-semibold text-slate-600">กติกาและเงื่อนไขของรายวิชา</label><textarea id="cvRules" maxlength="1500" rows="4" class="${inC}" placeholder="เช่น เวลาเรียนต้องไม่ต่ำกว่า 80% · ส่งงานช้าหักคะแนน ... · เงื่อนไขการสอบแก้ตัว">${esc(cv.rules)}</textarea></div>
+       <button type="button" onclick="saveCourse(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลรายวิชา</span></button></div></div>`;
   },
 
   news() {
@@ -1356,7 +1437,7 @@ const AVIEWS = {
 
   profile() {
     const c = adminData.profile || {};
-    return `<div class="space-y-4 max-w-xl"><h3 class="font-bold text-slate-700"><i class="fa-solid fa-id-badge text-indigo-600 mr-2"></i>โปรไฟล์ครู (นักเรียนจะเห็นในหน้าหลัก)</h3>
+    return `<div class="space-y-4 max-w-xl"><div><h3 class="font-bold text-slate-700"><i class="fa-solid fa-id-badge text-indigo-600 mr-2"></i>โปรไฟล์และประวัติครูผู้สอน</h3><p class="text-xs text-slate-500">ข้อมูลนี้นักเรียนจะเห็นในเมนู "ประวัติครูผู้สอน" กรอกเฉพาะข้อมูลที่ต้องการเปิดเผย</p></div>
       <div class="flex items-center gap-3">
        <div id="tfAvatarPrev" class="w-16 h-16 text-3xl rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">${avSpan(c.avatar)}</div>
        <label class="cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-camera mr-1"></i>อัปโหลดรูปจากเครื่อง<input type="file" accept="image/*" class="hidden" onchange="pickPhoto(this,'tfAvatar')"></label>
@@ -1365,8 +1446,13 @@ const AVIEWS = {
       <div><label class="text-xs font-semibold text-slate-600">หรือเลือกรูปประจำตัว</label><div class="flex flex-wrap gap-2 mt-1">${AVATARS.map((a) => `<button type="button" data-a="${a}" onclick="pickAvatar('${a}',this)" class="av-opt text-2xl w-11 h-11 rounded-full border bg-indigo-50 ${a === c.avatar ? "ring-2 ring-indigo-600" : ""}">${a}</button>`).join("")}</div><input type="hidden" id="tfAvatar" value="${esc(c.avatar)}"></div>
       <div class="grid md:grid-cols-2 gap-3"><div><label class="text-xs font-semibold text-slate-600">ชื่อ-นามสกุลครู</label><input id="tfName" value="${esc(c.name)}" class="${inC}"></div>
       <div><label class="text-xs font-semibold text-slate-600">ชื่อที่แสดง (เช่น ครูสมชาย)</label><input id="tfNick" value="${esc(c.nick)}" class="${inC}"></div></div>
-      <div><label class="text-xs font-semibold text-slate-600">รายวิชา</label><input id="tfSubject" value="${esc(c.subject)}" class="${inC}" placeholder="เช่น ภาษาอังกฤษ ม.4"></div>
-      <div><label class="text-xs font-semibold text-slate-600">แนะนำตัว</label><textarea id="tfBio" rows="3" class="${inC}">${esc(c.bio)}</textarea></div>
+      <div class="grid md:grid-cols-2 gap-3"><div><label class="text-xs font-semibold text-slate-600">ตำแหน่ง / วิทยฐานะ</label><input id="tfTitle" maxlength="150" value="${esc(c.title)}" class="${inC}" placeholder="เช่น ครูชำนาญการ แผนกวิชาคอมพิวเตอร์"></div>
+      <div><label class="text-xs font-semibold text-slate-600">รายวิชาที่สอน</label><input id="tfSubject" maxlength="200" value="${esc(c.subject)}" class="${inC}" placeholder="เช่น การเขียนโปรแกรมเบื้องต้น"></div></div>
+      <div><label class="text-xs font-semibold text-slate-600">แนะนำตัว</label><textarea id="tfBio" maxlength="600" rows="3" class="${inC}">${esc(c.bio)}</textarea></div>
+      <div><label class="text-xs font-semibold text-slate-600">ประวัติการศึกษา</label><textarea id="tfEdu" maxlength="800" rows="3" class="${inC}" placeholder="เช่น ค.อ.บ. วิศวกรรมคอมพิวเตอร์ มหาวิทยาลัย... (พ.ศ. ...)">${esc(c.edu)}</textarea></div>
+      <div><label class="text-xs font-semibold text-slate-600">ประสบการณ์ / ผลงาน</label><textarea id="tfExp" maxlength="1200" rows="4" class="${inC}" placeholder="เช่น ประสบการณ์สอน ... ปี, รางวัล, ผลงานที่ภาคภูมิใจ">${esc(c.exp)}</textarea></div>
+      <div class="grid md:grid-cols-2 gap-3"><div><label class="text-xs font-semibold text-slate-600">ช่องทางติดต่อ</label><textarea id="tfContact" maxlength="300" rows="2" class="${inC}" placeholder="เช่น อีเมลโรงเรียน, LINE">${esc(c.contact)}</textarea></div>
+      <div><label class="text-xs font-semibold text-slate-600">เวลา / สถานที่ให้คำปรึกษา</label><textarea id="tfOffice" maxlength="300" rows="2" class="${inC}" placeholder="เช่น ห้องพักครูแผนก... ทุกวันพุธ 15.00-16.00 น.">${esc(c.office)}</textarea></div></div>
       <button type="button" onclick="saveTeacherProfile(this)" class="${btnP}"><span><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกโปรไฟล์</span></button>${adminPwBlock()}</div>`;
   },
 };
@@ -1482,10 +1568,20 @@ function saveNews(btn) {
 
 function saveTeacherProfile(btn) {
   run(btn, "กำลังบันทึก...", async () => {
-    const profile = { name: $("tfName").value, nick: $("tfNick").value, subject: $("tfSubject").value, bio: $("tfBio").value, avatar: $("tfAvatar").value };
+    const profile = { name: $("tfName").value, nick: $("tfNick").value, subject: $("tfSubject").value, bio: $("tfBio").value, avatar: $("tfAvatar").value, title: $("tfTitle").value, edu: $("tfEdu").value, exp: $("tfExp").value, contact: $("tfContact").value, office: $("tfOffice").value };
     await adminCall({ action: "adminSaveProfile", profile });
     await loadAdminData();
     toast("บันทึกโปรไฟล์แล้ว", "success");
+    return true;
+  });
+}
+
+function saveCourse(btn) {
+  run(btn, "กำลังบันทึก...", async () => {
+    const course = { name: $("cvName").value, code: $("cvCode").value, credits: $("cvCredits").value, hours: $("cvHours").value, desc: $("cvDesc").value, objectives: $("cvObj").value, rules: $("cvRules").value };
+    await adminCall({ action: "adminSaveCourse", course });
+    await loadAdminData();
+    toast("บันทึกข้อมูลรายวิชาแล้ว", "success");
     return true;
   });
 }
